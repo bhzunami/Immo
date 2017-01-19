@@ -29,10 +29,15 @@ class Homegate(scrapy.Spider):
             next_add = response.urljoin(link)
             yield scrapy.Request(next_add, callback=self.parse_ad)
 
+        next_page_url = response.xpath('//div[@class="paginator-container"]/ul/li[@class="next"]/a/@href').extract_first()
+        if next_page_url:
+            print("Found next page")
+            next_page = response.urljoin(next_page_url)
+            yield scrapy.Request(next_page, callback=self.parse)
+
     def parse_ad(self, response):
         """Parse single add
         """
-        
         ad = HomegateAd()
         ad['ad_id'] = response.url.split("/")[-1]
         filename = 'ad-{}.html'.format(ad.get('ad_id'))
@@ -70,7 +75,5 @@ class Homegate(scrapy.Spider):
 
 
         print("Crawelt new Add {}".format(ad))
-
-        
 
 
