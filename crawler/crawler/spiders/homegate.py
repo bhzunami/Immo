@@ -2,13 +2,21 @@
 # The ad is in the div result-items-list class
 # and every reulst has the id resultItemPanel0 with the number
 #
+import os
 import scrapy
 from ..items import HomegateAd
 
 class Homegate(scrapy.Spider):
+    """Homegate crawler
+    """
     name = "homegate"
 
     def start_requests(self):
+        """Start method
+        """
+        if not os.path.exists('homegate'):
+            os.mkdir('homegate')
+
         urls = ['https://www.homegate.ch/mieten/immobilien/kanton-baselland/trefferliste?tab=list']
         # https://www.homegate.ch/kaufen/immobilien/kanton-appenzellinnerrhoden/trefferliste?tab=list
         for url in urls:
@@ -18,18 +26,23 @@ class Homegate(scrapy.Spider):
     def parse(self, response):
         """Parse the page
         """
-        page = response.url.split("/")[-2]
+        page = response.url.split("/")[-1]
         filename = 'homegate-{}.html'.format(page)
-        with open(filename, 'wb') as file:
+        with open(os.path.join('homegate/{}'.format(filename)), 'wb') as file:
             file.write(response.body)
         self.log('Saved file %s' % filename)
 
         # Go throw all ads
-        for link in response.xpath('//div[starts-with(@id, "resultItemPanel")]/article/a[contains(@class, "detail-page-link")]/@href').extract():
+        link_path = '//div[starts-with(@id, "resultItemPanel")]' \
+                    '/article/a[contains(@class, "detail-page-link")]/@href'
+
+        for link in response.xpath(link_path).extract():
             next_add = response.urljoin(link)
             yield scrapy.Request(next_add, callback=self.parse_ad)
 
-        next_page_url = response.xpath('//div[@class="paginator-container"]/ul/li[@class="next"]/a/@href').extract_first()
+        next_page_path = '//div[@class="paginator-container"]' \
+                         '/ul/li[@class="next"]/a/@href'
+        next_page_url = response.xpath(next_page_path).extract_first()
         if next_page_url:
             print("Found next page")
             next_page = response.urljoin(next_page_url)
@@ -41,15 +54,16 @@ class Homegate(scrapy.Spider):
         ad = HomegateAd()
         ad['ad_id'] = response.url.split("/")[-1]
         filename = 'ad-{}.html'.format(ad.get('ad_id'))
-        with open(filename, 'wb') as file:
+        with open(os.path.join('homegate/{}'.format(filename)), 'wb') as file:
             file.write(response.body)
         self.log('Saved file %s' % filename)
 
         address = response.xpath('//div[contains(@class, "detail-address")]/a')
         ad['street'] = address.xpath('h2/text()').extract_first()
-        ad['place']  = address.xpath('span/text()').extract_first()
+        ad['place'] = address.xpath('span/text()').extract_first()
 
-        prices = response.xpath('//div[contains(@class, "detail-price")]/ul/li/span/span/text()').extract()
+        price_path = '//div[contains(@class, "detail-price")]/ul/li/span/span/text()'
+        prices = response.xpath(price_path).extract()
         ad['price_total'] = prices[1]
         ad['price_netto'] = prices[3]
         ad['additional_costs'] = prices[5]
@@ -73,7 +87,6 @@ class Homegate(scrapy.Spider):
 
         ad['ref_no'] = response.xpath('//div[contains(@class, "ref")]/span[contains(@class, "text--ellipsis")]/text()').extract_first()
 
-
-        print("Crawelt new Add {}".format(ad))
+        yield ad
 
 
