@@ -7,9 +7,7 @@
 
 import scrapy
 
-
-class HomegateAd(scrapy.Item):
-    # define the fields for your item here like:
+class Ad(scrapy.Item):
     ad_id = scrapy.Field()
     ref_no = scrapy.Field()
     street = scrapy.Field()

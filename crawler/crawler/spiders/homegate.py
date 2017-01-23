@@ -30,7 +30,7 @@ class Homegate(scrapy.Spider):
         filename = 'homegate-{}.html'.format(page)
         with open(os.path.join('homegate/{}'.format(filename)), 'wb') as file:
             file.write(response.body)
-        self.log('Saved file %s' % filename)
+        self.logger.info('Saved file {}'.format(filename))
 
         # Go throw all ads
         link_path = '//div[starts-with(@id, "resultItemPanel")]' \
@@ -56,7 +56,7 @@ class Homegate(scrapy.Spider):
         filename = 'ad-{}.html'.format(ad.get('ad_id'))
         with open(os.path.join('homegate/{}'.format(filename)), 'wb') as file:
             file.write(response.body)
-        self.log('Saved file %s' % filename)
+        self.logger.info('Saved file {}'.format(filename))
 
         address = response.xpath('//div[contains(@class, "detail-address")]/a')
         ad['street'] = address.xpath('h2/text()').extract_first()
@@ -72,8 +72,8 @@ class Homegate(scrapy.Spider):
         infos = {}
         for data in key_data:
             # Unfortently Wohnflaeche is different
-            if data.xpath('span/text()').extract_first() == u"Wohnfläche":
-                key = u"Wohnfläche"
+            if data.xpath('span/text()').extract_first() == "Wohnfläche":
+                key = "Wohnfläche"
                 value = data.xpath('span/span/text()').extract_first()
             else:
                 key, value = data.xpath('span/text()').extract()
