@@ -5,6 +5,10 @@ FIELDS = {
     'Etage': 'etage',
     'Piano': 'etage',
 
+    'Anzahl Etagen': 'num_floors',
+
+    'Verfügbar': 'available',
+
     'Objekttyp': 'objecttype',
     'Type': 'objecttype',
     'Tipo': 'objecttype',

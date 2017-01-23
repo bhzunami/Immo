@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
-# The ad is in the div result-items-list class
-# and every reulst has the id resultItemPanel0 with the number
-#
-import os
+"""
+The ad is in the div result-items-list class
+and every reulst has the id resultItemPanel0 with the number
+
+Links:
+https://www.homegate.ch/kaufen/immobilien/kanton-{kanton}/trefferliste?tab=list
+https://www.homegate.ch/mieten/immobilien/kanton-{kanton}/trefferliste?tab=list
+
+Author: N. Mauchle <nmauchle@gmail.com>
+
+"""
 import scrapy
-from ..items import HomegateAd
+from ..items import Ad
+from ..utils import FIELDS as fields
 
 class Homegate(scrapy.Spider):
     """Homegate crawler
@@ -14,11 +22,11 @@ class Homegate(scrapy.Spider):
     def start_requests(self):
         """Start method
         """
-        if not os.path.exists('homegate'):
-            os.mkdir('homegate')
+        urls = ['https://www.homegate.ch/kaufen/immobilien/kanton-baselland/trefferliste?tab=list'] #,
+                #'https://www.homegate.ch/kaufen/immobilien/kanton-baselstadt/trefferliste?tab=list',
+                #'https://www.homegate.ch/kaufen/immobilien/kanton-aargau/trefferliste?tab=list']
 
-        urls = ['https://www.homegate.ch/mieten/immobilien/kanton-baselland/trefferliste?tab=list']
-        # https://www.homegate.ch/kaufen/immobilien/kanton-appenzellinnerrhoden/trefferliste?tab=list
+        # Go through all urls
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
@@ -26,13 +34,7 @@ class Homegate(scrapy.Spider):
     def parse(self, response):
         """Parse the page
         """
-        page = response.url.split("/")[-1]
-        filename = 'homegate-{}.html'.format(page)
-        with open(os.path.join('homegate/{}'.format(filename)), 'wb') as file:
-            file.write(response.body)
-        self.logger.info('Saved file {}'.format(filename))
-
-        # Go throw all ads
+        # Go through all ads
         link_path = '//div[starts-with(@id, "resultItemPanel")]' \
                     '/article/a[contains(@class, "detail-page-link")]/@href'
 
@@ -44,48 +46,62 @@ class Homegate(scrapy.Spider):
                          '/ul/li[@class="next"]/a/@href'
         next_page_url = response.xpath(next_page_path).extract_first()
         if next_page_url:
-            print("Found next page")
+            self.logger.debug("Found next page")
             next_page = response.urljoin(next_page_url)
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_ad(self, response):
         """Parse single add
         """
-        ad = HomegateAd()
-        ad['ad_id'] = response.url.split("/")[-1]
-        filename = 'ad-{}.html'.format(ad.get('ad_id'))
-        with open(os.path.join('homegate/{}'.format(filename)), 'wb') as file:
-            file.write(response.body)
-        self.logger.info('Saved file {}'.format(filename))
+        ad = Ad()
+        # object id
+        ad['object_id'] = response.url.split("/")[-1]
+        ad['crawler'] = 'homegate'
+        ad['url'] = response.url
+        ad['raw_data'] = response.body.decode()
 
+        # Owner
+        owner = '//div[contains(@class, "detail-owner")]/div[@class="infos"]/div[@class="description"]/p'
+        ad['owner'] = response.xpath(owner).extract_first()
+
+        # reference number
+        ref_path = '//div[contains(@class, "ref")]/span[contains(@class, "text--ellipsis")]/text()'
+        ad['reference_no'] = response.xpath(ref_path).extract_first()
+
+        # Address
         address = response.xpath('//div[contains(@class, "detail-address")]/a')
         ad['street'] = address.xpath('h2/text()').extract_first()
         ad['place'] = address.xpath('span/text()').extract_first()
 
+        # Prices
         price_path = '//div[contains(@class, "detail-price")]/ul/li/span/span/text()'
         prices = response.xpath(price_path).extract()
-        ad['price_total'] = prices[1]
-        ad['price_netto'] = prices[3]
-        ad['additional_costs'] = prices[5]
+        if len(prices) > 1:
+            ad['price_brutto'] = int(prices[1].replace("'", "").replace(".–", ""))
+        else:
+            ad['price_brutto'] = prices[0]
 
-        key_data = response.xpath('//div[contains(@class, "detail-key-data")]/ul/li[not(contains(@style, "display:none"))]')
-        infos = {}
+        # Characteristics
+        characteristics_path = '//div[contains(@class, "detail-configuration")]/ul/li/text()'
+        ad['characteristics'] = response.xpath(characteristics_path).extract()
+
+        # Description
+        description_path = '//div[contains(@class, "detail-description")]//text()'
+        ad['description'] = ' '.join(response.xpath(description_path).extract()).replace("'", " ")
+
+        # list
+        key_path = '//div[contains(@class, "detail-key-data")]/ul/li[not(contains(@style, "display:none"))]'
+        key_data = response.xpath(key_path)
+        ad['additional_data'] = {}
         for data in key_data:
-            # Unfortently Wohnflaeche is different
-            if data.xpath('span/text()').extract_first() == "Wohnfläche":
-                key = "Wohnfläche"
-                value = data.xpath('span/span/text()').extract_first()
-            else:
-                key, value = data.xpath('span/text()').extract()
-            infos[key] = value
-
-        ad['info'] = infos
-
-        ad['configuration'] = response.xpath('//div[contains(@class, "detail-configuration")]/ul/li/text()').extract()
-
-        ad['description'] = ' '.join(response.xpath('//div[contains(@class, "detail-description")]//text()').extract())
-
-        ad['ref_no'] = response.xpath('//div[contains(@class, "ref")]/span[contains(@class, "text--ellipsis")]/text()').extract_first()
+            key,  *values = data.xpath('span//text()').extract()
+            value = values[0]
+            try:
+                key = fields[key]
+                ad[key] = value
+            except KeyError:
+                self.logger.warning("This key not in database: {}".format(key))
+                ad['additional_data'][key] = value
 
         yield ad
 
