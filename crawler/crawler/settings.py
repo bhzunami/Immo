@@ -9,6 +9,8 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+import os
+
 BOT_NAME = 'crawler'
 
 SPIDER_MODULES = ['crawler.spiders']
@@ -20,6 +22,9 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
+
+# Set Loglevel
+#LOG_LEVEL = 'INFO'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 1
@@ -50,12 +55,6 @@ COOKIES_ENABLED = False
 #    'crawler.middlewares.CrawlerSpiderMiddleware': 543,
 #}
 
-# Enable or disable downloader middlewares
-# See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-    'crawler.middlewares.DuplicateCheck.DuplicateCheck': 100,
-}
-
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
 #EXTENSIONS = {
@@ -65,7 +64,8 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'crawler.pipelines.JSONWriterPipeline': 300,
+    'crawler.pipelines.database.DatabasePipline': 100,
+    'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -88,3 +88,25 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://postgres:@localhost/immo?')
+
+# Proxy
+PROXY = os.environ.get('PROXY_URL')
+API_SCRAPOXY = os.environ.get('PROXY_API')
+API_SCRAPOXY_PASSWORD = os.environ.get('PROXY_PASSWORD', '').encode()
+
+# Enable or disable downloader middlewares
+# See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
+if PROXY:
+    DOWNLOADER_MIDDLEWARES = {
+        'crawler.middlewares.DuplicateCheck.DuplicateCheck': 100,
+        'scrapoxy.downloadmiddlewares.proxy.ProxyMiddleware': 101,
+        'scrapoxy.downloadmiddlewares.wait.WaitMiddleware': 102,
+        'scrapoxy.downloadmiddlewares.scale.ScaleMiddleware': 103,
+        'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
+    }
+else:
+    DOWNLOADER_MIDDLEWARES = {
+        'crawler.middlewares.duplicateCheck.DuplicateCheck': 100,
+    }

@@ -2,8 +2,8 @@
 # German / France / Italian
 
 FIELDS = {
-    'Etage': 'etage',
-    'Piano': 'etage',
+    'Etage': 'floor',
+    'Piano': 'floor',
 
     'Anzahl Etagen': 'num_floors',
 

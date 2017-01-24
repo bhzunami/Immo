@@ -1,0 +1,21 @@
+version: '2'
+services:
+
+    srcapy:
+        build: .
+        links:
+            - scrapoxy
+
+    scrapoxy:
+        image: fabienvauchelles/scrapoxy
+        environment:
+            - PROVIDERS_AWSEC2_ACCESSKEYID=AKIAJKGJCUCRKBSWOECA
+            - PROVIDERS_AWSEC2_SECRETACCESSKEY=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
+            - PROVIDERS_AWSEC2_REGION=eu-west-1
+            - PROVIDERS_AWSEC2_INSTANCE_INSTANCETYPE=t1.micro
+            - PROVIDERS_AWSEC2_INSTANCE_IMAGEID=ami-c74d0db4
+            - PROVIDERS_AWSEC2_INSTANCE_SECURITYGROUPS=forward-proxy
+            - COMMANDER_PASSWORD=kdhf7wf97SK
+        ports:
+         - "8888:8888"
+         - "8889:8889"

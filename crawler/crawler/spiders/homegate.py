@@ -10,6 +10,7 @@ https://www.homegate.ch/mieten/immobilien/kanton-{kanton}/trefferliste?tab=list
 Author: N. Mauchle <nmauchle@gmail.com>
 
 """
+import logging
 import scrapy
 from ..items import Ad
 from ..utils import FIELDS as fields
@@ -18,6 +19,12 @@ class Homegate(scrapy.Spider):
     """Homegate crawler
     """
     name = "homegate"
+
+
+    def __init__(self, *args, **kwargs):
+        logger = logging.getLogger('scrapy.core.scraper')
+        logger.setLevel(logging.INFO)
+        super().__init__(*args, **kwargs)
 
     def start_requests(self):
         """Start method
