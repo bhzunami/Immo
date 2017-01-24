@@ -2,6 +2,8 @@
 # German / France / Italian
 
 FIELDS = {
+    'Verkaufspreis': 'price_brutto',
+
     'Etage': 'floor',
     'Piano': 'floor',
 
@@ -16,6 +18,7 @@ FIELDS = {
     'Zimmer': 'num_rooms',
     'Pièces': 'num_rooms',
     'Locali': 'num_rooms',
+    'Anzahl Zimmer': 'num_rooms',
 
     'Wohnfläche': 'living_area',
     'Surface habitable': 'living_area',
