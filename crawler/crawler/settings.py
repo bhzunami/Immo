@@ -23,11 +23,12 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
-# Set Loglevel
+# Set LOGGING
 LOG_LEVEL = 'INFO'
+LOG_FILE = 'scrapy.log'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 1
+CONCURRENT_REQUESTS = 5
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
@@ -65,7 +66,7 @@ COOKIES_ENABLED = False
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'crawler.pipelines.databaseWriter.DatabaseWriterPipline': 100,
-    'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
+    # 'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

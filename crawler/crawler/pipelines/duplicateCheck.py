@@ -57,7 +57,7 @@ class DatabaseWriterPipline(object):
 
         session.close()
         if len(ad) > 1:
-            logging.warning("Found possible dublicate: %s", ad[0].id)
+            logging.info("Found possible dublicate: %s", ad[0].id)
             raise DropItem
 
         return item

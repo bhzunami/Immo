@@ -32,7 +32,7 @@ class DatabaseWriterPipline(object):
 
         # get type
         obtype_name = item.get('objecttype')
-        logging.info("Search for type %s", obtype_name)
+        logging.debug("Search for type %s", obtype_name)
         obtype = session.query(ObjectType).filter(ObjectType.name == item.get('objecttype')).first()
         if not obtype:
             logging.info("This object type was not found in the database -> Store it")
@@ -41,25 +41,25 @@ class DatabaseWriterPipline(object):
             session.add(obtype)
             # To get the new id
             session.commit()
-            logging.info("Objecttype stored: %i", obtype.id)
+            logging.debug("Objecttype stored: %i", obtype.id)
 
-        logging.info("Objecttype id: %i", obtype.id)
+        logging.debug("Objecttype id: %i", obtype.id)
         # Get zip
         zip_code, *name = item.get('place').split(' ')
 
-        logging.info("Search place %s %s", int(zip_code), ' '.join(name))
+        logging.debug("Search place %s %s", int(zip_code), ' '.join(name))
 
         municipalities = session.query(Municipality).filter(Municipality.zip == int(zip_code)).all()
         if len(municipalities) == 1:
             municipality = municipalities[0]
-            logging.info("Found exact one %s ", municipality.name)
+            logging.debug("Found exact one %s ", municipality.name)
 
         if len(municipalities) > 1:
-            logging.info("Found more as one %i search for %s", len(municipalities), name[0])
+            logging.debug("Found more as one %i search for %s", len(municipalities), name[0])
             for m in municipalities:
                 if m.name.startswith(name[0]):
                     municipality = m
-                    logging.info("Found the correct municipality %s", municipality.name)
+                    logging.debug("Found the correct municipality %s", municipality.name)
 
 
         if not municipality:
@@ -69,10 +69,11 @@ class DatabaseWriterPipline(object):
         ad.object_types_id = obtype.id
 
         try:
-            logging.info("Now we save the whole shit: SHOW THE FUCKING ID: muni %i, obj %i", ad.municipalities_id, ad.object_types_id)
             session.add(ad)
             session.commit()
-        except:
+            logging.info("Advertisement stored: %i", ad.id)
+        except Exception as exception:
+            logging.error("Could not save advertisement %s cause %s", ad.object_id, exception)
             session.rollback()
             raise
         finally:

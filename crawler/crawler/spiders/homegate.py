@@ -29,9 +29,31 @@ class Homegate(scrapy.Spider):
     def start_requests(self):
         """Start method
         """
-        urls = ['https://www.homegate.ch/kaufen/immobilien/kanton-baselland/trefferliste?tab=list'] #,
-                #'https://www.homegate.ch/kaufen/immobilien/kanton-baselstadt/trefferliste?tab=list',
-                #'https://www.homegate.ch/kaufen/immobilien/kanton-aargau/trefferliste?tab=list']
+        urls = ['https://www.homegate.ch/kaufen/immobilien/kanton-aargau/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-appenzellinnerrhoden/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-appenzellausserrhoden/trefferliste?tab=list','https://www.homegate.ch/kaufen/immobilien/kanton-baselland/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-baselstadt/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-bern/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-fribourg/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-genf/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-glarus/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-graubuenden/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-jura/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-luzern/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-neuchatel/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-nidwalden/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-obwalden/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-st-gallen/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-schaffhausen/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-schwyz/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-solothurn/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-thurgau/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-tessin/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-uri/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-vaud/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-wallis/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-zug/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-zurich/trefferliste?tab=list']
 
         # Go through all urls
         for url in urls:
@@ -84,7 +106,7 @@ class Homegate(scrapy.Spider):
         price_path = '//div[contains(@class, "detail-price")]/ul/li/span/span/text()'
         prices = response.xpath(price_path).extract()
         if len(prices) > 1:
-            ad['price_brutto'] = int(prices[1].replace("'", "").replace(".–", ""))
+            ad['price_brutto'] = prices[1].replace("'", "").replace(".–", "")
         else:
             ad['price_brutto'] = prices[0]
 
