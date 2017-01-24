@@ -1,0 +1,3 @@
+-- run like this: psql "connection string" -a -f import.psql
+\copy municipalities from './municipalities.csv' delimiter ',' csv header;
+

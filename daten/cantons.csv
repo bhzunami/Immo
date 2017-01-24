@@ -1,0 +1,27 @@
+id,name,code
+1,Zürich,ZH
+2,Bern,BE
+3,Luzern,LU
+4,Uri,UR
+5,Schwyz,SZ
+6,Obwalden,OW
+7,Nidwalden,NW
+8,Glarus,GL
+9,Zug,ZG
+10,Fribourg,FR
+11,Solothurn,SO
+12,Basel-Stadt,BS
+13,Basel-Landschaft,BL
+14,Schaffhausen,SH
+15,Appenzell Ausserrhoden,AR
+16,Appenzell Innerrhoden,AI
+17,St. Gallen,SG
+18,Graubünden,GR
+19,Aargau,AG
+20,Thurgau,TG
+21,Ticino,TI
+22,Vaud,VD
+23,Wallis,VS
+24,Neuchâtel,NE
+25,Genève,GE
+26,Jura,JU
