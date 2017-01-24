@@ -1,16 +1,23 @@
 version: '2'
 services:
+  scrapy:
+    build: .
+    links:
+    - scrapoxy
+    env_file:
+    - scrapy.env
+    - scrapy.secrets.env
+    command: "homegate"
+    hostname: ip6-scrapy
+    network_mode: bridge
 
-    srcapy:
-        build: .
-        links:
-            - scrapoxy
-
-    scrapoxy:
-        image: fabienvauchelles/scrapoxy
-        env_file:
-        - ./scrapoxy.env
-        - ./scrapoxy.secrets.env
-        ports:
-         - "8888:8888"
-         - "8889:8889"
+  scrapoxy:
+    image: fabienvauchelles/scrapoxy
+    env_file:
+    - ./scrapoxy.env
+    - ./scrapoxy.secrets.env
+    expose:
+    - 8888
+    - 8889
+    hostname: ip6-scrapoxy
+    network_mode: bridge
