@@ -1,5 +1,6 @@
 #ignored files
 /crawler/items.jl
+*.secrets.env
 
 
 # Byte-compiled / optimized / DLL files
