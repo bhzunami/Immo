@@ -2,44 +2,16 @@
 """
 """
 import json
-from datetime import date, datetime
+from datetime import date
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Date
-from ..settings import DATABASE_URL
-
-Base = declarative_base()
-
-
-def convert_to_int(num):
-    if type(num) == int:
-        return num
-    num = num.replace(",", ".").replace(".–", "").replace("'", "")
-    try:
-        return int(num)
-    except ValueError:
-        return None
-
-def convert_to_float(num):
-    if type(num) == float:
-        return num
-    num = num.replace(",", ".").replace(".–", "").replace("'", "")
-    try:
-        return float(num)
-    except ValueError:
-        return None
-
-def convert_to_date(data):
-    if data == "sofort":
-        return date.today()
-    try:
-        return datetime.strptime(data, '%d.%m.%Y')
-    except ValueError:
-        pass
-
-    return None
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from .utils import convert_to_int, convert_to_float, convert_to_date
+from sqlalchemy.orm import relationship
+from . import Municipality, ObjectType
+from .utils import Base
 
 class Advertisement(Base):
-    """
+    """Advertisment class to store in the database
     """
     __tablename__ = 'advertisements'
 
@@ -65,16 +37,22 @@ class Advertisement(Base):
     room_height = Column(Float)
     effective_area = Column(Float)    # Nutzfläche
     plot_area = Column(Float)         # Grundstückfläche
-    floors_house = Column(Integer)      # how many floors the whole building have
-    characteristics = Column(String)   # Additional information Seesicht, Lift/ Balkon/Sitzplatz
-    additional_data = Column(String)   # Data at the moment we do not know where to put
-    owner = Column(String)           # The name of the copany which insert the ad (if exists)
+    floors_house = Column(Integer)    # how many floors the whole building have
+    characteristics = Column(String)  # Additional information Seesicht, Lift/ Balkon/Sitzplatz
+    additional_data = Column(String)  # Data at the moment we do not know where to put
+    owner = Column(String)            # The name of the copany which insert the ad (if exists)
     crawled_at = Column(Date)
     longitude = Column(Float)
     latitude = Column(Float)
 
+    # Relationship
+    object_types_id = Column(Integer, ForeignKey('object_types.id'))
+    object_type = relationship(ObjectType)
 
-    def build_advertisement(self, data):
+    municipalities_id = Column(Integer, ForeignKey('municipalities.id'))
+    municipalities = relationship(Municipality)
+
+    def __init__(self, data):
         # Set the easy values
         self.object_id = data.get('object_id', '')
         self.reference_no = data.get('reference_no', '')
@@ -84,7 +62,9 @@ class Advertisement(Base):
         self.street = data.get('street', '')
         self.description = data.get('description', '')
         self.owner = data.get('owner', '')
+        self.crawled_at = date.today()
 
+        # Set integers
         self.price_brutto = convert_to_int(data.get('price_brutto', ''))
         self.price_netto = convert_to_int(data.get('price_netto', ''))
         self.additional_costs = convert_to_int(data.get('additional_costs', ''))
@@ -96,15 +76,15 @@ class Advertisement(Base):
         self.last_renovation_year = convert_to_int(data.get('last_renovation_year', ''))
         self.floors_house = convert_to_int(data.get('floors_house', ''))
 
+        # Set dates
         self.available = convert_to_date(data.get('available', ''))
 
+        # Set floats
         self.num_rooms = convert_to_float(data.get('num_rooms', ''))
         self.cubature = convert_to_float(data.get('cubature', ''))
         self.room_height = convert_to_float(data.get('room_height', ''))
         self.effective_area = convert_to_float(data.get('effective_area', ''))
         self.plot_area = convert_to_float(data.get('plot_area', ''))
-
+        # Set jsons
         self.characteristics = json.dumps(data.get('characteristics', ''))
         self.additional_data = json.dumps(data.get('additional_data', ''))
-
-        self.crawled_at = date.today()

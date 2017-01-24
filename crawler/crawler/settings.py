@@ -24,7 +24,7 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 ROBOTSTXT_OBEY = True
 
 # Set Loglevel
-#LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'INFO'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 1
@@ -64,7 +64,7 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'crawler.pipelines.database.DatabasePipline': 100,
+    'crawler.pipelines.databaseWriter.DatabaseWriterPipline': 100,
     'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
@@ -100,7 +100,7 @@ API_SCRAPOXY_PASSWORD = os.environ.get('PROXY_PASSWORD', '').encode()
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 if PROXY:
     DOWNLOADER_MIDDLEWARES = {
-        'crawler.middlewares.DuplicateCheck.DuplicateCheck': 100,
+        'crawler.middlewares.crawledURLCheck.CrawledURLCheck': 100,
         'scrapoxy.downloadmiddlewares.proxy.ProxyMiddleware': 101,
         'scrapoxy.downloadmiddlewares.wait.WaitMiddleware': 102,
         'scrapoxy.downloadmiddlewares.scale.ScaleMiddleware': 103,
@@ -108,5 +108,5 @@ if PROXY:
     }
 else:
     DOWNLOADER_MIDDLEWARES = {
-        'crawler.middlewares.duplicateCheck.DuplicateCheck': 100,
+        'crawler.middlewares.crawledURLCheck.CrawledURLCheck': 100,
     }
