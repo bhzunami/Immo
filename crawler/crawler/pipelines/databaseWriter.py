@@ -50,6 +50,9 @@ class DatabaseWriterPipline(object):
         logging.debug("Search place %s %s", int(zip_code), ' '.join(name))
 
         municipalities = session.query(Municipality).filter(Municipality.zip == int(zip_code)).all()
+
+        municipality = None
+
         if len(municipalities) == 1:
             municipality = municipalities[0]
             logging.debug("Found exact one %s ", municipality.name)
