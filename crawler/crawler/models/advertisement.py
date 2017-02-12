@@ -42,6 +42,7 @@ class Advertisement(Base):
     additional_data = Column(String)  # Data at the moment we do not know where to put
     owner = Column(String)            # The name of the copany which insert the ad (if exists)
     crawled_at = Column(Date)
+    last_seen = Column(Date)
     longitude = Column(Float)
     latitude = Column(Float)
 
@@ -63,6 +64,7 @@ class Advertisement(Base):
         self.description = data.get('description', '')
         self.owner = data.get('owner', '')
         self.crawled_at = date.today()
+        self.last_seen = date.today()
 
         # Set integers
         self.price_brutto = convert_to_int(data.get('price_brutto', ''))

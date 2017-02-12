@@ -23,6 +23,6 @@ class CrawledURLCheck(object):
         advertisement = session.query(Advertisement).filter(Advertisement.url == request.url).all()
         session.close()
         if advertisement:
-            logging.info("This url %s was already crawled.", request.url)
+            logging.info("This url %s was already crawled update last seen", request.url)
             raise IgnoreRequest
         return
