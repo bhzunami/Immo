@@ -25,7 +25,7 @@ ROBOTSTXT_OBEY = True
 
 # Set LOGGING
 LOG_LEVEL = 'INFO'
-LOG_FILE = 'scrapy.log'
+LOG_FILE = os.environ.get('LOG_FILE', 'scrapy.log')
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 5
