@@ -32,11 +32,11 @@ class Immoscout24(scrapy.Spider):
             yield scrapy.Request(next_ad, callback=self.parse_ad)
 
         # find next page
-        next_page_link = '//a[contains(@class, "next")]/@href'
-
+        next_page_link = '//a[contains(@class, "next") and not(contains(@class, "disabled"))]/@href'
         next_page_url = response.xpath(next_page_link).extract_first()
+
         if next_page_url:
-            self.logger.debug("Found next page")
+            self.logger.info("Found next page: {}".format(next_page_url))
             next_page = response.urljoin(next_page_url)
             yield scrapy.Request(next_page, callback=self.parse_list)
 
@@ -92,5 +92,4 @@ class Immoscout24(scrapy.Spider):
             if len(entries) > 0:
                 ad['characteristics'][title] = entries
 
-        self.logger.debug("Parsed Ad: {}", ad.get('object_id'))
         yield ad
