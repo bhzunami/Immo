@@ -28,8 +28,32 @@ class Newhome(scrapy.Spider):
     def start_requests(self):
         """Start method
         """
-        urls = ['https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_basellandschaft/liste.aspx?pc=new']
-        # urls = ['http://localhost:8000/newhome-kanton_basellandschaft.html']
+        urls = ['https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_aargau/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_appenzellinnerrhoden/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_appenzellausserrhoden/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_baselland/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_baselstadt/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_bern/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_fribourg/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_genf/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_glarus/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_graubuenden/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_jura/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_luzern/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_neuchatel/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_nidwalden/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_obwalden/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_st-gallen/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_schaffhausen/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_schwyz/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_solothurn/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_thurgau/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_tessin/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_uri/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_vaud/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_wallis/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_zug/liste.aspx?pc=new',
+                'https://www.newhome.ch/de/kaufen/suchen/haus_wohnung/kanton_zurich/liste.aspx?pc=new']
 
         # Go through all urls
         for url in urls:
@@ -108,7 +132,7 @@ class Newhome(scrapy.Spider):
                     element_name = element.xpath('span/text()').extract_first().strip()
                     element_value = element.xpath('div/div//text()').extract_first()
                     if not element_value:
-                      data[title_name][category_name][element_name] = 1
+                      data[title_name][category_name][element_name] = True
                     else:
                         data[title_name][category_name][element_name] = element_value.strip()
         

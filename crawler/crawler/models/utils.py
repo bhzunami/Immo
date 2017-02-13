@@ -7,6 +7,42 @@ import re
 
 Base = declarative_base()
 
+
+def prepare_string(input):
+    return input.replace("'", "").replace(",", ".")
+
+def extract_number(input):
+    try:
+        return re.search('[0-9]*\.?[0-9]+', input).group(0)
+    except IndexError:
+        return None
+    except AttributeError:
+        print("ERROR REGEX INPUT: {}".format(input))
+        return None
+
+
+def get_int(input):
+    try:
+        return int(extract_number(prepare_string(input)))
+    except TypeError:
+        return None
+
+def get_float(input):
+    try:
+        return float(extract_number(prepare_string(input)))
+    except TypeError:
+        return None
+
+def get_date(input):
+    if input == "sofort":
+        return date.today()
+    try:
+        return datetime.strptime(input, '%d.%m.%Y')
+    except ValueError:
+        pass
+
+    return None
+
 def convert_to_int(num):
     if type(num) == int:
         return num
@@ -15,30 +51,3 @@ def convert_to_int(num):
         return int(num)
     except ValueError:
         return None
-
-def convert_to_float(num):
-    if type(num) == float:
-        return num
-    num = num.replace(",", ".").replace(".–", "").replace("'", "")
-    try:
-        return float(num)
-    except ValueError:
-        return None
-
-def convert_to_date(data):
-    if data == "sofort":
-        return date.today()
-    try:
-        return datetime.strptime(data, '%d.%m.%Y')
-    except ValueError:
-        pass
-
-    return None
-
-def parse_price(price_str):
-    m = re.search(r'CHF\s([0-9\\\']+)\\.', price_str)
-    if m is not None:
-        return int(m.group(1).replace("'", ""))
-
-def parse_area(s):
-    return int(s.split(' ')[0])

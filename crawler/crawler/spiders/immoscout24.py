@@ -40,27 +40,12 @@ class Immoscout24(scrapy.Spider):
             next_page = response.urljoin(next_page_url)
             yield scrapy.Request(next_page, callback=self.parse_list)
 
-    parse_methods = {
-        'price_brutto': utils.parse_price,
-        'num_rooms': float,
-        'living_area': utils.parse_area,
-        'floor': lambda s: int(s.split(" ")[0]),
-        'object_id': lambda x: x,
-        'num_floors': int,
-        'reference_no': lambda x: x,
-        'build_year': int,
-        'cubature': utils.parse_area,
-        'effective_area': utils.parse_area,
-        'plot_area': utils.parse_area,
-        'last_renovation_year': int,
-    }
-
     def parse_ad(self, response):
         ad = Ad()
         ad['crawler'] = 'immoscout24'
         ad['url'] = response.url
         ad['raw_data'] = response.body.decode()
-        ad['object_type'] = response.url.split("/")[5].split("-")[0]
+        ad['objecttype'] = response.url.split("/")[5].split("-")[0]
 
         # price, number of rooms, living area
         for div in response.xpath('//div[contains(@class, "layout--columns")]/div[@class="column" and ./div[@class="data-label"]]'):
@@ -68,7 +53,7 @@ class Immoscout24(scrapy.Spider):
 
             try:
                 key = FIELDS[key]
-                ad[key] = self.parse_methods[key](value)
+                ad[key] = value
             except KeyError:
                 self.logger.warning("Key not found: {}".format(key))
                 ad['additional_data'][key] = value
@@ -100,12 +85,12 @@ class Immoscout24(scrapy.Spider):
                 # write to additional data, or to structured field
                 try:
                     key = FIELDS[key]
-                    ad[key] = self.parse_methods[key](value)
+                    ad[key] = value
                 except KeyError:
                     entries[key] = value
 
             if len(entries) > 0:
                 ad['characteristics'][title] = entries
 
-        print("****************************************")
-        print(ad)
+        self.logger.debug("Parsed Ad: {}", ad.get('object_id'))
+        yield ad

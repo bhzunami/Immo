@@ -76,7 +76,6 @@ class DatabaseWriterPipline(object):
         else:
             logging.info("Could not find zip_code %s %s in database", zip_code, ' '.join(name))     
 
-        ad.municipalities_id = municipality.id
         ad.object_types_id = obtype.id
 
         # Store the add in the database
