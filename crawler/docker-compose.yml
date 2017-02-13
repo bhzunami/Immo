@@ -7,7 +7,6 @@ services:
     env_file:
     - scrapy.env
     - scrapy.secrets.env
-    command: "homegate"
     hostname: ip6-scrapy
     network_mode: bridge
 
