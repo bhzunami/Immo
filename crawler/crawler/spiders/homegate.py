@@ -110,7 +110,7 @@ class Homegate(scrapy.Spider):
         else:
             ad['price_brutto'] = prices[0]
 
-        # Characteristics
+        # Characteristics / Merkmale und Ausstattung
         characteristics_path = '//div[contains(@class, "detail-configuration")]/ul/li/text()'
         ad['characteristics'] = response.xpath(characteristics_path).extract()
 

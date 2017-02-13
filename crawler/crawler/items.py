@@ -39,4 +39,12 @@ class Ad(scrapy.Item):
     additional_data = scrapy.Field(serializer=json.dumps)   # Data at the moment we do not know where to put
     owner = scrapy.Field()             # The name of the copany which insert the ad (if exists)
     objecttype = scrapy.Field()
+    condition = scrapy.Field()
 
+
+    def __str__(self):
+        return "object id: {object_id}, url: {url}, crawler: {crawler}, price_brutto: {price_brutto}, living_area: {living_area}".format(object_id=self.get('object_id', ''),
+                              url=self.get('url', ''),
+                              crawler=self.get('crawler', ''),
+                              price_brutto=self.get('price_brutto', ''),
+                              living_area=self.get('living_area', ''))

@@ -1,50 +1,45 @@
 # Dict for different languages
-# German / France / Italian
+# homegate / newhome
 
 FIELDS = {
-    'Verkaufspreis': 'price_brutto',
+    'Verkaufspreis': 'price_brutto',  # homegate
+    'Preis': 'price_brutto',  # newhome
+    'Preis Garage': 'additional_costs',  # newhome
 
-    'Etage': 'floor',
-    'Piano': 'floor',
+    'Etage': 'floor',     # homegate
+    'Stockwerk': 'floor', # newhome
 
-    'Anzahl Etagen': 'num_floors',
+    'Anzahl Etagen': 'num_floors',  # homegate
+    'Etagen im Haus': 'num_floors',  # newhome
 
-    'Verfügbar': 'available',
+    'Verfügbar': 'available',  # homegate
+    'Bezug': 'available',  # newhome
 
-    'Objekttyp': 'objecttype',
-    'Type': 'objecttype',
-    'Tipo': 'objecttype',
+    'Objekttyp': 'objecttype',  # homegate
+    'Objektart': 'objecttype', # newhome
 
-    'Zimmer': 'num_rooms',
-    'Pièces': 'num_rooms',
-    'Locali': 'num_rooms',
+    'Zimmer': 'num_rooms',  # homegate / newhome
     'Anzahl Zimmer': 'num_rooms',
 
-    'Wohnfläche': 'living_area',
-    'Surface habitable': 'living_area',
-    'Superficie abitabile': 'living_area',
+    'Wohnfläche': 'living_area',  # homegate / newhome
 
-    'Baujahr': 'build_year',
-    'Année de construction': 'build_year',
-    'Anno di costruzione': 'build_year',
+    'Baujahr': 'build_year',  # homegate / newhome
+    
+    'Nutzfläche': 'effective_area', # homegate
 
-    'Nutzfläche': 'effective_area',
-    'Surface utile': 'effective_area',
-    'Superficie utile': 'effective_area',
+    'Kubatur': 'cubature',  # homegate / newhome
 
-    'Kubatur': 'cubature',
-    'Volume': 'cubature',
-    'Cubatura': 'cubature',
+    'Raumhöhe': 'room_height',  # homegate
+   
+    'Grundstückfläche': 'plot_area',  # homegate / newhome
+    
+    'Zustand': 'condition',  # newhome
 
-    'Raumhöhe': 'room_height',
-    'Hauteur des pièces': 'room_height',
-    'Altezza locali': 'room_height',
+    'Letzte Renovation': 'last_renovation_year',  # homegate
+    'Renoviert im Jahr': 'last_renovation_year',  # newhome
 
-    'Grundstückfläche': 'plot_area',
-    'Surface du terrain': 'plot_area',
-    'Superficie terreno': 'plot_area',
+    'Immocode' : 'object_id',  # newhome
 
-    'Letzte Renovation': 'last_renovation_year',
-    'Dernière rénovation': 'last_renovation_year',
-    'Ultimo rinnovo': 'last_renovation_year'
+    'Objektnummer': 'reference_no'  # newhome
+ 
 }

@@ -71,8 +71,10 @@ class DatabaseWriterPipline(object):
                     logging.debug("Found the correct municipality %s", municipality.name)
 
 
-        if not municipality:
-            logging.error("Could not find zip_code %s %s in database", zip_code, ' '.join(name))
+        if municipality:
+            ad.municipalities_id = municipality.id
+        else:
+            logging.info("Could not find zip_code %s %s in database", zip_code, ' '.join(name))     
 
         ad.municipalities_id = municipality.id
         ad.object_types_id = obtype.id

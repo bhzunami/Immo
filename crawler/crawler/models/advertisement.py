@@ -45,6 +45,7 @@ class Advertisement(Base):
     last_seen = Column(Date)
     longitude = Column(Float)
     latitude = Column(Float)
+    municipality_unparsed = Column(String)
 
     # Relationship
     object_types_id = Column(Integer, ForeignKey('object_types.id'))
@@ -61,6 +62,7 @@ class Advertisement(Base):
         self.crawler = data.get('crawler', '')
         self.url = data.get('url', '')
         self.street = data.get('street', '')
+        self.municipality_unparsed = data.get('place', '')
         self.description = data.get('description', '')
         self.owner = data.get('owner', '')
         self.crawled_at = date.today()
