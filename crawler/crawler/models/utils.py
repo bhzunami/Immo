@@ -3,6 +3,7 @@
 """
 from datetime import date, datetime
 from sqlalchemy.ext.declarative import declarative_base
+import re
 
 Base = declarative_base()
 
@@ -33,3 +34,11 @@ def convert_to_date(data):
         pass
 
     return None
+
+def parse_price(price_str):
+    m = re.search(r'CHF\s([0-9\\\']+)\\.', price_str)
+    if m is not None:
+        return int(m.group(1).replace("'", ""))
+
+def parse_area(s):
+    return int(s.split(' ')[0])
