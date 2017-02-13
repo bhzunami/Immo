@@ -3,6 +3,7 @@
     Checks if the given URL was already processed
 """
 import logging
+from datetime import date
 from scrapy.exceptions import IgnoreRequest
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -20,9 +21,12 @@ class CrawledURLCheck(object):
         """check if the url was already crawled
         """
         session = self.Session()
-        advertisement = session.query(Advertisement).filter(Advertisement.url == request.url).all()
+        advertisement = session.query(Advertisement).filter(Advertisement.url == request.url).first()
         session.close()
         if advertisement:
             logging.info("This url %s was already crawled update last seen", request.url)
+            advertisement.last_seen = date.today()
+            session.add(advertisement)
+            session.commit()
             raise IgnoreRequest
         return
