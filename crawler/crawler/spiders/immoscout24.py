@@ -36,6 +36,7 @@ class Immoscout24(scrapy.Spider):
         ad['url'] = response.url
         ad['raw_data'] = response.body.decode()
         ad['objecttype'] = response.url.split("/")[5].split("-")[0]
+        ad['additional_data'] = {}
 
         # price, number of rooms, living area
         for div in response.xpath('//div[contains(@class, "layout--columns")]/div[@class="column" and ./div[@class="data-label"]]'):

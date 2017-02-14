@@ -2,8 +2,9 @@
 # homegate / newhome
 
 FIELDS = {
-    'Verkaufspreis': 'price_brutto',  # homegate
+    'Verkaufspreis': 'price_brutto',  # homegate, immoscout24
     'Preis': 'price_brutto',  # newhome
+    'Kaufpreis': 'price_brutto',  # immoscout24
     'Preis Garage': 'additional_costs',  # newhome
 
     'Etage': 'floor',     # homegate, urbanhome
