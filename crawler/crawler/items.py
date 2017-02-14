@@ -40,6 +40,8 @@ class Ad(scrapy.Item):
     owner = scrapy.Field()             # The name of the copany which insert the ad (if exists)
     objecttype = scrapy.Field()
     condition = scrapy.Field()
+    longitude = scrapy.Field()
+    latitude = scrapy.Field()
 
 
     def __str__(self):

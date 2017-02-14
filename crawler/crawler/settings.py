@@ -65,7 +65,8 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'crawler.pipelines.databaseWriter.DatabaseWriterPipline': 100,
+    'crawler.pipelines.coordinates.CoordinatesPipline': 100,
+    'crawler.pipelines.databaseWriter.DatabaseWriterPipline': 200,
     # 'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
@@ -91,6 +92,7 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://postgres:@localhost/immo?')
+OPENSTREETMAP_BASE_URL = 'http://nominatim.openstreetmap.org/search/'
 
 # Proxy
 PROXY = os.environ.get('PROXY_URL')

@@ -67,6 +67,8 @@ class Advertisement(Base):
         self.owner = data.get('owner', '')
         self.crawled_at = date.today()
         self.last_seen = date.today()
+        self.longitude = data.get('longitude', 0)
+        self.latitude = data.get('latitude', 0)
 
         # Set integers
         self.price_brutto = get_int(data.get('price_brutto', '0'))
