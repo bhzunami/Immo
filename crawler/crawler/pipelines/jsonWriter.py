@@ -5,10 +5,17 @@ Define your item pipelines here
 See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 """
 import json
+import logging
 
 class JSONWriterPipeline(object):
     """Write the item as Json
     """
+
+    logger = logging.getLogger('jsonwriter')
+
+    def __init__(self, *args, **kwargs):
+        self.logger.setLevel(logging.INFO)
+        super().__init__(*args, **kwargs)
 
     def open_spider(self, spider):
         """once when spider is started
@@ -25,6 +32,6 @@ class JSONWriterPipeline(object):
         """
         line = json.dumps(dict(item)) + ",\n"
         self.file.write(line.encode())
-        print("Craweled {}".format(item.get('object_id')))
+        self.logger.info("Crawled {}".format(item.get('object_id')))
         return item
 

@@ -1,27 +1,17 @@
-import logging
-import re
-
 import scrapy
 from ..items import Ad
 from ..utils import FIELDS
-from ..models import utils
 
 
 class Immoscout24(scrapy.Spider):
     name = "immoscout24"
 
-    def __init__(self, *args, **kwargs):
-        logger = logging.getLogger('scrapy.core.scraper')
-        logger.setLevel(logging.INFO)
-        super().__init__(*args, **kwargs)
-
-
     def start_requests(self):
         # the l parameter describes the canton id
         for i in range(1, 27):
-            yield scrapy.Request(url='http://www.immoscout24.ch/de/suche/wohnung-haus-kaufen?s=1&t=2&l={}&se=16&pn=1&ps=120'.format(i), callback=self.parse_list)
+            yield scrapy.Request(url='http://www.immoscout24.ch/de/suche/wohnung-haus-kaufen?s=1&t=2&l={}&se=16&pn=1&ps=120'.format(i), callback=self.parse)
 
-    def parse_list(self, response):
+    def parse(self, response):
         """ Parse the ad list """
 
         # find ads
@@ -38,7 +28,7 @@ class Immoscout24(scrapy.Spider):
         if next_page_url:
             self.logger.info("Found next page: {}".format(next_page_url))
             next_page = response.urljoin(next_page_url)
-            yield scrapy.Request(next_page, callback=self.parse_list)
+            yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_ad(self, response):
         ad = Ad()
@@ -49,7 +39,8 @@ class Immoscout24(scrapy.Spider):
 
         # price, number of rooms, living area
         for div in response.xpath('//div[contains(@class, "layout--columns")]/div[@class="column" and ./div[@class="data-label"]]'):
-            key, value, *_ = [x.strip() for x in div.xpath('div//text()').extract()]
+            key, value, *_ = [x.strip()
+                              for x in div.xpath('div//text()').extract()]
 
             try:
                 key = FIELDS[key]
@@ -60,11 +51,14 @@ class Immoscout24(scrapy.Spider):
 
         # location
         loc = response.xpath('//table//div[contains(@class, "adr")]')
-        ad['street'] = loc.xpath('div[contains(@class, "street-address")]/text()').extract_first()
-        ad['place'] = "{} {}".format(loc.xpath('span[contains(@class, "postal-code")]/text()').extract_first().strip(), loc.xpath('span[contains(@class, "locality")]/text()').extract_first())
+        ad['street'] = loc.xpath(
+            'div[contains(@class, "street-address")]/text()').extract_first()
+        ad['place'] = "{} {}".format(loc.xpath('span[contains(@class, "postal-code")]/text()').extract_first(
+        ).strip(), loc.xpath('span[contains(@class, "locality")]/text()').extract_first())
 
         # description
-        ad['description'] = ''.join(response.xpath('//div[contains(@class, "description")]//text()').extract()).strip()
+        ad['description'] = ''.join(response.xpath(
+            '//div[contains(@class, "description")]//text()').extract()).strip()
 
         # more attributes
         ad['characteristics'] = {}

@@ -10,7 +10,6 @@ https://www.homegate.ch/mieten/immobilien/kanton-{kanton}/trefferliste?tab=list
 Author: N. Mauchle <nmauchle@gmail.com>
 
 """
-import logging
 import scrapy
 from ..items import Ad
 from ..utils import FIELDS as fields
@@ -20,18 +19,13 @@ class Homegate(scrapy.Spider):
     """
     name = "homegate"
 
-
-    def __init__(self, *args, **kwargs):
-        logger = logging.getLogger('scrapy.core.scraper')
-        logger.setLevel(logging.INFO)
-        super().__init__(*args, **kwargs)
-
     def start_requests(self):
         """Start method
         """
         urls = ['https://www.homegate.ch/kaufen/immobilien/kanton-aargau/trefferliste?tab=list',
                 'https://www.homegate.ch/kaufen/immobilien/kanton-appenzellinnerrhoden/trefferliste?tab=list',
-                'https://www.homegate.ch/kaufen/immobilien/kanton-appenzellausserrhoden/trefferliste?tab=list','https://www.homegate.ch/kaufen/immobilien/kanton-baselland/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-appenzellausserrhoden/trefferliste?tab=list',
+                'https://www.homegate.ch/kaufen/immobilien/kanton-baselland/trefferliste?tab=list',
                 'https://www.homegate.ch/kaufen/immobilien/kanton-baselstadt/trefferliste?tab=list',
                 'https://www.homegate.ch/kaufen/immobilien/kanton-bern/trefferliste?tab=list',
                 'https://www.homegate.ch/kaufen/immobilien/kanton-fribourg/trefferliste?tab=list',

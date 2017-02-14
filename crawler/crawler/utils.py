@@ -6,23 +6,23 @@ FIELDS = {
     'Preis': 'price_brutto',  # newhome
     'Preis Garage': 'additional_costs',  # newhome
 
-    'Etage': 'floor',     # homegate
+    'Etage': 'floor',     # homegate, urbanhome
     'Stockwerk': 'floor', # newhome, immoscout24
 
     'Anzahl Etagen': 'num_floors',  # homegate
-    'Etagen im Haus': 'num_floors',  # newhome
+    'Etagen im Haus': 'num_floors',  # newhome, urbanhome
     'Anzahl Etagen des Objektes': 'num_floors', # immoscout24
 
-    'Verfügbar': 'available',  # homegate
+    'Verfügbar': 'available',  # homegate, urbanhome
     'Bezug': 'available',  # newhome
 
     'Objekttyp': 'objecttype',  # homegate
     'Objektart': 'objecttype', # newhome
 
-    'Zimmer': 'num_rooms',  # homegate / newhome
+    'Zimmer': 'num_rooms',  # homegate, newhome, urbanhome
     'Anzahl Zimmer': 'num_rooms',
 
-    'Wohnfläche': 'living_area',  # homegate / newhome
+    'Wohnfläche': 'living_area',  # homegate, newhome, urbanhome
 
     'Baujahr': 'build_year',  # homegate, newhome, immoscout24
 
@@ -33,6 +33,7 @@ FIELDS = {
     'Raumhöhe': 'room_height',  # homegate
 
     'Grundstückfläche': 'plot_area',  # homegate, newhome, immoscout24
+    'Grundstück': 'plot_area',  # urbanhome
 
     'Zustand': 'condition',  # newhome
 
@@ -42,7 +43,9 @@ FIELDS = {
 
     'Immocode' : 'object_id',  # newhome
     'ImmoScout24-Code': 'object_id', # immoscout24
+    'Inserate-Nr': 'object_id', # urbanhome
 
     'Objektnummer': 'reference_no', # newhome
     'Referenz': 'reference_no', # immoscout24
+    'Objekt-Referenz': 'reference_no', # urbanhome
 }
