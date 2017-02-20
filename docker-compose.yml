@@ -1,20 +1,22 @@
-version: '2'
+version: '2.1'
 services:
   scrapy:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-crawler
     links:
     - scrapoxy
     env_file:
-    - scrapy.env
-    - scrapy.secrets.env
+    - crawler/scrapy.env
+    - crawler/scrapy.secrets.env
     hostname: ip6-scrapy
     network_mode: bridge
 
   scrapoxy:
     image: fabienvauchelles/scrapoxy
     env_file:
-    - ./scrapoxy.env
-    - ./scrapoxy.secrets.env
+    - crawler/scrapoxy.env
+    - crawler/scrapoxy.secrets.env
     expose:
     - 8888
     - 8889

@@ -25,7 +25,7 @@ ROBOTSTXT_OBEY = True
 
 # Set LOGGING
 LOG_LEVEL = 'INFO'
-LOG_FILE = os.environ.get('LOG_FILE', 'scrapy.log')
+#LOG_FILE = os.environ.get('LOG_FILE', 'scrapy.log')
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 5
@@ -67,7 +67,7 @@ COOKIES_ENABLED = False
 ITEM_PIPELINES = {
     'crawler.pipelines.coordinates.CoordinatesPipline': 100,
     'crawler.pipelines.databaseWriter.DatabaseWriterPipline': 200,
-    # 'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
+    #'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -91,7 +91,7 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://postgres:@localhost/immo?')
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://crawler:0OP0PDC1o6I508NDjxiZNY1Tu2RH7g@indigo.the-admins.ch:55432/immo?sslmode=require')
 OPENSTREETMAP_BASE_URL = 'http://nominatim.openstreetmap.org/search/'
 
 # Proxy
