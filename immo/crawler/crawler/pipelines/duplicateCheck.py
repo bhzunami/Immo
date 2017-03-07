@@ -10,10 +10,12 @@ from scrapy.exceptions import DropItem
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, and_
 from ..settings import DATABASE_URL
-from ..models import Advertisement
-from ..models import ObjectType
-from ..models import Municipality
-from ..models.utils import convert_to_int, convert_to_float, convert_to_date
+from models import Advertisement, ObjectType, Municipality
+from models.utils import get_int
+# from ..models import Advertisement
+# from ..models import ObjectType
+# from ..models import Municipality
+# from ..models.utils import get_int
 
 class DatabaseWriterPipline(object):
 
@@ -49,9 +51,9 @@ class DatabaseWriterPipline(object):
         # wohnfläche
         # preis
         # ort
-        num_rooms = convert_to_int(item.get('num_rooms'))
-        living_area = convert_to_int(item.get('living_area'))
-        price_netto = convert_to_int(item.get('price_netto'))
+        num_rooms = get_int(item.get('num_rooms'))
+        living_area = get_int(item.get('living_area'))
+        price_netto = get_int(item.get('price_netto'))
 
         ad = session.query(Advertisement).filter(Advertisement.num_rooms == num_rooms).filter(Advertisement.living_area == living_area).filter(Advertisement.price_netto == price_netto).filter(Advertisement.object_types_id == objectType.id).fitler(Advertisement.municipalities_id == municipality.id).all()
 

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+ Define here the models for your scraped items
 
-# Define here the models for your scraped items
-#
-# See documentation in:
-# http://doc.scrapy.org/en/latest/topics/items.html
-
-import scrapy
+ See documentation in:
+ http://doc.scrapy.org/en/latest/topics/items.html
+"""
 import json
+import scrapy
 
 class Ad(scrapy.Item):
     """Ad for all real estate advertisement

@@ -9,9 +9,11 @@ from datetime import date, datetime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from ..settings import DATABASE_URL
-from ..models import Advertisement
-from ..models import ObjectType
-from ..models import Municipality
+from models import Advertisement, ObjectType, Municipality
+
+# from ..models import Advertisement
+# from ..models import ObjectType
+# from ..models import Municipality
 
 class DatabaseWriterPipline(object):
 

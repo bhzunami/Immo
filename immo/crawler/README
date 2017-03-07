@@ -1,0 +1,52 @@
+# Start crawling manually
+
+Be sure that you have installed the models tools:
+cd immo/models
+pip install -e .    # This installs the model module with a link. So the changes are immediately updated
+
+1. Change in immo/crawler directory
+
+2. Before you start crawling be sure how you want to crawl but always export the DATABASE_URL
+  - Crawl over amazon wiht scrapoxy: -> Export environments vars:
+    - AMAZON_KEY_ID
+    - AMAZON_ACCESS_KEY
+    - AMAZON_AMI_ID
+    - PROXY_URL
+    - PROXY_API
+    - PROXY_PASSWORD
+  - Crawl over local machine:
+    - Only the DATABASE_URL must be exported
+
+3. Start crawler with command scrapy crawl <crawler_name> e.g. homegate scrapy crawl homegate
+
+NOTE: It is sometimes useful to change the logging verbosity in the settings.py file.
+
+Piplines:
+Piplines are used to add more functionallity to the crawler. After every crawled item we check or get some more infos
+  - coordinates: Get the X and Y coordinates of the location
+  - databasWriter: Write the crawled item to the DATABASE 
+  - duplicateCheck: Check if this advertisement was already crawled by another crawler. If yes we ignore it.
+  - jsonWriter: For Debug only if you want to store the crawled data in a JSON file.
+
+
+Middlewares:
+These are used before the site is really crawled. Here we check if we crawled a specific url. Cause if yes we do not need to crawl it again
+
+Spiders:
+The Spiders are the actual code for crawling a website. At the moment there are 4 crawler
+  - homegate
+  - immoscout24
+  - urbanhome
+  - newhome
+
+items.py
+To crawl a site it is easy to use an Object for putting the data. In items we define our Advertisement as Ad. All crawled data where assigned to this element.
+Later when we want to store the object we have to convert it to an SQLAlchemy Object.
+
+utils.py
+The utils.py file holds the different names of the additional fields in a hashmap. So we have one unique name in the database.
+
+
+
+Run on a server:
+TODO
