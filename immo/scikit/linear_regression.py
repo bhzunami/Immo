@@ -4,6 +4,8 @@ import time
 from threading import Thread
 import numpy as np
 import pandas as pd
+from sklearn import linear_model
+import pdb
 import matplotlib.pyplot as plt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, defer
@@ -37,6 +39,7 @@ def main():
         sys.stdout.write(".")
         sys.stdout.flush()
         time.sleep(5)
+    print()  # New line
     advertisements = thread.advertisements
 
     fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(15, 10))
@@ -74,6 +77,34 @@ def main():
     ax[2, 0].set_title('Price - Numbers of floors')
     ax[2, 0].get_xaxis().get_major_formatter().set_useOffset(False)
 
+    plt.show()
+
+    advertisements.insert(0, 'ones', 1)
+
+    # Remove these houses where price is NaN
+    print("Missing price for {} ads".format(len(advertisements.price_brutto.loc[advertisements.price_brutto == 0])))
+
+    # ads = advertisements[advertisements.price_brutto.notnull()]
+    ads = advertisements.dropna()
+    X = ads[['ones', 'price_brutto']]
+    y = ads[['living_area']]
+
+    X = np.matrix(X.values)
+    y = np.matrix(y.values)
+
+    model = linear_model.LinearRegression(normalize=True)
+
+    model.fit(X, y)
+    x = np.array(X[:, 1].A1)
+    f = model.predict(X).flatten()
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.plot(x, f, 'r', label='Prediction')
+    ax.scatter(ads.price_brutto, ads.living_area, label='Traning Data')
+    ax.legend(loc=2)
+    ax.set_xlabel('Price')
+    ax.set_ylabel('Living Area')
+    ax.set_title('Predicted Price vs. Living Area')
     plt.show()
 
 if __name__ == "__main__":
