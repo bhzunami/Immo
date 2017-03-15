@@ -50,9 +50,7 @@ class DataAnalysis():
                 Session = sessionmaker(bind=engine)
                 self.session = Session()
                 self.ads = self.load_dataset_from_database()
-                self.ads.to_csv(file, header=True, encoding='utf-8',
-                                dtype={'object_id': str, 'reference_no': str, 'id': str},
-                                parse_dates=[6, 25])
+                self.ads.to_csv(file, header=True, encoding='utf-8')
             except AttributeError:
                 raise Exception("If you want to load data from the database you have to export the DATABASE_URL environment")
 
@@ -131,18 +129,21 @@ class DataAnalysis():
         print("Dataset preparation:")
         print("-"*70)
         # Remove all entries with NaN / None
+        self.ads = self.ads.drop(['street', 'id', 'available',
+                                  'object_id', 'reference_no', 'crawler', 'url', 
+                                  'additional_costs', 'description', 'characteristics',
+                                  'additional_data', 'owner', 'crawled_at', 
+                                  'last_seen', 'municipality_unparsed', 
+                                  'object_types_id', 'municipalities_id'], axis=1)
+
         self.ads_cleanup = self.ads.dropna()
         print("After remove all NaN the size of our dataset is {}".format(self.ads_cleanup.shape))
-        
         self.y = self.ads_cleanup['price_brutto'].values
-        self.X = self.ads_cleanup.drop(['price_brutto', 'street', 'id', 'available',
-                                        'object_id', 'reference_no', 'crawler', 'url', 
-                                        'additional_costs', 'description', 'characteristics',
-                                        'additional_data', 'owner', 'crawled_at', 
-                                        'last_seen', 'municipality_unparsed', 
-                                        'object_types_id', 'municipalities_id'], axis=1)
+        # pdb.set_trace()
+        self.X = self.ads_cleanup.drop(['price_brutto'], axis=1)
         self.keys = list(self.X.keys())[1:]
         self.X = self.X.values
+
 
 
     # Features Selection
@@ -210,7 +211,7 @@ class DataAnalysis():
 def main():
     data_analysis = DataAnalysis(from_file=True, file='all.csv')
     data_analysis.simple_stats()
-    data_analysis.draw_features(show_null_values=True)
+    # data_analysis.draw_features(show_null_values=True)
     data_analysis.prepare_dataset()
     data_analysis.select_k_best()
     data_analysis.recursive_feature_elimination()
