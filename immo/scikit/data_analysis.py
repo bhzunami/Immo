@@ -50,7 +50,9 @@ class DataAnalysis():
                 Session = sessionmaker(bind=engine)
                 self.session = Session()
                 self.ads = self.load_dataset_from_database()
-                self.ads.to_csv(file, header=True, encoding='utf-8')
+                self.ads.to_csv(file, header=True, encoding='utf-8',
+                                dtype={'object_id': str, 'reference_no': str, 'id': str},
+                                parse_dates=[6, 25])
             except AttributeError:
                 raise Exception("If you want to load data from the database you have to export the DATABASE_URL environment")
 
@@ -63,7 +65,7 @@ class DataAnalysis():
     def load_dataset_from_database(self):
         """ load data from database
         """
-        return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).filter(Advertisement.crawler == 'homegate').statement,
+        return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).statement,
                                  self.session.bind,
                                  parse_dates=['crawled_at'])
 
@@ -125,8 +127,13 @@ class DataAnalysis():
         plt.show()
 
     def prepare_dataset(self):
+        print("="*70)
+        print("Dataset preparation:")
+        print("-"*70)
         # Remove all entries with NaN / None
         self.ads_cleanup = self.ads.dropna()
+        print("After remove all NaN the size of our dataset is {}".format(self.ads_cleanup.shape))
+        
         self.y = self.ads_cleanup['price_brutto'].values
         self.X = self.ads_cleanup.drop(['price_brutto', 'street', 'id', 'available',
                                         'object_id', 'reference_no', 'crawler', 'url', 
@@ -147,7 +154,7 @@ class DataAnalysis():
         # summarize scores
         print("="*70)
         print("Select K Best fit scores:")
-        print("="*70)
+        print("-"*70)
         for key, fit_score in zip(self.keys, fit.scores_):
             print("{:25}: {:6}".format(key, fit_score))
 
@@ -193,12 +200,15 @@ class DataAnalysis():
 
         model = SelectFromModel(lsvc, prefit=True)
         X_new = model.transform(self.X)
+        print("New shape of the matrix: {} old was {}. Removed {} cols".format(X_new.shape,
+                                                                               self.X.shape,
+                                                                               self.X.shape[1] - X_new.shape[1]))
         print(X_new)
 
 
 
 def main():
-    data_analysis = DataAnalysis(from_file=True)
+    data_analysis = DataAnalysis(from_file=True, file='all.csv')
     data_analysis.simple_stats()
     data_analysis.draw_features(show_null_values=True)
     data_analysis.prepare_dataset()
