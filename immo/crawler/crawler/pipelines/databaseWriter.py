@@ -68,11 +68,11 @@ class DatabaseWriterPipline(object):
             logger.debug("Found exact one %s ", municipality.name)
 
         if len(municipalities) > 1:
-            logger.debug("Found more as one %i search for %s", len(municipalities), name[0])
+            logger.debug("Found more than one %i search for %s", len(municipalities), name[0])
             for m in municipalities:
-                if m.name.startswith(name[0]):
+                if m.name.startswith(name[0]) or name[0] in m.alternate_names:
                     municipality = m
-                    logger.debug("Found the correct municipality %s", municipality.name)
+                    logger.debug("Found the municipality '%s' for input: %s", municipality.name, item.get('place'))
 
 
         if municipality:
