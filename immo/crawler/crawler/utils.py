@@ -6,6 +6,7 @@ FIELDS = {
     'Preis': 'price_brutto',  # newhome
     'Kaufpreis': 'price_brutto',  # immoscout24
     'Preis Garage': 'additional_costs',  # newhome
+    'Preis Abstellplatz': 'additional_costs', # newhome
 
     'Etage': 'floor',     # homegate, urbanhome
     'Stockwerk': 'floor', # newhome, immoscout24
@@ -49,4 +50,6 @@ FIELDS = {
     'Objektnummer': 'reference_no', # newhome
     'Referenz': 'reference_no', # immoscout24
     'Objekt-Referenz': 'reference_no', # urbanhome
+
+    'Qualitätslabel': 'quality_label',  # newhome
 }

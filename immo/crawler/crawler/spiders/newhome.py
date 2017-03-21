@@ -108,7 +108,7 @@ class Newhome(scrapy.Spider):
                 key = FIELDS[key]
                 ad[key] = value.strip()
             except KeyError:
-                self.logger.warning("This key not in database: {}".format(key))
+                self.logger.warning("This key not in database: {} for url {}".format(key, response.url))
                 ad['additional_data'][key] = value
 
 
@@ -128,6 +128,8 @@ class Newhome(scrapy.Spider):
                 data[title_name][category_name] = {}
 
                 for element in category.xpath('div[@class="form-group"]'):
+                    if not element.xpath('span/text()'):
+                        continue
                     element_name = element.xpath('span/text()').extract_first().strip()
                     element_value = element.xpath('div/div//text()').extract_first()
                     if not element_value:
