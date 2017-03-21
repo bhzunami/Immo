@@ -22,10 +22,13 @@ class CrawledURLCheck(object):
         """check if the url was already crawled
         """
         session = self.Session()
-        advertisement = session.query(Advertisement).filter(Advertisement.url == request.url).first()
+
+        clean_url = request.url.split('?')[0]
+
+        advertisement = session.query(Advertisement).filter(Advertisement.url == clean_url).first()
         session.close()
         if advertisement:
-            logging.info("This url %s was already crawled update last seen", request.url)
+            #logging.info("This url %s was already crawled update last seen", clean_url)
             advertisement.last_seen = date.today()
             session.add(advertisement)
             session.commit()

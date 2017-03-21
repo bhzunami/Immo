@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # code
 COPY . /usr/src/app
 
+RUN cd models && pip install -e .
+
 WORKDIR /usr/src/app/crawler/crawler
 
 ENTRYPOINT ["scrapy", "crawl"]

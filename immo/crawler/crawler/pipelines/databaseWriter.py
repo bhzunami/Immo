@@ -57,7 +57,7 @@ class DatabaseWriterPipline(object):
         municipalities = session.query(Municipality).filter(Municipality.zip == int(zip_code)).all()
 
         # It is possible to get more than one municipality so if this happens
-        # we search through all 
+        # we search through all
         municipality = None
 
         # Only one was found
@@ -76,7 +76,7 @@ class DatabaseWriterPipline(object):
         if municipality:
             ad.municipalities_id = municipality.id
         else:
-            logging.info("Could not find zip_code %s %s in database", zip_code, ' '.join(name))     
+            logging.info("Could not find zip_code %s %s in database", zip_code, ' '.join(name))
 
         ad.object_types_id = obtype.id
 
@@ -84,7 +84,7 @@ class DatabaseWriterPipline(object):
         try:
             session.add(ad)
             session.commit()
-            logging.info("Advertisement stored: %i", ad.id)
+            #logging.info("Advertisement stored: %i", ad.id)
         except Exception as exception:
             logging.error("Could not save advertisement %s cause %s", ad.object_id, exception)
             session.rollback()
