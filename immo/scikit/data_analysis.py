@@ -21,7 +21,7 @@ from sklearn import linear_model
 import pdb
 import matplotlib.pyplot as plt
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, defer
+from sqlalchemy.orm import sessionmaker, defer, load_only
 from models import Advertisement
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectKBest, SelectFromModel, chi2, RFE
@@ -63,9 +63,28 @@ class DataAnalysis():
     def load_dataset_from_database(self):
         """ load data from database
         """
-        return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).statement,
-                                 self.session.bind,
-                                 parse_dates=['crawled_at'])
+
+        return pd.read_sql_query(self.session.query(Advertisement).options(load_only('num_floors',
+                                                                                     'living_area',
+                                                                                     'floor',
+                                                                                     'price_brutto',
+                                                                                     'num_rooms',
+                                                                                     'object_types_id',
+                                                                                     'build_year',
+                                                                                     'last_renovation_year',
+                                                                                     'cubature',
+                                                                                     'room_height',
+                                                                                     'effective_area',
+                                                                                     'floors_house',
+                                                                                     'longitude',
+                                                                                     'latitude',
+                                                                                     'plot_area',
+                                                                                     'municipalities_id')).statement,
+                                 self.session.bind)
+                
+        # return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).statement,
+        #                          self.session.bind,
+        #                          parse_dates=['crawled_at'])
 
 
     def simple_stats(self):
@@ -79,7 +98,11 @@ class DataAnalysis():
         total_zero = 0
         total_nan = 0
         total_use = 0
-        for i, key in KEYS:
+
+        for i, key in enumerate(self.ads.keys()):
+            if key == 'id' or key == 'Unnamed':  # Keys from pandas we do not want
+                continue
+        # for i, key in KEYS:
             zero_values = self.ads.loc[self.ads[key] == 0][key].shape[0]
             nan_values = self.ads[key].isnull().sum()
             useful_values = total_amount_of_data - zero_values - nan_values
@@ -109,6 +132,7 @@ class DataAnalysis():
 
             df = pd.concat([zero_values, non_zero_values, self.ads.price_brutto],
                             axis=1, keys=['zero', 'non_zero', 'price_brutto'])
+
             df.plot(kind='scatter', x='price_brutto',
                     y='non_zero', color='DarkBlue', ax=current_axis, s=2)
 
@@ -129,18 +153,11 @@ class DataAnalysis():
         print("Dataset preparation:")
         print("-"*70)
         # Remove all entries with NaN / None
-        self.ads = self.ads.drop(['street', 'id', 'available',
-                                  'object_id', 'reference_no', 'crawler', 'url', 
-                                  'additional_costs', 'description', 'characteristics',
-                                  'additional_data', 'owner', 'crawled_at', 
-                                  'last_seen', 'municipality_unparsed', 
-                                  'object_types_id', 'municipalities_id'], axis=1)
-
         self.ads_cleanup = self.ads.dropna()
         print("After remove all NaN the size of our dataset is {}".format(self.ads_cleanup.shape))
         self.y = self.ads_cleanup['price_brutto'].values
         # pdb.set_trace()
-        self.X = self.ads_cleanup.drop(['price_brutto'], axis=1)
+        self.X = self.ads_cleanup.drop(['price_brutto', 'id'], axis=1)
         self.keys = list(self.X.keys())[1:]
         self.X = self.X.values
 
@@ -156,7 +173,7 @@ class DataAnalysis():
         print("="*70)
         print("Select K Best fit scores:")
         print("-"*70)
-        for key, fit_score in zip(self.keys, fit.scores_):
+        for key, fit_score in sorted(zip(self.keys, fit.scores_), key=lambda x: x[1], reverse=True):
             print("{:25}: {:6}".format(key, fit_score))
 
         features = fit.transform(self.X)  # fit.fit_transform(self.X, self.y)
@@ -209,14 +226,14 @@ class DataAnalysis():
 
 
 def main():
-    data_analysis = DataAnalysis(from_file=True, file='all.csv')
+    data_analysis = DataAnalysis(from_file=False, file='all.csv')
     data_analysis.simple_stats()
     # data_analysis.draw_features(show_null_values=True)
     data_analysis.prepare_dataset()
-    data_analysis.select_k_best()
-    data_analysis.recursive_feature_elimination()
+    # data_analysis.select_k_best()
+    # data_analysis.recursive_feature_elimination()
     data_analysis.pricipal_component_analysis()
-    data_analysis.L1()
+    # data_analysis.L1()
 
     # model.fit(X, y)
     # x = np.array(X[:, 1].A1)

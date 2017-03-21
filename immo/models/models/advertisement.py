@@ -24,12 +24,12 @@ class Advertisement(Base):
     available = Column(Date)
     street = Column(String)
     price_brutto = Column(Integer)
-    price_netto = Column(Integer)
-    additional_costs = Column(Integer)
+    price_netto = Column(Integer)       # If we also want crawl rent
+    additional_costs = Column(Integer)  # Additional costs like: Garage or something
     description = Column(String)
     living_area = Column(Integer)
     floor = Column(Integer)             # on which floor
-    num_rooms = Column(Float)
+    num_rooms = Column(Float)           # Ow many rooms does this ad have
     num_floors = Column(Integer)        # if you have multiple floors
     build_year = Column(Integer)
     last_renovation_year = Column(Integer)
@@ -56,41 +56,41 @@ class Advertisement(Base):
 
     def __init__(self, data):
         # Set the easy values
-        self.object_id = data.get('object_id', '')
-        self.reference_no = data.get('reference_no', '')
-        self.raw_data = data.get('raw_data', '')
-        self.crawler = data.get('crawler', '')
-        self.url = data.get('url', '')
-        self.street = data.get('street', '')
-        self.municipality_unparsed = data.get('place', '')
-        self.description = data.get('description', '')
-        self.owner = data.get('owner', '')
+        self.object_id = data.get('object_id', None)
+        self.reference_no = data.get('reference_no', None)
+        self.raw_data = data.get('raw_data', None)
+        self.crawler = data.get('crawler', None)
+        self.url = data.get('url', None)
+        self.street = data.get('street', None)
+        self.municipality_unparsed = data.get('place', None)
+        self.description = data.get('description', None)
+        self.owner = data.get('owner', None)
         self.crawled_at = date.today()
         self.last_seen = date.today()
-        self.longitude = data.get('longitude', 0)
-        self.latitude = data.get('latitude', 0)
+        self.longitude = data.get('longitude', None)
+        self.latitude = data.get('latitude', None)
 
         # Set integers
-        self.price_brutto = get_int(data.get('price_brutto', '0'))
-        self.price_netto = get_int(data.get('price_netto', '0'))
-        self.additional_costs = get_int(data.get('additional_costs', '0'))
+        self.price_brutto = get_int(data.get('price_brutto', None))
+        self.price_netto = get_int(data.get('price_netto', None))
+        self.additional_costs = get_int(data.get('additional_costs', None))
 
-        self.living_area = get_int(data.get('living_area', '0'))
-        self.floor = get_int(data.get('floor', '0'))
-        self.num_floors = get_int(data.get('num_floors', '0'))
-        self.build_year = get_int(data.get('build_year', '0'))
-        self.last_renovation_year = get_int(data.get('last_renovation_year', '0'))
-        self.floors_house = get_int(data.get('floors_house', '0'))
+        self.living_area = get_int(data.get('living_area', None))
+        self.floor = get_int(data.get('floor', None))
+        self.num_floors = get_int(data.get('num_floors', None))
+        self.build_year = get_int(data.get('build_year', None))
+        self.last_renovation_year = get_int(data.get('last_renovation_year', None))
+        self.floors_house = get_int(data.get('floors_house', None))
 
         # Set dates
-        self.available = get_date(data.get('available', ''))
+        self.available = get_date(data.get('available', None))
 
         # Set floats
-        self.num_rooms = get_float(data.get('num_rooms', '0'))
-        self.cubature = get_float(data.get('cubature', '0'))
-        self.room_height = get_float(data.get('room_height', '0'))
-        self.effective_area = get_float(data.get('effective_area', '0'))
-        self.plot_area = get_float(data.get('plot_area', '0'))
+        self.num_rooms = get_float(data.get('num_rooms', None))
+        self.cubature = get_float(data.get('cubature', None))
+        self.room_height = get_float(data.get('room_height', None))
+        self.effective_area = get_float(data.get('effective_area', None))
+        self.plot_area = get_float(data.get('plot_area', None))
         # Set jsons
-        self.characteristics = json.dumps(data.get('characteristics', ''))
-        self.additional_data = json.dumps(data.get('additional_data', ''))
+        self.characteristics = json.dumps(data.get('characteristics', None))
+        self.additional_data = json.dumps(data.get('additional_data', None))

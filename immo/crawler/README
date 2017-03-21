@@ -50,3 +50,8 @@ The utils.py file holds the different names of the additional fields in a hashma
 
 Run on a server:
 TODO
+
+
+Run from console
+cd immo/crawler
+scrapy shell <linkt_to_webseite>

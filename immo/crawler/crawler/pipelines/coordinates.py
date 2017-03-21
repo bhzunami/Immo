@@ -42,5 +42,7 @@ class CoordinatesPipline(object):
             logging.debug("Nice found long lat for item %s, %s",
                           item.get('longitude'),
                           item.get('latitude'))
+        else:
+            logging.warn("Could not get long or lat cause answer was 0")
         return item
 
