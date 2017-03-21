@@ -37,7 +37,7 @@ class Urbanhome(scrapy.Spider):
             self.logger.error("Did not receive all search results for: " + j["Url"])
 
         if j["Count"] == 0:
-            self.logger.info("No results for: " + j["Url"])
+            self.logger.debug("No results for: " + j["Url"])
             return
 
         results = Selector(text=j["Rows"])
@@ -85,5 +85,5 @@ class Urbanhome(scrapy.Spider):
             except KeyError:
                 ad['characteristics'][key] = value
 
-        self.logger.info("Crawled: " + ad["object_id"] + "    " + ad["url"])
+        self.logger.debug("Crawled: " + ad["object_id"] + "    " + ad["url"])
         yield ad

@@ -32,6 +32,6 @@ class JSONWriterPipeline(object):
         """
         line = json.dumps(dict(item)) + ",\n"
         self.file.write(line.encode())
-        self.logger.info("Crawled {}".format(item.get('object_id')))
+        self.logger.debug("Crawled {}".format(item.get('object_id')))
         return item
 

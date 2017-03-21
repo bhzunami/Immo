@@ -38,7 +38,7 @@ class DatabaseWriterPipline(object):
         logging.debug("Search for type %s", obtype_name)
         obtype = session.query(ObjectType).filter(ObjectType.name == item.get('objecttype')).first()
         if not obtype:
-            logging.info("This object type was not found in the database -> Store it")
+            logging.debug("This object type was not found in the database -> Store it")
             # Store new ObjectType
             obtype = ObjectType(name=item.get('objecttype'))
             session.add(obtype)
@@ -76,7 +76,7 @@ class DatabaseWriterPipline(object):
         if municipality:
             ad.municipalities_id = municipality.id
         else:
-            logging.info("Could not find zip_code %s %s in database", zip_code, ' '.join(name))
+            logging.warn("Could not find zip_code %s %s in database", zip_code, ' '.join(name))
 
         ad.object_types_id = obtype.id
 
@@ -84,7 +84,7 @@ class DatabaseWriterPipline(object):
         try:
             session.add(ad)
             session.commit()
-            #logging.info("Advertisement stored: %i", ad.id)
+            logging.debug("Advertisement stored: %i", ad.id)
         except Exception as exception:
             logging.error("Could not save advertisement %s cause %s", ad.object_id, exception)
             session.rollback()

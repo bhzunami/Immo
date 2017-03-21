@@ -74,7 +74,7 @@ class Newhome(scrapy.Spider):
 
         next_page_url = response.xpath(next_page_path).extract_first()
         if next_page_url:
-            #self.logger.info("Found next page {}".format(next_page_url))
+            self.logger.debug("Found next page {}".format(next_page_url))
             next_page = response.urljoin(next_page_url)
             yield scrapy.Request(next_page, callback=self.parse)
 

@@ -59,7 +59,7 @@ class DatabaseWriterPipline(object):
 
         session.close()
         if len(ad) > 1:
-            logging.info("Found possible dublicate: %s", ad[0].id)
+            logging.debug("Found possible duplicate: %s", ad[0].id)
             raise DropItem
 
         return item

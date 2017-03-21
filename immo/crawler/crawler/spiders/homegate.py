@@ -69,7 +69,7 @@ class Homegate(scrapy.Spider):
                          '/ul/li[@class="next"]/a/@href'
         next_page_url = response.xpath(next_page_path).extract_first()
         if next_page_url:
-            #self.logger.debug("Found next page")
+            self.logger.debug("Found next page")
             next_page = response.urljoin(next_page_url)
             yield scrapy.Request(next_page, callback=self.parse)
 

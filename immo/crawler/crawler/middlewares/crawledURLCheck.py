@@ -28,7 +28,7 @@ class CrawledURLCheck(object):
         advertisement = session.query(Advertisement).filter(Advertisement.url == clean_url).first()
         session.close()
         if advertisement:
-            #logging.info("This url %s was already crawled update last seen", clean_url)
+            logging.debug("This url %s was already crawled update last seen", clean_url)
             advertisement.last_seen = date.today()
             session.add(advertisement)
             session.commit()
