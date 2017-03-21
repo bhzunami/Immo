@@ -6,6 +6,11 @@ from ..utils import FIELDS
 class Immoscout24(scrapy.Spider):
     name = "immoscout24"
 
+    def get_clean_url(self, url):
+        """Returns clean ad url for storing in database
+        """
+        return url.split('?')[0]
+
     def start_requests(self):
         # the l parameter describes the canton id
         for i in range(1, 27):
@@ -52,10 +57,9 @@ class Immoscout24(scrapy.Spider):
 
         # location
         loc = response.xpath('//table//div[contains(@class, "adr")]')
-        ad['street'] = loc.xpath(
-            'div[contains(@class, "street-address")]/text()').extract_first()
-        ad['place'] = "{} {}".format(loc.xpath('span[contains(@class, "postal-code")]/text()').extract_first(
-        ).strip(), loc.xpath('span[contains(@class, "locality")]/text()').extract_first())
+        ad['street'] = loc.xpath('div[contains(@class, "street-address")]/text()').extract_first()
+        ad['place'] = "{} {}".format(loc.xpath('span[contains(@class, "postal-code")]/text()').extract_first().strip(),
+                                     loc.xpath('span[contains(@class, "locality")]/text()').extract_first())
 
         # description
         ad['description'] = ''.join(response.xpath(

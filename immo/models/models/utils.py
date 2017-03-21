@@ -7,9 +7,14 @@ import re
 
 Base = declarative_base()
 
+CANTONS = ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "FR", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG", "TI", "VD", "VS", "NE", "GE", "JU"]
 
 def prepare_string(input):
+    if input is None:
+        return None
     return input.replace("'", "").replace(",", ".")
+
+ignore_values = ['Preis auf Anfrage', 'Erdgeschoss']
 
 def extract_number(input):
     try:
@@ -17,6 +22,9 @@ def extract_number(input):
     except IndexError:
         return None
     except AttributeError:
+        if input in ignore_values:
+            return 0
+
         print("ERROR REGEX INPUT: {}".format(input))
         return None
 
@@ -51,3 +59,8 @@ def convert_to_int(num):
         return int(num)
     except ValueError:
         return None
+
+def extract_municipality(mun):
+    return re.sub(" (" + "|".join(CANTONS) + ")$", "", mun)
+
+

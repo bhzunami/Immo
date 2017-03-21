@@ -19,11 +19,10 @@ class Newhome(scrapy.Spider):
     """
     name = "newhome"
 
-
-    def __init__(self, *args, **kwargs):
-        logger = logging.getLogger('scrapy.core.scraper')
-        logger.setLevel(logging.INFO)
-        super().__init__(*args, **kwargs)
+    def get_clean_url(self, url):
+        """Returns clean ad url for storing in database
+        """
+        return url
 
     def start_requests(self):
         """Start method

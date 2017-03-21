@@ -17,7 +17,9 @@ from models.utils import get_int
 # from ..models import Municipality
 # from ..models.utils import get_int
 
-class DatabaseWriterPipline(object):
+logger = logging.getLogger(__name__)
+
+class DuplicateCheckPipeline(object):
 
     def open_spider(self, spider):
         """
@@ -35,7 +37,7 @@ class DatabaseWriterPipline(object):
         type = item.get('objecttype')
         objectType = session.query(ObjectType).filter(ObjectType.name == type).first()
         if not objectType:
-            logging.warn("Object type %s not found in database", type)
+            logger.warn("Object type %s not found in database", type)
             # Check for duplicate is not usefull
             session.close()
             return item
@@ -44,7 +46,7 @@ class DatabaseWriterPipline(object):
         municipality = session.query(Municipality).filter(Municipality.zip == int(zip_code)).filter(Municipality.name == ' '.join(name)).first()
 
         if not municipality:
-            logging.warning("Municipality %s %s not found", zip_code, name)
+            logger.warning("Municipality %s %s not found", zip_code, name)
             session.close()
             return item
         # zimmer
@@ -59,7 +61,7 @@ class DatabaseWriterPipline(object):
 
         session.close()
         if len(ad) > 1:
-            logging.debug("Found possible duplicate: %s", ad[0].id)
+            logger.debug("Found possible duplicate: %s", ad[0].id)
             raise DropItem
 
         return item

@@ -3,11 +3,18 @@ import json
 import scrapy
 from scrapy.selector import Selector
 
+from models import utils
+
 from ..items import Ad
 from ..utils import FIELDS
 
 class Urbanhome(scrapy.Spider):
     name = "urbanhome"
+
+    def get_clean_url(self, url):
+        """Returns clean ad url for storing in database
+        """
+        return url.split('?')[0]
 
     def start_requests(self):
 
@@ -20,9 +27,10 @@ class Urbanhome(scrapy.Spider):
 
         # canton ids from 7 (AI) to 32 (SH)
         for i in range(7, 33):  # range(7, 33)
-            data = json.dumps({"settings": {"MainTypeGroup": "1", "Category": "2", "AdvancedSearchOpen": "false", "MailID": "", "PayType": "2", "Type": "0", "RoomsMin": "0", "RoomsMax": "0", "PriceMin": "0", "PriceMax": "0", "Regions": [str(i)], "SubTypes": ["0"], "SizeMin": "0", "SizeMax": "0", "Available": "", "NoAgreement": "false", "FloorRange": "0", "equipmentgroups": [], "Email": "", "Interval": "0", "SubscriptionType1": "true", "SubscriptionType4": "true", "SubscriptionType8": "true", "SubscriptionType128": "true", "SubscriptionType512": "true", "Sort": "0"}, "manual": False, "skip": 0, "reset": True, "position": 0, "iframe": 0, "defaultTitle": True, "saveSettings": True})
+            for t in ["1", "4", "512"]: # wohnung, haus, feriendomizil
+                data = json.dumps({"settings": {"MainTypeGroup": "1", "Category": "2", "AdvancedSearchOpen": "false", "MailID": "", "PayType": "2", "Type": t, "RoomsMin": "0", "RoomsMax": "0", "PriceMin": "0", "PriceMax": "0", "Regions": [str(i)], "SubTypes": ["0"], "SizeMin": "0", "SizeMax": "0", "Available": "", "NoAgreement": "false", "FloorRange": "0", "equipmentgroups": [], "Email": "", "Interval": "0", "SubscriptionType1": "true", "SubscriptionType4": "true", "SubscriptionType8": "true", "SubscriptionType128": "true", "SubscriptionType512": "true", "Sort": "0"}, "manual": False, "skip": 0, "reset": True, "position": 0, "iframe": 0, "defaultTitle": True, "saveSettings": True})
 
-            yield scrapy.Request(url=url, method="POST", headers=headers, body=data, callback=self.parse)
+                yield scrapy.Request(url=url, method="POST", headers=headers, body=data, callback=self.parse)
 
     def parse(self, response):
         """ Parse the ad list """
@@ -53,6 +61,9 @@ class Urbanhome(scrapy.Spider):
             yield request
 
     def parse_ad(self, response):
+        if "Wartungsarbeiten" in response.body.decode():
+            return
+
         ad = Ad()
         ad['crawler'] = 'urbanhome'
         ad['url'] = response.url
@@ -63,7 +74,7 @@ class Urbanhome(scrapy.Spider):
 
         base = '//div[@id="xInfos"]//li[@class="cb pt15"]'
         ad['objecttype'] = response.xpath(base + '[1]/h2/text()').extract_first()
-        ad['place'] = ' '.join(response.xpath(base + '//span[@itemprop="address"]/span[not(@itemprop="streetAddress")]/text()').extract())
+        ad['place'] = utils.extract_municipality(' '.join(response.xpath(base + '//span[@itemprop="address"]/span[not(@itemprop="streetAddress")]/text()').extract()))
         ad['street'] = response.xpath(base + '//span[@itemprop="address"]/span[@itemprop="streetAddress"]/text()').extract_first()
 
         description = response.xpath('//*[@id="xGd"]/div/div[@class="cb pb15"]|//*[@id="xGd"]/div/div[contains(@class, "fl")]//text()').extract()
@@ -77,7 +88,11 @@ class Urbanhome(scrapy.Spider):
 
         # more attributes
         for entry in response.xpath(base + '/div/text()').extract():
-            key, value = [x.strip() for x in entry.split(':')]
+            tokens = entry.split(':')
+            if len(tokens) < 2: # ignore lines wich are not in format "key: value"
+                continue
+
+            key, value = [x.strip() for x in tokens]
 
             try:
                 key = FIELDS[key]

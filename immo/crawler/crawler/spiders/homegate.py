@@ -19,6 +19,11 @@ class Homegate(scrapy.Spider):
     """
     name = "homegate"
 
+    def get_clean_url(self, url):
+        """Returns clean ad url for storing in database
+        """
+        return url.split('?')[0]
+
     def start_requests(self):
         """Start method
         """
