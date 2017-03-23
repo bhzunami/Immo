@@ -58,7 +58,6 @@ class Newhome(scrapy.Spider):
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
-
     def parse(self, response):
         """Parse the page
         """
@@ -76,8 +75,6 @@ class Newhome(scrapy.Spider):
             self.logger.debug("Found next page {}".format(next_page_url))
             next_page = response.urljoin(next_page_url)
             yield scrapy.Request(next_page, callback=self.parse)
-
-
 
     def parse_ad(self, response):
         """Parse single add
@@ -111,7 +108,6 @@ class Newhome(scrapy.Spider):
                 self.logger.warning("This key not in database: {} for url {}".format(key, response.url))
                 ad['additional_data'][key] = value
 
-
         # Characteristics / Ausstattung
         characteristics_path = '//div[contains(@class, "environment")]/div[contains(@class, "form")]/div'
         data = {}
@@ -120,25 +116,17 @@ class Newhome(scrapy.Spider):
         # for el in response.xpath(characteristics_path:
         #   print(el.xpath('//h4/text()')) only returns the first?
         for title in response.xpath(characteristics_path):
-            title_name = title.xpath('.//h4/text()').extract_first().strip()
-            data[title_name] = {}
-
             for category in title.xpath('div[@class="row"]/div'):
-                category_name = ''.join(category.xpath('h5//text()').extract()).strip()
-                data[title_name][category_name] = {}
-
                 for element in category.xpath('div[@class="form-group"]'):
                     if not element.xpath('span/text()'):
                         continue
                     element_name = element.xpath('span/text()').extract_first().strip()
                     element_value = element.xpath('div/div//text()').extract_first()
                     if not element_value:
-                      data[title_name][category_name][element_name] = True
+                      data[element_name] = True
                     else:
-                        data[title_name][category_name][element_name] = element_value.strip()
+                        data[element_name] = element_value.strip()
 
         ad['characteristics'] = data
 
         yield ad
-
-
