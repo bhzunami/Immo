@@ -122,7 +122,7 @@ class Homegate(scrapy.Spider):
         key_data = response.xpath(key_path)
         ad['additional_data'] = {}
         for data in key_data:
-            key,  *values = data.xpath('span//text()').extract()
+            key, *values = data.xpath('span//text()').extract()
             value = values[0]
             try:
                 key = fields[key]
