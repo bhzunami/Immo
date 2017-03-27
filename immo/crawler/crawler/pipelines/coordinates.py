@@ -74,7 +74,7 @@ class CoordinatesPipline(object):
             return (None, None)
 
         res = response.json()
-        if len(res) > 0:
+        if len(res['results']) > 0:
             long = res['results'][0]['geometry']['location']['lng']
             lat = res['results'][0]['geometry']['location']['lat']
             return long, lat
