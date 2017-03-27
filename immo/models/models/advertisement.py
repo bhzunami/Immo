@@ -74,9 +74,6 @@ class Advertisement(Base):
         self.price_brutto = get_int(data.get('price_brutto', None))
         self.price_netto = get_int(data.get('price_netto', None))
         self.additional_costs = get_int(data.get('additional_costs', None))
-
-        self.living_area = get_int(data.get('living_area', None))
-        self.floor = get_int(data.get('floor', None))
         self.num_floors = get_int(data.get('num_floors', None))
         self.build_year = get_int(data.get('build_year', None))
         self.last_renovation_year = get_int(data.get('last_renovation_year', None))
@@ -86,6 +83,8 @@ class Advertisement(Base):
         self.available = get_date(data.get('available', None))
 
         # Set floats
+        self.living_area = get_float(data.get('living_area', None))
+        self.floor = get_float(data.get('floor', None))
         self.num_rooms = get_float(data.get('num_rooms', None))
         self.cubature = get_float(data.get('cubature', None))
         self.room_height = get_float(data.get('room_height', None))
