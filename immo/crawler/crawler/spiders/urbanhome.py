@@ -67,7 +67,7 @@ class Urbanhome(scrapy.Spider):
         ad = Ad()
         ad['crawler'] = 'urbanhome'
         ad['url'] = response.url
-        #ad['raw_data'] = response.body.decode()
+        ad['raw_data'] = response.body.decode()
         ad['price_brutto'] = response.meta['price_brutto']
         ad['additional_data'] = {}
         ad['characteristics'] = {}
