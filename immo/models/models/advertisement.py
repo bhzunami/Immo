@@ -46,6 +46,7 @@ class Advertisement(Base):
     longitude = Column(Float)
     latitude = Column(Float)
     municipality_unparsed = Column(String)
+    quality_label = Column(String)
 
     # Relationship
     object_types_id = Column(Integer, ForeignKey('object_types.id'))
@@ -69,6 +70,7 @@ class Advertisement(Base):
         self.last_seen = date.today()
         self.longitude = data.get('longitude', None)
         self.latitude = data.get('latitude', None)
+        self.quality_label = data.get('quality_label', None)
 
         # Set integers
         self.price_brutto = get_int(data.get('price_brutto', None))
