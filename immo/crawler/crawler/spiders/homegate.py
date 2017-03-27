@@ -19,7 +19,8 @@ class Homegate(scrapy.Spider):
     """
     name = "homegate"
 
-    def get_clean_url(self, url):
+    @staticmethod
+    def get_clean_url(url):
         """Returns clean ad url for storing in database
         """
         return url.split('?')[0]
@@ -132,5 +133,3 @@ class Homegate(scrapy.Spider):
                 ad['additional_data'][key] = value
 
         yield ad
-
-

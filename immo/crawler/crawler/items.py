@@ -42,6 +42,7 @@ class Ad(scrapy.Item):
     condition = scrapy.Field()
     longitude = scrapy.Field()
     latitude = scrapy.Field()
+    quality_label = scrapy.Field()
 
 
     def __str__(self):
@@ -53,4 +54,3 @@ class Ad(scrapy.Item):
             living_area=self.get('living_area', ''),
             characteristics=json.dumps(self.get('characteristics'), indent=2)
         )
-
