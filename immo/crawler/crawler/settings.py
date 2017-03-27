@@ -93,6 +93,7 @@ ITEM_PIPELINES = {
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '12345')
 OPENSTREETMAP_BASE_URL = 'http://nominatim.openstreetmap.org/search/'
+GOOGLE_MAP_API_BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address='
 
 # Proxy
 PROXY = os.environ.get('PROXY_URL')

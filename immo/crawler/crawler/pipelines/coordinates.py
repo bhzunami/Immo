@@ -3,9 +3,10 @@
 Get longitude and latitude from the openstreetmap
 
 """
+import os
 import logging
 import requests
-from ..settings import OPENSTREETMAP_BASE_URL
+from ..settings import OPENSTREETMAP_BASE_URL, GOOGLE_MAP_API_BASE_URL
 
 
 class CoordinatesPipline(object):
@@ -23,7 +24,8 @@ class CoordinatesPipline(object):
 
         # check if we have a city -> this should be set
         if item.get('place', None) is not None:
-            payload['city'] = item.get('place', None)
+            payload['postcode'], *city = item.get('place').split()
+            payload['city'] = ' '.join(city)
 
         # Do GET request and check if answer is ok
         response = requests.get(url, params=payload)
@@ -43,6 +45,42 @@ class CoordinatesPipline(object):
                           item.get('longitude'),
                           item.get('latitude'))
         else:
-            logging.warning("Could not get long or lat for address {}, {} cause answer was 0 [{}]".format(item.get('street', None), item.get('place', None), item.get('url', None)))
+            # Check google:
+            item['longitude'], item['latitude'] = self.askGoogle(item.get('street', None), item.get('place', None) )
+            if not item.get('longitude', None):
+                logging.warning("Could not get long or lat for address {}, {} cause answer was 0 [{}]".format(item.get('street', None), item.get('place', None), item.get('url', None)))
         return item
+
+
+    def askGoogle(self, street=None, place=None):
+        if os.environ.get('GOOGLE_MAP_API_KEY', None):
+            logging.error("Missing Google map api key")
+            return (None, None)
+
+        if not street and not place:
+            logging.warning("Google is good but can not lookup addresses with no streetname and no place")
+            return (None, None)
+
+        logging.debug("Ask google for coordinates")
+        if not street:
+            address = "{}".format(place)
+        else:
+            address = "{},{}".format(street, place)
+
+        url = "{}{}&key={}".format(GOOGLE_MAP_API_BASE_URL, address, os.environ.get('GOOGLE_MAP_API_KEY', None))
+
+        response = requests.get(url)
+        if response.status_code != 200:
+            return (None, None)
+
+        res = response.json()
+        if len(res) > 0:
+            long = res['results'][0]['geometry']['location']['lng']
+            lat = res['results'][0]['geometry']['location']['lat']
+            return long, lat
+
+        return (None, None)
+
+
+
 
