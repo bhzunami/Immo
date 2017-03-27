@@ -43,6 +43,6 @@ class CoordinatesPipline(object):
                           item.get('longitude'),
                           item.get('latitude'))
         else:
-            logging.warn("Could not get long or lat cause answer was 0")
+            logging.warning("Could not get long or lat for address {}, {} cause answer was 0".format(item.get('street', None), item.get('place', None)))
         return item
 

@@ -91,7 +91,7 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://crawler:0OP0PDC1o6I508NDjxiZNY1Tu2RH7g@indigo.the-admins.ch:55432/immo?sslmode=require')
+DATABASE_URL = os.environ.get('DATABASE_URL', '12345')
 OPENSTREETMAP_BASE_URL = 'http://nominatim.openstreetmap.org/search/'
 
 # Proxy

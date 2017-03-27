@@ -47,6 +47,12 @@ utils.py
 The utils.py file holds the different names of the additional fields in a hashmap. So we have one unique name in the database.
 
 
+Scrapoxy:
+With this tool we can crawl over a amazon Instance to avoid getting band. If we are going over an amazon instance we can start every 10 minutes a new instance and start crawling from new ip addresses.
+
+scrpoxy ist started with
+scrapoxy start conf.json -d
+
 
 Run on a server:
 TODO
