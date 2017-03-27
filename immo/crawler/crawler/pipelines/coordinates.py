@@ -53,7 +53,7 @@ class CoordinatesPipline(object):
 
 
     def askGoogle(self, street=None, place=None):
-        if os.environ.get('GOOGLE_MAP_API_KEY', None):
+        if not os.environ.get('GOOGLE_MAP_API_KEY', None):
             logging.error("Missing Google map api key")
             return (None, None)
 
