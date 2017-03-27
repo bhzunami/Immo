@@ -22,6 +22,8 @@ def extract_number(input):
     except IndexError:
         return None
     except AttributeError:
+        if input == "UG":
+            return -1
         if input in ignore_values:
             return 0
 
