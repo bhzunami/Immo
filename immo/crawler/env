@@ -1,7 +1,0 @@
-export AMAZON_KEY_ID=AKIAIIUKOYYYZ5LBXODQ
-export AMAZON_ACCESS_KEY=TfKuJsjWq1mP+Kar9F1b7Q0utPXCjFBiQHUCDgOj
-export AMAZON_AMI_ID=ami-85509fea
-export DATABASE_URL=postgres://crawler:0OP0PDC1o6I508NDjxiZNY1Tu2RH7g@indigo.the-admins.ch:55432/immo?sslmode=require
-export PROXY_URL=http://127.0.0.1:8888/?noconnect
-export PROXY_API=http://127.0.0.1:8889/api
-export PROXY_PASSWORD=kdhf7wf97SK
