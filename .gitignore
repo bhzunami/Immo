@@ -96,3 +96,9 @@ ENV/
 .vscode/
 documents/
 notes/
+
+# Nicolas special files
+immo/crawler/env
+immo/crawler/urls
+immo/scikit/all.csv
+*pkl
