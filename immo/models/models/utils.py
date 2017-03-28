@@ -14,7 +14,7 @@ def prepare_string(s):
         return None
     return s.replace("'", "").replace(",", ".")
 
-ignore_values = ['Preis auf Anfrage', 'auf Anfrage' 'Erdgeschoss', 'EG', 'Parterre']
+ignore_values = ['Preis auf Anfrage', 'auf Anfrage', 'Erdgeschoss', 'EG', 'Parterre']
 
 def extract_number(num):
     try:

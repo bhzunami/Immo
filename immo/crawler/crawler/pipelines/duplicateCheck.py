@@ -38,7 +38,8 @@ class DuplicateCheckPipeline(object):
             return item
 
         zip_code, *name = item.get('place').split(' ')
-        municipality = session.query(Municipality).filter(Municipality.zip == int(zip_code)).filter(Municipality.name == ' '.join(name)).first()
+        name = utils.extract_municipality(' '.join(name))
+        municipality = session.query(Municipality).filter(Municipality.zip == int(zip_code)).filter(Municipality.name == name).first()
 
         if not municipality:
             logger.warning("Municipality %s %s not found", zip_code, name)
@@ -51,12 +52,20 @@ class DuplicateCheckPipeline(object):
         num_rooms = utils.get_int(item.get('num_rooms'))
         living_area = utils.get_float(item.get('living_area'))
         price_brutto = utils.get_int(item.get('price_brutto'))
+        crawler = item.get('crawler', '')
 
-        ad = session.query(Advertisement).filter(Advertisement.num_rooms == num_rooms).filter(Advertisement.living_area == living_area).filter(Advertisement.price_brutto == price_brutto).filter(Advertisement.object_types_id == objectType.id).fitler(Advertisement.municipalities_id == municipality.id).all()
+        ad = session.query(Advertisement) \
+                    .filter(Advertisement.num_rooms == num_rooms) \
+                    .filter(Advertisement.living_area == living_area) \
+                    .filter(Advertisement.price_brutto == price_brutto) \
+                    .filter(Advertisement.object_types_id == objectType.id) \
+                    .filter(Advertisement.municipalities_id == municipality.id) \
+                    .filter(Advertisement.crawler != crawler) \
+                    .all()
 
         session.close()
         if len(ad) > 1:
-            logger.debug("Found possible duplicate: %s", ad[0].id)
+            logger.info("Found possible duplicate: url in database: {}, duplicate url: {}".format(ad[0].url, item.get('url', '')))
             raise DropItem
 
         return item

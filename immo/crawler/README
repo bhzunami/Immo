@@ -17,7 +17,11 @@ pip install -e .    # This installs the model module with a link. So the changes
   - Crawl over local machine:
     - Only the DATABASE_URL must be exported
 
-3. Start crawler with command scrapy crawl <crawler_name> e.g. homegate scrapy crawl homegate
+3. Start crawler with command 
+  scrapy crawl <crawler_name> 
+e.g. homegate
+
+scrapy crawl homegate
 
 NOTE: It is sometimes useful to change the logging verbosity in the settings.py file.
 
