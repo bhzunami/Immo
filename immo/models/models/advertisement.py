@@ -5,10 +5,9 @@ import json
 from datetime import date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
-from .utils import get_int, get_float, get_date
+from .utils import get_int, get_float, get_date, Base, maybe_street
 from sqlalchemy.orm import relationship
 from . import Municipality, ObjectType
-from .utils import Base
 
 class Advertisement(Base):
     """Advertisment class to store in the database
@@ -62,7 +61,7 @@ class Advertisement(Base):
         self.raw_data = data.get('raw_data', None)
         self.crawler = data.get('crawler', None)
         self.url = data.get('url', None)
-        self.street = data.get('street', None)
+        self.street = maybe_street(data.get('street', None))
         self.municipality_unparsed = data.get('place', None)
         self.description = data.get('description', None)
         self.owner = data.get('owner', None)

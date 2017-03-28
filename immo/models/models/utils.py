@@ -30,7 +30,6 @@ def extract_number(num):
         print("ERROR REGEX INPUT: {}".format(num))
         return None
 
-
 def get_int(num):
     try:
         return int(extract_number(prepare_string(num)))
@@ -65,4 +64,7 @@ def convert_to_int(num):
 def extract_municipality(mun):
     return re.sub(" (" + "|".join(CANTONS) + ")$", "", mun)
 
-
+def maybe_street(street):
+    if street in ["Auf Anfrage", "Sur demande", "sur demande", "-", "."]:
+        return None
+    return street

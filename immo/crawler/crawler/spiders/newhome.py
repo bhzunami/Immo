@@ -90,10 +90,7 @@ class Newhome(scrapy.Spider):
 
         # Address
         address = response.xpath('//span[@class="sub"]/text()').extract_first().split(',')
-
-        if address[0] != "Auf Anfrage":
-            ad['street'] = address[0]
-
+        ad['street'] = address[0]
         ad['place'] = address[1].strip()
 
         description_path = '//div[@id="dDescription"]/span//text()'
