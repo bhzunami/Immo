@@ -9,7 +9,6 @@ http://www.newhome.ch/de/mieten/suchen/wohnung/kanton_basellandschaft/liste.aspx
 Author: N. Mauchle <nmauchle@gmail.com>
 
 """
-import logging
 import scrapy
 from ..items import Ad
 from ..utils import FIELDS
@@ -19,7 +18,8 @@ class Newhome(scrapy.Spider):
     """
     name = "newhome"
 
-    def get_clean_url(self, url):
+    @staticmethod
+    def get_clean_url(url):
         """Returns clean ad url for storing in database
         """
         return url
@@ -97,7 +97,7 @@ class Newhome(scrapy.Spider):
         ad['place'] = address[1].strip()
 
         description_path = '//div[@id="dDescription"]/span//text()'
-        ad['description'] = ' '.join(response.xpath(description_path).extract()).replace('"', '' )
+        ad['description'] = ' '.join(response.xpath(description_path).extract()).replace('"', '')
 
         ad['additional_data'] = {}
         fields_path = '//div[@class="content-section details clearfix"]//div[@class="form-group"]'
@@ -126,7 +126,7 @@ class Newhome(scrapy.Spider):
                     element_name = element.xpath('span/text()').extract_first().strip()
                     element_value = element.xpath('div/div//text()').extract_first()
                     if not element_value:
-                      data[element_name] = True
+                        data[element_name] = True
                     else:
                         data[element_name] = element_value.strip()
 

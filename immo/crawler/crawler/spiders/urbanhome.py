@@ -11,13 +11,13 @@ from ..utils import FIELDS
 class Urbanhome(scrapy.Spider):
     name = "urbanhome"
 
-    def get_clean_url(self, url):
+    @staticmethod
+    def get_clean_url(url):
         """Returns clean ad url for storing in database
         """
         return url.split('?')[0]
 
-    def start_requests(self):
-
+    def build_search_request(self, canton, otype, skip=0):
         url = "http://www.urbanhome.ch/Search/DoSearch"
         headers = {
             # todo use dynamic user agent?
@@ -25,12 +25,15 @@ class Urbanhome(scrapy.Spider):
             'Content-Type': 'application/json; charset=UTF-8',
         }
 
-        # canton ids from 7 (AI) to 32 (SH)
-        for i in range(7, 33):  # range(7, 33)
-            for t in ["1", "4", "512"]: # wohnung, haus, feriendomizil
-                data = json.dumps({"settings": {"MainTypeGroup": "1", "Category": "2", "AdvancedSearchOpen": "false", "MailID": "", "PayType": "2", "Type": t, "RoomsMin": "0", "RoomsMax": "0", "PriceMin": "0", "PriceMax": "0", "Regions": [str(i)], "SubTypes": ["0"], "SizeMin": "0", "SizeMax": "0", "Available": "", "NoAgreement": "false", "FloorRange": "0", "equipmentgroups": [], "Email": "", "Interval": "0", "SubscriptionType1": "true", "SubscriptionType4": "true", "SubscriptionType8": "true", "SubscriptionType128": "true", "SubscriptionType512": "true", "Sort": "0"}, "manual": False, "skip": 0, "reset": True, "position": 0, "iframe": 0, "defaultTitle": True, "saveSettings": True})
+        data = json.dumps({"settings": {"MainTypeGroup": "1", "Category": "2", "AdvancedSearchOpen": "false", "MailID": "", "PayType": "2", "Type": otype, "RoomsMin": "0", "RoomsMax": "0", "PriceMin": "0", "PriceMax": "0", "Regions": [str(canton)], "SubTypes": ["0"], "SizeMin": "0", "SizeMax": "0", "Available": "", "NoAgreement": "false", "FloorRange": "0", "equipmentgroups": [], "Email": "", "Interval": "0", "SubscriptionType1": "true", "SubscriptionType4": "true", "SubscriptionType8": "true", "SubscriptionType128": "true", "SubscriptionType512": "true", "Sort": "1"}, "manual": False, "skip": 0, "reset": skip == 0, "position": 0, "iframe": 0, "defaultTitle": True, "saveSettings": True})
 
-                yield scrapy.Request(url=url, method="POST", headers=headers, body=data, callback=self.parse)
+        return scrapy.Request(url=url, method="POST", headers=headers, body=data, callback=self.parse, meta={'canton': canton, 'otype': otype, 'skip': skip})
+
+    def start_requests(self):
+        # canton ids from 7 (AI) to 32 (SH)
+        for canton in range(7, 33):  # range(7, 33)
+            for t in ["1", "4", "512"]: # wohnung, haus, feriendomizil
+                yield self.build_search_request(canton, t)
 
     def parse(self, response):
         """ Parse the ad list """
@@ -41,12 +44,16 @@ class Urbanhome(scrapy.Spider):
             self.logger.error("API error.\n    Exception: " + j["Exception"] + "\n    Message: " + j["Message"])
 
         # there is no next page option, so we need to improve the search to accomodate this (max. 200 results per search, ~6000 objects to search for)
-        if j["MaximumReached"]:
-            self.logger.error("Did not receive all search results for: " + j["Url"])
+        if j["Count"] == 200 and response.meta['skip'] == 0:
+            self.logger.warning("Did not receive all search results for: " + j["Url"])
 
         if j["Count"] == 0:
             self.logger.debug("No results for: " + j["Url"])
             return
+
+        # one search only returns 25 results. get the next result page
+        if j["Count"] > (response.meta['skip'] + 25):
+            yield self.build_search_request(response.meta['canton'], response.meta['otype'], response.meta['skip'] + 25)
 
         results = Selector(text=j["Rows"])
 
