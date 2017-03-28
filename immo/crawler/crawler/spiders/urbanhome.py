@@ -25,8 +25,43 @@ class Urbanhome(scrapy.Spider):
             'Content-Type': 'application/json; charset=UTF-8',
         }
 
-        data = json.dumps({"settings": {"MainTypeGroup": "1", "Category": "2", "AdvancedSearchOpen": "false", "MailID": "", "PayType": "2", "Type": otype, "RoomsMin": "0", "RoomsMax": "0", "PriceMin": "0", "PriceMax": "0", "Regions": [str(canton)], "SubTypes": ["0"], "SizeMin": "0", "SizeMax": "0", "Available": "", "NoAgreement": "false", "FloorRange": "0", "equipmentgroups": [], "Email": "", "Interval": "0", "SubscriptionType1": "true", "SubscriptionType4": "true", "SubscriptionType8": "true", "SubscriptionType128": "true", "SubscriptionType512": "true", "Sort": "1"}, "manual": False, "skip": 0, "reset": skip == 0, "position": 0, "iframe": 0, "defaultTitle": True, "saveSettings": True})
-
+        data = json.dumps({
+            "settings": {
+                "MainTypeGroup": "1",
+                "Category": "2",
+                "AdvancedSearchOpen": "false",
+                "MailID": "",
+                "PayType": "2",
+                "Type": otype,
+                "RoomsMin": "0",
+                "RoomsMax": "0",
+                "PriceMin": "0",
+                "PriceMax": "0",
+                "Regions": [str(canton)],
+                "SubTypes": ["0"],
+                "SizeMin": "0",
+                "SizeMax": "0",
+                "Available": "",
+                "NoAgreement": "false",
+                "FloorRange": "0",
+                "equipmentgroups": [],
+                "Email": "",
+                "Interval": "0",
+                "SubscriptionType1": "true",
+                "SubscriptionType4": "true",
+                "SubscriptionType8": "true",
+                "SubscriptionType128": "true",
+                "SubscriptionType512": "true",
+                "Sort": "1"
+            },
+            "manual": False,
+            "skip": skip,
+            "reset": skip == 0,
+            "position": 0,
+            "iframe": 0,
+            "defaultTitle": True,
+            "saveSettings": True
+        })
         return scrapy.Request(url=url, method="POST", headers=headers, body=data, callback=self.parse, meta={'canton': canton, 'otype': otype, 'skip': skip})
 
     def start_requests(self):
@@ -55,9 +90,7 @@ class Urbanhome(scrapy.Spider):
         if j["Count"] > (response.meta['skip'] + 25):
             yield self.build_search_request(response.meta['canton'], response.meta['otype'], response.meta['skip'] + 25)
 
-        results = Selector(text=j["Rows"])
-
-        for ad in results.xpath("//li"):
+        for ad in Selector(text=j["Rows"]).xpath("//li"):
             url = ad.xpath('./a/@href').extract_first().split('\\"')[1]
 
             request = scrapy.Request(url, callback=self.parse_ad)
