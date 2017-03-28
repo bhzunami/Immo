@@ -34,13 +34,13 @@ def extract_number(num):
 def get_int(num):
     try:
         return int(extract_number(prepare_string(num)))
-    except TypeError:
+    except Exception:
         return None
 
 def get_float(num):
     try:
         return float(extract_number(prepare_string(num)))
-    except TypeError:
+    except Exception:
         return None
 
 def get_date(s):
@@ -48,7 +48,7 @@ def get_date(s):
         return date.today()
     try:
         return datetime.strptime(s, '%d.%m.%Y')
-    except ValueError:
+    except Exception:
         pass
 
     return None
