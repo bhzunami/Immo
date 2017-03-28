@@ -27,6 +27,23 @@ class DatabaseWriterPipline(object):
         engine = create_engine(DATABASE_URL)
         self.Session = sessionmaker(bind=engine)
 
+    def get_object_type(self, object_str):
+        object_str = object_str.lower()
+
+        session = self.Session()
+        # Check if the type of the object is already in the Database
+        # If we do not have the type we store a new type.
+        logger.debug("Search for type %s", object_str)
+        obtype = session.query(ObjectType).filter(ObjectType.name == object_str).first()
+        if not obtype:
+            logger.debug("This object type was not found in the database -> Store it")
+            # Store new ObjectType
+            obtype = ObjectType(name=object_str)
+            session.add(obtype)
+            # To get the new id
+            session.commit()
+            logger.debug("Objecttype stored: %i", obtype.id)
+        return obtype
 
     def process_item(self, item, spider):
         """after item is processed
@@ -34,21 +51,9 @@ class DatabaseWriterPipline(object):
         session = self.Session()
         ad = Advertisement(item)
 
-        # Check if the type of the object is already in the Database
-        # If we do not have the type we store a new type.
-        obtype_name = item.get('objecttype')
-        logger.debug("Search for type %s", obtype_name)
-        obtype = session.query(ObjectType).filter(ObjectType.name == item.get('objecttype')).first()
-        if not obtype:
-            logger.debug("This object type was not found in the database -> Store it")
-            # Store new ObjectType
-            obtype = ObjectType(name=item.get('objecttype'))
-            session.add(obtype)
-            # To get the new id
-            session.commit()
-            logger.debug("Objecttype stored: %i", obtype.id)
+        obtype = self.get_object_type(item.get('objecttype'))
 
-        # Now we have for shure a correspondence type
+        # Now we have for sure a correspondence type
         logger.debug("Objecttype id: %i", obtype.id)
 
         # Next we have to find our place from the zip and name from the database
