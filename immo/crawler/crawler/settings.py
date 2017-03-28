@@ -87,7 +87,7 @@ else:
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'crawler.pipelines.coordinates.CoordinatesPipline': 100,
+    # 'crawler.pipelines.coordinates.CoordinatesPipline': 100,
     'crawler.pipelines.duplicateCheck.DuplicateCheckPipeline': 150,
     'crawler.pipelines.databaseWriter.DatabaseWriterPipline': 200,
     #'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,

@@ -17,4 +17,4 @@
 # R0915 Too many statements
 # R0913 Too many arguments
 # R0904 Too many public methods
-disable=C0111,C0301,C0103
+disable=C0111,C0301,C0103,W1202

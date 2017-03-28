@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
 
@@ -13,5 +13,7 @@ class Municipality(Base):
     zip = Column(Integer)
     name = Column(String)
     alternate_names = Column(JSON)
+    lat = Column(Float)
+    long = Column(Float)
 
     # TODO: add all fileds
