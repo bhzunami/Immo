@@ -69,8 +69,6 @@ class Immoscout24(scrapy.Spider):
         ad['characteristics'] = {}
 
         for elm in response.xpath('//div[contains(@class, "description")]/following-sibling::h2[@class="title-secondary"]'):
-            title = elm.xpath('.//text()').extract_first()
-            entries = {}
             for entry in elm.xpath('./following-sibling::table[1]//tr'):
                 key, value = entry.xpath('td')
                 key = key.xpath('text()').extract_first()
@@ -86,9 +84,6 @@ class Immoscout24(scrapy.Spider):
                     key = FIELDS[key]
                     ad[key] = value
                 except KeyError:
-                    entries[key] = value
-
-            if len(entries) > 0:
-                ad['characteristics'][title] = entries
+                    ad['characteristics'][key] = value
 
         yield ad

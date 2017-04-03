@@ -55,42 +55,52 @@ class Advertisement(Base):
     municipalities = relationship(Municipality)
 
     def __init__(self, data):
+        self.merge(data)
+
+    def assign(self, data, key, default=None, func=lambda x: x):
+        setattr(self, key, func(data.get(key, default)) or getattr(self, key))
+        #self[key] = func(data.get(key, default)) or self[key]
+
+    def merge(self, data):
         # Set the easy values
-        self.object_id = data.get('object_id', None)
-        self.reference_no = data.get('reference_no', None)
-        self.raw_data = data.get('raw_data', None)
-        self.crawler = data.get('crawler', None)
-        self.url = data.get('url', None)
-        self.street = maybe_street(data.get('street', None))
-        self.municipality_unparsed = data.get('place', None)
-        self.description = data.get('description', None)
-        self.owner = data.get('owner', None)
-        self.crawled_at = date.today()
-        self.last_seen = date.today()
-        self.longitude = data.get('longitude', None)
-        self.latitude = data.get('latitude', None)
-        self.quality_label = data.get('quality_label', None)
+        self.assign(data, 'object_id')
+        self.assign(data, 'reference_no')
+        self.assign(data, 'raw_data')
+        self.assign(data, 'crawler')
+        self.assign(data, 'url')
+        self.assign(data, 'object_id')
+        self.assign(data, 'description')
+        self.assign(data, 'owner')
+        self.assign(data, 'object_id')
+        self.assign(data, 'longitude')
+        self.assign(data, 'latitude')
+        self.assign(data, 'quality_label')
+
+        self.crawled_at = self.crawled_at or date.today()
+        self.last_seen = self.last_seen or date.today()
+
+        self.assign(data, 'street', func=maybe_street)
+
+        self.municipality_unparsed = data.get('place', None) or self.municipality_unparsed
 
         # Set integers
-        self.price_brutto = get_int(data.get('price_brutto', None))
-        self.price_netto = get_int(data.get('price_netto', None))
-        self.additional_costs = get_int(data.get('additional_costs', None))
-        self.num_floors = get_int(data.get('num_floors', None))
-        self.build_year = get_int(data.get('build_year', None))
-        self.last_renovation_year = get_int(data.get('last_renovation_year', None))
-        self.floors_house = get_int(data.get('floors_house', None))
-
-        # Set dates not important!
-        # self.available = get_date(data.get('available', None))
+        self.assign(data, 'price_brutto', func=get_int)
+        self.assign(data, 'price_netto', func=get_int)
+        self.assign(data, 'additional_costs', func=get_int)
+        self.assign(data, 'num_floors', func=get_int)
+        self.assign(data, 'build_year', func=get_int)
+        self.assign(data, 'last_renovation_year', func=get_int)
+        self.assign(data, 'floors_house', func=get_int)
 
         # Set floats
-        self.living_area = get_float(data.get('living_area', None))
-        self.floor = get_float(data.get('floor', None))
-        self.num_rooms = get_float(data.get('num_rooms', None))
-        self.cubature = get_float(data.get('cubature', None))
-        self.room_height = get_float(data.get('room_height', None))
-        self.effective_area = get_float(data.get('effective_area', None))
-        self.plot_area = get_float(data.get('plot_area', None))
+        self.assign(data, 'living_area', func=get_float)
+        self.assign(data, 'floor', func=get_float)
+        self.assign(data, 'num_rooms', func=get_float)
+        self.assign(data, 'cubature', func=get_float)
+        self.assign(data, 'room_height', func=get_float)
+        self.assign(data, 'effective_area', func=get_float)
+        self.assign(data, 'plot_area', func=get_float)
+
         # Set jsons
-        self.characteristics = json.dumps(data.get('characteristics', None))
-        self.additional_data = json.dumps(data.get('additional_data', None))
+        self.characteristics = json.dumps(data.get('characteristics', None)) or self.characteristics
+        self.additional_data = json.dumps(data.get('additional_data', None)) or self.additional_data
