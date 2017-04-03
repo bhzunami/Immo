@@ -8,8 +8,10 @@ import json
 from datetime import date, datetime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from ..settings import DATABASE_URL
 from models import Advertisement, ObjectType, Municipality
+from models.utils import extract_number, get_place
+from ..settings import DATABASE_URL
+
 
 # from ..models import Advertisement
 # from ..models import ObjectType
@@ -27,7 +29,7 @@ class DatabaseWriterPipline(object):
         engine = create_engine(DATABASE_URL)
         self.Session = sessionmaker(bind=engine)
 
-    def get_object_type(self, object_str):
+    def get_object_type(self, object_str=""):
         object_str = object_str.lower()
 
         session = self.Session()
@@ -58,10 +60,10 @@ class DatabaseWriterPipline(object):
 
         # Next we have to find our place from the zip and name from the database
         # Get zip
-        zip_code, *name = item.get('place').split(' ')
-        logger.debug("Search place %s %s", int(zip_code), ' '.join(name))
+        zip_code, *name = get_place(item.get('place'))
+        logger.debug("Search place %s %s", extract_number(zip_code), ' '.join(name))
         # Search in database
-        municipalities = session.query(Municipality).filter(Municipality.zip == int(zip_code)).all()
+        municipalities = session.query(Municipality).filter(Municipality.zip == extract_number(zip_code)).all()
 
         # It is possible to get more than one municipality so if this happens
         # we search through all

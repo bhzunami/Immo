@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 """
+import re
 from datetime import date, datetime
 from sqlalchemy.ext.declarative import declarative_base
-import re
 
 Base = declarative_base()
 
-CANTONS = ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "FR", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG", "TI", "VD", "VS", "NE", "GE", "JU"]
+CANTONS = ["ZH", "BE", "LU", "UR", "SZ",
+           "OW", "NW", "GL", "ZG", "FR",
+           "SO", "BS", "BL", "SH", "AR",
+           "AI", "SG", "GR", "AG", "TG",
+           "TI", "VD", "VS", "NE", "GE",
+           "JU"]
 
 def prepare_string(s):
     if s is None:
@@ -27,8 +32,8 @@ def extract_number(num):
         if num in ignore_values:
             return 0
 
-        print("ERROR REGEX INPUT: {}".format(num))
-        return None
+    print("ERROR REGEX INPUT: {}".format(num))
+    return None
 
 def get_int(num):
     try:
@@ -47,10 +52,8 @@ def get_date(s):
         return date.today()
     try:
         return datetime.strptime(s, '%d.%m.%Y')
-    except Exception:
-        pass
-
-    return None
+    except (TypeError, ValueError):
+        return None
 
 def convert_to_int(num):
     if isinstance(num, int):
@@ -68,3 +71,11 @@ def maybe_street(street):
     if street in ["Auf Anfrage", "Sur demande", "sur demande", "-", "."]:
         return None
     return street
+
+def get_place(place):
+    # Regex find word with 4 digits 1 withespace and then any word with spaces
+    address = re.search(r'[0-9]{4}\s[\w\u00c4-\u02AF\s]*', place)
+    if address:
+        return address.group(0).split()  # We have plz, ort
+    # Did not find any place locality try old version:
+    return place.split(' ')  # Maybe we have plz and ort

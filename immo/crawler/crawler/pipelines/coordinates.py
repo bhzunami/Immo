@@ -6,6 +6,7 @@ Get longitude and latitude from the openstreetmap
 import os
 import logging
 import requests
+from models import utils
 from ..settings import OPENSTREETMAP_BASE_URL, GOOGLE_MAP_API_BASE_URL
 
 
@@ -24,7 +25,7 @@ class CoordinatesPipline(object):
 
         # check if we have a city -> this should be set
         if item.get('place', None) is not None:
-            payload['postcode'], *city = item.get('place').split()
+            payload['postcode'], *city = utils.get_place(item.get('place'))
             payload['city'] = ' '.join(city)
 
         # Do GET request and check if answer is ok

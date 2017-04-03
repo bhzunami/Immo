@@ -29,7 +29,7 @@ class DuplicateCheckPipeline(object):
         """after item is processed
         """
         session = self.Session()
-        type = item.get('objecttype')
+        type = item.get('objecttype').lower()
         objectType = session.query(ObjectType).filter(ObjectType.name == type).first()
         if not objectType:
             logger.warn("Object type %s not found in database", type)
@@ -37,7 +37,7 @@ class DuplicateCheckPipeline(object):
             session.close()
             return item
 
-        zip_code, *name = item.get('place').split(' ')
+        zip_code, *name = utils.get_place(item.get('place'))
         name = utils.extract_municipality(' '.join(name))
         municipality = session.query(Municipality).filter(Municipality.zip == int(zip_code)).filter(Municipality.name == name).first()
 

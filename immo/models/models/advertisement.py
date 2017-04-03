@@ -80,8 +80,8 @@ class Advertisement(Base):
         self.last_renovation_year = get_int(data.get('last_renovation_year', None))
         self.floors_house = get_int(data.get('floors_house', None))
 
-        # Set dates
-        self.available = get_date(data.get('available', None))
+        # Set dates not important!
+        # self.available = get_date(data.get('available', None))
 
         # Set floats
         self.living_area = get_float(data.get('living_area', None))
