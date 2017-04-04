@@ -108,9 +108,9 @@ class Urbanhome(scrapy.Spider):
         ad['crawler'] = 'urbanhome'
         ad['url'] = response.url
         ad['raw_data'] = response.body.decode()
-        ad['price_brutto'] = response.meta['price_brutto']
+        ad['price_brutto'] = getattr(response, 'meta', {}).get('price_brutto', None)
         ad['additional_data'] = {}
-        ad['characteristics'] = {}
+        ad['characteristics'] = []
 
         base = '//div[@id="xInfos"]//li[@class="cb pt15"]'
         ad['objecttype'] = response.xpath(base + '[1]/h2/text()').extract_first()
@@ -122,8 +122,7 @@ class Urbanhome(scrapy.Spider):
         ad['description'] = ' '.join(description)
 
         for characteristics in response.xpath('//*[@id="xGd"]/div/div[@class="a d"]/ul/li'):
-            title = characteristics.xpath('./h6/text()').extract_first()
-            ad['characteristics'][title] = characteristics.xpath('./ul/li//span/following-sibling::text()').extract()
+            ad['characteristics'] += characteristics.xpath('./ul/li//span/following-sibling::text()').extract()
 
 
         # more attributes
@@ -138,7 +137,7 @@ class Urbanhome(scrapy.Spider):
                 key = FIELDS[key]
                 ad[key] = value
             except KeyError:
-                ad['characteristics'][key] = value
+                ad['additional_data'][key] = value
 
         self.logger.debug("Crawled: " + ad["object_id"] + "    " + ad["url"])
         yield ad

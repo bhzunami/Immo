@@ -22,7 +22,7 @@ try:
     offset = int(sys.argv[2]) if len(sys.argv) > 2 else 0
     limit = int(sys.argv[3]) if len(sys.argv) > 3 else 100
 except:
-    print("Usage: python respider.py <string crawlername> [<int offset> [<int limit>]]")
+    print("Usage: python respider.py <string crawlername> [<int offset> [<int batchsize>]]")
     exit(1)
 
 
@@ -37,13 +37,22 @@ session = Session()
 try:
     while True:
         print("Fetch data from {} to {}".format(offset, offset + limit))
-        results = session.query(Advertisement).filter(Advertisement.crawler == spider.name).order_by(Advertisement.id).offset(offset).limit(limit).all()
+        results = session.query(Advertisement) \
+                  .filter(Advertisement.crawler == spider.name and Advertisement.raw_data != '') \
+                  .order_by(Advertisement.id) \
+                  .offset(offset) \
+                  .limit(limit) \
+                  .all()
+
         offset += limit
 
         if len(results) == 0:
             break
 
         for ad in results:
+            if ad.raw_data == "":
+                continue
+
             print("Reprocess Ad: {}".format(ad.id))
 
             new_ad = next(spider.parse_ad(HtmlResponse(url=ad.url, body=ad.raw_data, encoding='utf-8')))
