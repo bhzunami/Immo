@@ -112,7 +112,12 @@ class Homegate(scrapy.Spider):
 
         # Characteristics / Merkmale und Ausstattung
         characteristics_path = '//div[contains(@class, "detail-configuration")]/ul/li/text()'
-        ad['characteristics'] = response.xpath(characteristics_path).extract()
+        data = {}
+        characteristics = response.xpath(characteristics_path).extract()
+        for characteristic in characteristics:
+            data[characteristic] = True
+
+        ad['characteristics'] = data
 
         # Description
         description_path = '//div[contains(@class, "detail-description")]//text()'
