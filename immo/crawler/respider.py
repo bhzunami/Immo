@@ -16,11 +16,15 @@ def get_spider(name):
             if spcls.name == name:
                 return spcls
 
+# parse arguments
 try:
     spider = get_spider(sys.argv[1])()
+    offset = int(sys.argv[2]) if len(sys.argv) > 2 else 0
+    limit = int(sys.argv[3]) if len(sys.argv) > 3 else 100
 except:
-    print("Usage: python respider.py <crawlername> [<offset> [<limit>]]")
+    print("Usage: python respider.py <string crawlername> [<int offset> [<int limit>]]")
     exit(1)
+
 
 print("Reprocessing crawler: {}".format(spider.name))
 
@@ -31,8 +35,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 try:
-    offset = 0
-    limit = 100
     while True:
         print("Fetch data from {} to {}".format(offset, offset + limit))
         results = session.query(Advertisement).filter(Advertisement.crawler == spider.name).order_by(Advertisement.id).offset(offset).limit(limit).all()
