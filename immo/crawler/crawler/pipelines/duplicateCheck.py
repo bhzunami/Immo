@@ -42,7 +42,7 @@ class DuplicateCheckPipeline(object):
         municipality = session.query(Municipality).filter(Municipality.zip == int(zip_code)).filter(Municipality.name == name).first()
 
         if not municipality:
-            logger.warning("Municipality %s %s not found", zip_code, name)
+            logger.warning("Municipality {} {} not found original was {}".format(zip_code, name, item.get('place', '')))
             session.close()
             return item
         # zimmer

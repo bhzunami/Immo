@@ -9,7 +9,7 @@ from datetime import date, datetime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from models import Advertisement, ObjectType, Municipality
-from models.utils import extract_number, get_place
+from models.utils import extract_number, get_place, extract_municipality
 from ..settings import DATABASE_URL
 
 
@@ -61,7 +61,7 @@ class DatabaseWriterPipline(object):
         # Next we have to find our place from the zip and name from the database
         # Get zip
         zip_code, *name = get_place(item.get('place'))
-        logger.debug("Search place %s %s", extract_number(zip_code), ' '.join(name))
+        name = extract_municipality(' '.join(name))
         # Search in database
         municipalities = session.query(Municipality).filter(Municipality.zip == extract_number(zip_code)).all()
 
@@ -75,17 +75,18 @@ class DatabaseWriterPipline(object):
             logger.debug("Found exact one %s ", municipality.name)
 
         if len(municipalities) > 1:
-            logger.debug("Found more than one %i search for %s", len(municipalities), name[0])
+            logger.debug("Found more than one {} search for {}".format(len(municipalities), name))
             for m in municipalities:
-                if m.name.startswith(name[0]) or name[0] in m.alternate_names:
+                if m.name.startswith(name) or name in m.alternate_names:
                     municipality = m
                     logger.debug("Found the municipality '%s' for input: %s", municipality.name, item.get('place'))
+                    break
 
 
         if municipality:
             ad.municipalities_id = municipality.id
         else:
-            logger.warn("Could not find zip_code %s %s in database", zip_code, ' '.join(name))
+            logger.warn("Could not find zip_code {} {} in database".format(zip_code, name))
 
         ad.object_types_id = obtype.id
 
