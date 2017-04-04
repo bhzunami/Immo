@@ -74,7 +74,7 @@ def maybe_street(street):
 
 def get_place(place):
     # Regex find word with 4 digits 1 withespace and then any word with spaces
-    address = re.search(r'[0-9]{4}\s[\w\u00c4-\u02AF\s]*', place)
+    address = re.search(r'[0-9]{4}\s[^,]*', place)
     if address:
         return address.group(0).split()  # We have plz, ort
     # Did not find any place locality try old version:
