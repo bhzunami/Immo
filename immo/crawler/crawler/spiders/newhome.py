@@ -89,9 +89,12 @@ class Newhome(scrapy.Spider):
         ad['owner'] = ' '.join(response.xpath(owner).extract())
 
         # Address
-        address = response.xpath('//span[@class="sub"]/text()').extract_first().split(',')
-        ad['street'] = address[0]
-        ad['place'] = address[1].strip()
+        #address = response.xpath('//span[@itemprop="address"]/span/text()').extract_first().split(',')
+        address = response.xpath('//span[@itemprop="address"]/span/text()').extract()
+        #street_path = '//span[@itemprop="address"]/span[@itemprop="streetAddress"]/text()'
+        #place_path = '//span[@itemprop="address"]/span/text()'
+        ad['street'] = address.pop(0).strip()
+        ad['place'] = ' '.join(map(lambda a: a.strip(), address))
 
         description_path = '//div[@id="dDescription"]/span//text()'
         ad['description'] = ' '.join(response.xpath(description_path).extract()).replace('"', '')
