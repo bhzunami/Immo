@@ -43,6 +43,7 @@ class Ad(scrapy.Item):
     longitude = scrapy.Field()
     latitude = scrapy.Field()
     quality_label = scrapy.Field()
+    tags = scrapy.Field(serializer=json.dumps)
 
 
     def __str__(self):

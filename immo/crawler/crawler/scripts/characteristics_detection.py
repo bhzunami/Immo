@@ -36,6 +36,10 @@ def check_dict(d):
 def add_stat(key, val):
     if isinstance(val, dict):
         val = 'dict'
+    if isinstance(val, list):
+        val = 'list'
+
+    key = key + ':' + str(val)
 
     if key not in statistics:
         statistics[key] = {"occurence": 1, "values": [val]}
@@ -46,7 +50,7 @@ def add_stat(key, val):
 for entry in qry:
     check_dict(entry[0])
 
-sorted_arr = sorted([[x, statistics[x]["occurence"]] for x in statistics], key=lambda x: x[1])
+sorted_arr = sorted([[key, statistics[key]["occurence"]] for key in statistics], key=lambda x: x[1])
 for k in sorted_arr:
-    print(str(k[0]) + " " + str(k[1]))
+    print(str(k[0]) + ":" + str(k[1]))
 

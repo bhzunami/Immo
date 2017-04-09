@@ -47,6 +47,8 @@ class Advertisement(Base):
     municipality_unparsed = Column(String)
     quality_label = Column(String)
 
+    tags = Column(String) # JSON list of tags
+
     # Relationship
     object_types_id = Column(Integer, ForeignKey('object_types.id'))
     object_type = relationship(ObjectType)
@@ -104,3 +106,4 @@ class Advertisement(Base):
         # Set jsons
         self.characteristics = json.dumps(data.get('characteristics', None)) or self.characteristics
         self.additional_data = json.dumps(data.get('additional_data', None)) or self.additional_data
+        self.tags = json.dumps(data.get('tags', None)) or self.tags

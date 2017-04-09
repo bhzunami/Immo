@@ -17,18 +17,18 @@ pip install -e .    # This installs the model module with a link. So the changes
   - Crawl over local machine:
     - Only the DATABASE_URL must be exported
 
-3. Start crawler with command 
-  scrapy crawl <crawler_name> 
+3. Start crawler with command
+  scrapy crawl <crawler_name>
 e.g. homegate
 
 scrapy crawl homegate
 
 NOTE: It is sometimes useful to change the logging verbosity in the settings.py file.
 
-Piplines:
-Piplines are used to add more functionallity to the crawler. After every crawled item we check or get some more infos
+Pipelines:
+Pipelines are used to add more functionallity to the crawler. After every crawled item we check or get some more infos
   - coordinates: Get the X and Y coordinates of the location
-  - databasWriter: Write the crawled item to the DATABASE 
+  - databasWriter: Write the crawled item to the DATABASE
   - duplicateCheck: Check if this advertisement was already crawled by another crawler. If yes we ignore it.
   - jsonWriter: For Debug only if you want to store the crawled data in a JSON file.
 

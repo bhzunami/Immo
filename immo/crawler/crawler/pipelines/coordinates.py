@@ -10,7 +10,7 @@ from models import utils
 from ..settings import OPENSTREETMAP_BASE_URL, GOOGLE_MAP_API_BASE_URL
 
 
-class CoordinatesPipline(object):
+class CoordinatesPipeline(object):
     """get longitutde and latitute for specific address
     """
     def process_item(self, item, spider):

@@ -19,7 +19,7 @@ from ..settings import DATABASE_URL
 
 logger = logging.getLogger(__name__)
 
-class DatabaseWriterPipline(object):
+class DatabaseWriterPipeline(object):
 
     def open_spider(self, spider):
         """
