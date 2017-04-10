@@ -93,6 +93,11 @@ ITEM_PIPELINES = {
     #'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
+# custom setting for item pipeline in respider.py
+ITEM_PIPELINES_RESPIDER = {
+    'crawler.pipelines.tags.TagsPipeline': 160,
+}
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

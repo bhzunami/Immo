@@ -9,6 +9,23 @@ import crawler.settings as settings
 from scrapy.http import HtmlResponse
 from scrapy.utils.misc import walk_modules
 from scrapy.utils.spider import iter_spider_classes
+from scrapy.middleware import MiddlewareManager
+from scrapy.utils.conf import build_component_list
+from scrapy.settings import Settings
+
+class ItemPipelineManager(MiddlewareManager):
+    @classmethod
+    def _get_mwlist_from_settings(cls, settings):
+        return build_component_list(settings.ITEM_PIPELINES_RESPIDER)
+
+    def _add_middleware(self, pipe):
+        super(ItemPipelineManager, self)._add_middleware(pipe)
+        if hasattr(pipe, 'process_item'):
+            self.methods['process_item'].append(pipe.process_item)
+
+    def process_item(self, item, spider):
+        return self._process_chain('process_item', item, spider)
+
 
 def get_spider(name):
     for module in walk_modules('crawler.spiders'):
@@ -25,8 +42,11 @@ except:
     print("Usage: python respider.py <string crawlername> [<int offset> [<int batchsize>]]")
     exit(1)
 
-
 print("Reprocessing crawler: {}".format(spider.name))
+
+# initialise item pipeline
+itemProcessor = ItemPipelineManager.from_settings(settings)
+
 
 engine = create_engine(settings.DATABASE_URL, echo=False)
 Session = sessionmaker(bind=engine)
@@ -56,6 +76,8 @@ try:
             print("Reprocess Ad: {}".format(ad.id))
 
             new_ad = next(spider.parse_ad(HtmlResponse(url=ad.url, body=ad.raw_data, encoding='utf-8')))
+            itemProcessor.process_item(new_ad, spider)
+
             ad.merge(new_ad)
 
         print("Commit")

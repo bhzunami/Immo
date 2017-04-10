@@ -1,7 +1,7 @@
 """
     Data Analysis
 
-    Load data from database or a csv File 
+    Load data from database or a csv File
 
     Feature Selection: (http://machinelearningmastery.com/feature-selection-machine-learning-python/)
     Feature selection is a important step to:
@@ -64,24 +64,27 @@ class DataAnalysis():
         """ load data from database
         """
 
-        return pd.read_sql_query(self.session.query(Advertisement).options(load_only('num_floors',
-                                                                                     'living_area',
-                                                                                     'floor',
-                                                                                     'price_brutto',
-                                                                                     'num_rooms',
-                                                                                     'object_types_id',
-                                                                                     'build_year',
-                                                                                     'last_renovation_year',
-                                                                                     'cubature',
-                                                                                     'room_height',
-                                                                                     'effective_area',
-                                                                                     'floors_house',
-                                                                                     'longitude',
-                                                                                     'latitude',
-                                                                                     'plot_area',
-                                                                                     'municipalities_id')).statement,
-                                 self.session.bind)
-                
+        return pd.read_sql_query(self.session.query(Advertisement).options(
+            load_only(
+                'num_floors',
+                'living_area',
+                'floor',
+                'price_brutto',
+                'num_rooms',
+                'object_types_id',
+                'build_year',
+                'last_renovation_year',
+                'cubature',
+                'room_height',
+                'effective_area',
+                'floors_house',
+                'longitude',
+                'latitude',
+                'plot_area',
+                'municipalities_id',
+                'tags'
+                )).statement, self.session.bind)
+
         # return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).statement,
         #                          self.session.bind,
         #                          parse_dates=['crawled_at'])
@@ -137,7 +140,7 @@ class DataAnalysis():
                     y='non_zero', color='DarkBlue', ax=current_axis, s=2)
 
             if show_null_values:
-                df.plot(kind='scatter', x='price_brutto', 
+                df.plot(kind='scatter', x='price_brutto',
                         y='zero', color='Red', ax=current_axis, s=2)
             # set label and
             current_axis.set_xlabel('Price')

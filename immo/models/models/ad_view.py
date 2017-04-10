@@ -38,3 +38,4 @@ class AD_View(Base):
     c_balcony = Column(Boolean)
     c_patio = Column(Boolean)
     c_newbuilding = Column(Boolean)
+    tags = Column(String)

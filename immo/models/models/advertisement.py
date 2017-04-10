@@ -2,9 +2,9 @@
 """
 """
 import json
-from datetime import date
+import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, JSON
 from .utils import get_int, get_float, get_date, Base, maybe_street
 from sqlalchemy.orm import relationship
 from . import Municipality, ObjectType
@@ -40,14 +40,14 @@ class Advertisement(Base):
     characteristics = Column(String)  # Additional information Seesicht, Lift/ Balkon/Sitzplatz
     additional_data = Column(String)  # Data at the moment we do not know where to put
     owner = Column(String)            # The name of the copany which insert the ad (if exists)
-    crawled_at = Column(Date)
-    last_seen = Column(Date)
+    crawled_at = Column(DateTime)
+    last_seen = Column(DateTime)
     longitude = Column(Float)
     latitude = Column(Float)
     municipality_unparsed = Column(String)
     quality_label = Column(String)
 
-    tags = Column(String) # JSON list of tags
+    tags = Column(JSON) # JSON list of tags
 
     # Relationship
     object_types_id = Column(Integer, ForeignKey('object_types.id'))
@@ -78,8 +78,8 @@ class Advertisement(Base):
         self.assign(data, 'latitude')
         self.assign(data, 'quality_label')
 
-        self.crawled_at = self.crawled_at or date.today()
-        self.last_seen = self.last_seen or date.today()
+        self.crawled_at = self.crawled_at or datetime.datetime.now()
+        self.last_seen = self.last_seen or datetime.datetime.now()
 
         self.assign(data, 'street', func=maybe_street)
 
@@ -106,4 +106,4 @@ class Advertisement(Base):
         # Set jsons
         self.characteristics = json.dumps(data.get('characteristics', None)) or self.characteristics
         self.additional_data = json.dumps(data.get('additional_data', None)) or self.additional_data
-        self.tags = json.dumps(data.get('tags', None)) or self.tags
+        self.tags = json.loads(data.get('tags', None)) or self.tags or []
