@@ -62,7 +62,7 @@ class Immoscout24(scrapy.Spider):
                                      loc.xpath('span[contains(@class, "locality")]/text()').extract_first())
 
         # description
-        ad['description'] = ''.join(response.xpath(
+        ad['description'] = ' '.join(response.xpath(
             '//div[contains(@class, "description")]//text()').extract()).strip()
 
         # more attributes
