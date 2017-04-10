@@ -164,6 +164,23 @@ class DataAnalysis():
         self.keys = list(self.X.keys())[1:]
         self.X = self.X.values
 
+    def transform_tags(self):
+        with open('../crawler/taglist.txt') as f:
+            search_words = set([x.split(':')[0] for x in f.read().splitlines()])
+
+        template_dict = dict.fromkeys(search_words, 0)
+
+        def transformer(row):
+            the_dict = template_dict.copy()
+
+            for tag in row.tags:
+                the_dict[tag] = 1
+
+            return pd.Series(the_dict)
+
+        tag_columns = self.ads.apply(transformer, axis=1)
+
+        self.ads = self.ads.drop(['tags'], axis=1).merge(tag_columns, left_index=True, right_index=True)
 
 
     # Features Selection
@@ -230,6 +247,7 @@ class DataAnalysis():
 
 def main():
     data_analysis = DataAnalysis(from_file=False, file='all.csv')
+    data_analysis.transform_tags()
     data_analysis.simple_stats()
     # data_analysis.draw_features(show_null_values=True)
     data_analysis.prepare_dataset()

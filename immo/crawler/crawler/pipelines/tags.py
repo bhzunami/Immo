@@ -6,12 +6,12 @@ import json
 with open('./taglist.txt') as f:
     search_words = set([x.split(':')[0] for x in f.read().splitlines()])
 
-remove_tokens = r'[-().,+\':/}{\n\r!?"•;*\[\]%“„ ˋ\t_]'
+remove_tokens = r'[-().,+\':/}{\n\r!?"•;*\[\]%“„ ˋ\t_◦—=«»~><’‘&@…|−]'
 
 class TagsPipeline(object):
     def process_item(self, item, spider):
 
-        words = (str(item.get('street', '')) + str(item.get('characteristics', ''))).lower()
+        words = (str(item.get('description', '')) + str(item.get('characteristics', '')) + " " + str(item.get('quality_label', ''))).lower()
 
         clean_words = set(re.split(' ', re.sub(remove_tokens, ' ', words)))
 
