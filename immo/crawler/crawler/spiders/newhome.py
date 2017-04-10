@@ -93,7 +93,9 @@ class Newhome(scrapy.Spider):
         address = response.xpath('//span[@itemprop="address"]/span/text()').extract()
         #street_path = '//span[@itemprop="address"]/span[@itemprop="streetAddress"]/text()'
         #place_path = '//span[@itemprop="address"]/span/text()'
-        ad['street'] = address.pop(0).strip()
+        if address is not None and len(address) > 0:
+            ad['street'] = address.pop(0).strip()
+
         ad['place'] = ' '.join(map(lambda a: a.strip(), address))
 
         description_path = '//div[@id="dDescription"]/span//text()'
