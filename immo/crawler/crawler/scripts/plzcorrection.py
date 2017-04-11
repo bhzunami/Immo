@@ -11,7 +11,7 @@ from models import Advertisement, Municipality
 import json
 
 
-engine = create_engine(os.environ.get('DATABASE_URL', None), echo=True)
+engine = create_engine(os.environ.get('DATABASE_URL'), echo=True)
 Session = sessionmaker(bind=engine)
 
 # start transaction

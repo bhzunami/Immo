@@ -40,10 +40,13 @@ def get_data(from_db=False):
     return pd.read_csv('all.csv', index_col=0, engine='c', dtype=DB_TYPES)
 
 def get_from_db():
-    engine = create_engine(os.environ.get('DATABASE_URL', None))
+    engine = create_engine(os.environ.get('DATABASE_URL'))
     Session = sessionmaker(bind=engine)
     session = Session()
     ads = pd.read_sql_query(session.query(AD_View).statement, session.bind)
+
+    ads = transform_tags(ads)
+
     ads.to_csv('all.csv', header=True, encoding='utf-8')
     return ads
 
@@ -73,6 +76,26 @@ def plot(X, y, outlierIdx):
     ax.scatter(X.living_area[2000:], y[2000:], X.num_rooms[2000:], c=(0,0,1))
     ax.scatter(X.living_area[outlierIdx], y[outlierIdx], X.num_rooms[outlierIdx],c=(1,0,0))
     plt.show()
+
+
+
+def transform_tags(dataframe):
+    with open('../crawler/taglist.txt') as f:
+        search_words = set([x.split(':')[0] for x in f.read().splitlines()])
+
+    template_dict = dict.fromkeys(search_words, 0)
+
+    def transformer(row):
+        the_dict = template_dict.copy()
+
+        for tag in row.tags:
+            the_dict[tag] = 1
+
+        return pd.Series(the_dict)
+
+    tag_columns = dataframe.apply(transformer, axis=1)
+
+    return dataframe.drop(['tags'], axis=1).merge(tag_columns, left_index=True, right_index=True)
 
 
 def main():
