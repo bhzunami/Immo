@@ -13,7 +13,7 @@ COPY . /usr/src/app
 
 RUN cd models && pip install -e .
 
-WORKDIR /usr/src/app/crawler/crawler
+WORKDIR /usr/src/app/crawler
 
 ENTRYPOINT ["scrapy", "crawl"]
 
