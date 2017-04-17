@@ -51,10 +51,10 @@ class Advertisement(Base):
 
     # Relationship
     object_types_id = Column(Integer, ForeignKey('object_types.id'))
-    object_type = relationship(ObjectType)
+    object_type = relationship(ObjectType, load_on_pending=True)
 
     municipalities_id = Column(Integer, ForeignKey('municipalities.id'))
-    municipalities = relationship(Municipality)
+    municipalities = relationship(Municipality, load_on_pending=True)
 
     def __init__(self, data):
         self.merge(data)
@@ -70,10 +70,8 @@ class Advertisement(Base):
         self.assign(data, 'raw_data')
         self.assign(data, 'crawler')
         self.assign(data, 'url')
-        self.assign(data, 'object_id')
         self.assign(data, 'description')
         self.assign(data, 'owner')
-        self.assign(data, 'object_id')
         self.assign(data, 'longitude')
         self.assign(data, 'latitude')
         self.assign(data, 'quality_label')
@@ -84,6 +82,8 @@ class Advertisement(Base):
         self.assign(data, 'street', func=maybe_street)
 
         self.municipality_unparsed = data.get('place', None) or self.municipality_unparsed
+        self.municipalities_id = data.get('municipality_id', None)
+        self.object_types_id = data.get('obtype_id', None)
 
         # Set integers
         self.assign(data, 'price_brutto', func=get_int)

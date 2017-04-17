@@ -44,14 +44,16 @@ class Ad(scrapy.Item):
     latitude = scrapy.Field()
     quality_label = scrapy.Field()
     tags = scrapy.Field(serializer=json.dumps)
+    municipality_id = scrapy.Field()  # The municiplaity id
+    obtype_id = scrapy.Field()        # The Object type id from the database. The objecttype is the string
 
 
     def __str__(self):
-        return "object id: {object_id}, url: {url}, crawler: {crawler}, price_brutto: {price_brutto}, living_area: {living_area}\ncharacteristics: {characteristics}".format(
+        return "object id: {object_id}, url: {url}, crawler: {crawler}, price_brutto: {price_brutto}, living_area: {living_area}".format(
             object_id=self.get('object_id', ''),
             url=self.get('url', ''),
             crawler=self.get('crawler', ''),
             price_brutto=self.get('price_brutto', ''),
-            living_area=self.get('living_area', ''),
-            characteristics=json.dumps(self.get('characteristics'), indent=2)
+            living_area=self.get('living_area', '')
+            # characteristics=json.dumps(self.get('characteristics'), indent=2)
         )
