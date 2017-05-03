@@ -22,6 +22,8 @@ from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.externals import joblib
 from sklearn.preprocessing import OneHotEncoder
+import seaborn as sns
+
 import sys
 
 rng = np.random.RandomState(42)
@@ -47,7 +49,13 @@ def get_data(from_db=False):
     return pd.read_csv('all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
 
 
-def get_col_name(X, ohe, ohe_features, dv, idx):
+def get_col_name(dv, idx):
+    return "{} ({})".format(dv.get_feature_names()[idx], idx)
+
+def get_col_name2(X, ohe, ohe_features, dv, idx):
+    """
+    depricated, because we only use dv
+    """
     try:
         # if it's a OHE feature
         # OHE Featrues are left from index 0 to len(ohe.active_features_)-1
@@ -97,14 +105,54 @@ def print_isolation_forest(data, cls, x, y, outlierIdx, elements):
 
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.savefig("IsolationForest.png")
+    plt.close()
+
 
 
 if __name__ == "__main__":
     ads = get_data(from_db=False)
     ads = ads.drop(['id', 'long', 'lat', 'price_brutto', 'living_area'], axis=1)
+    
+    # Insert missing data
+    ads.floor.fillna(0, inplace=True)  # Add floor 0 if not present
+    ads.num_rooms.fillna(ads.num_rooms.median(), inplace=True)
+
     # Remove some vars
     # If no renovation was found the last renovation was the build year
     ads_cleanup = ads.dropna()  # Remove all entries with NaN
+
+
+    # Show some stats
+    # Price per sm2 for cantons
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
+    sns.barplot(x="canton_id", y="price_brutto_m2", data=ads_cleanup, ax=ax1)
+    ax1.set(xlabel='')
+    sns.barplot(x="num_rooms", y="price_brutto_m2", data=ads_cleanup, ax=ax2)
+    sns.barplot(x="floor", y="price_brutto_m2", data=ads_cleanup, ax=ax3)    
+    g = sns.barplot(x="otype", y="price_brutto_m2", data=ads_cleanup, ax=ax4)
+    g.set_xticklabels(g.get_xticklabels(), rotation=90)
+    #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.show()
+    #plt.savefig("Analytical_data.png")
+    plt.close()
+    
+    
+    sns.lmplot(x="avg_room_area", y="price_brutto_m2", data=ads_cleanup)
+    plt.savefig("avg_room_area.png")
+    plt.close()
+    
+    sns.lmplot(x="build_year", y="price_brutto_m2", data=ads_cleanup)
+    plt.savefig("build_year.png")
+    plt.close()
+
+
+    #scatterplot
+    sns.set()
+    cols = ['price_brutto_m2', 'build_year', 'num_rooms', 'avg_room_area', 'last_construction']
+    sns.pairplot(ads[cols], size = 2.5)
+    plt.savefig("pairplot.png")
+    plt.close()
+    
 
     elements = ['floor', 'build_year', 'num_rooms', 'avg_room_area']
     data = {}
@@ -151,10 +199,33 @@ if __name__ == "__main__":
     # Reindex our dataset
     ads_with_out_anomaly.reindex()
 
+    
+    corr = ads_with_out_anomaly.corr()
+    labels = corr.keys()
+    g = sns.heatmap(corr, vmax=.8, square=True)
+    g.set_yticklabels(labels=labels, rotation=0)
+    g.set_xticklabels(labels=reversed(labels), rotation=90)
+    plt.savefig("corr.png")
+    plt.close()
+    
+    
+    # Get the most corelate features
+    k = 15 #number of variables for heatmap
+    cols = corr.nlargest(k, 'price_brutto_m2')['price_brutto_m2'].index
+    cm = np.corrcoef(ads_with_out_anomaly[cols].values.T)
+    sns.set(font_scale=1.25)
+    hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
+    hm.set_xticklabels(hm.get_xticklabels(), rotation=90)
+    hm.set_yticklabels(reversed(hm.get_xticklabels()), rotation=0)
+    plt.savefig("corrDetail.png")
+    plt.close()
+    
+    
+    
     # Prepare transformation from pandas dataframe to matrix
     X = ads_with_out_anomaly.drop(['price_brutto_m2'], axis=1)
     y = ads_with_out_anomaly['price_brutto_m2'].astype(int)
-
+    
     # One Hot Encoding for string
     # Otype municiplaiy ogroup
     # - - - - - - - - - - - - - - - - 
@@ -169,22 +240,22 @@ if __name__ == "__main__":
 
     # ONE HOT ENCODING
     # - - - - - - - - - - - - - - - - - - - 
-    # get features and map to corresponding index in X_transformed, and sort by index
-    classification_features = ['floor', 'canton_id', 'district_id',
-    'mountain_region_id', 'language_region_id', 'job_market_region_id',
-    'agglomeration_id', 'metropole_region_id', 'tourism_region_id']
+    # # get features and map to corresponding index in X_transformed, and sort by index
+    # classification_features = ['floor', 'canton_id', 'district_id',
+    # 'mountain_region_id', 'language_region_id', 'job_market_region_id',
+    # 'agglomeration_id', 'metropole_region_id', 'tourism_region_id']
 
-    # Sort the positions and the name of our classification_features in a list
-    indexs = sorted([(dv.get_feature_names().index(e), e) for e in classification_features], key=lambda x: x[0])
+    # # Sort the positions and the name of our classification_features in a list
+    # indexs = sorted([(dv.get_feature_names().index(e), e) for e in classification_features], key=lambda x: x[0])
 
-    rf_enc = OneHotEncoder(categorical_features=[i[0] for i in indexs])
-    rf_enc.fit(X_transformed.todense())
-    X_transformed_oneHot = rf_enc.transform(X_transformed.todense())
+    # rf_enc = OneHotEncoder(categorical_features=[i[0] for i in indexs])
+    # rf_enc.fit(X_transformed.todense())
+    # X_transformed_oneHot = rf_enc.transform(X_transformed.todense())
 
     from sklearn import datasets
     from sklearn import metrics
     from sklearn.ensemble import ExtraTreesClassifier
-    X_train, X_test, y_train, y_test = train_test_split(X_transformed_oneHot, y_transformed, test_size=0.5)
+    X_train, X_test, y_train, y_test = train_test_split(X_transformed, y_transformed, test_size=0.5)
 
     model = ExtraTreesClassifier(n_estimators=10,
                                  random_state=rng,
@@ -203,7 +274,7 @@ if __name__ == "__main__":
     for f in range(X_train.shape[1]):
         if importances[indices[f]] > min_percent:
             print("{}. feature {} ({})".format(f+1,
-                                            get_col_name(X_transformed_oneHot, rf_enc, indexs, dv, indices[f]), 
+                                            get_col_name(dv, indices[f]), 
                                             importances[indices[f]]))
 
     # Plot all features which are over the min_percent importance
@@ -215,10 +286,37 @@ if __name__ == "__main__":
     plt.show()
 
 
-    # from sklearn.feature_selection import SelectKBest
-    # from sklearn.feature_selection import chi2
-    # X_new = SelectKBest(chi2, k=6).fit_transform(X_train, y_train)
-    # X_new.shape
+    from sklearn.feature_selection import SelectKBest
+    from sklearn.feature_selection import chi2
+    from sklearn.feature_selection import f_regression
+    skb_chi2 = SelectKBest(chi2, k=40)
+    skb_f_reg = SelectKBest(f_regression, k=40)
+    X_new = skb_chi2.fit_transform(X_train, y_train)
+    X_new = skb_f_reg.fit_transform(X_train.todense(), y_train)
+
+    #indices = np.argsort(skb.scores_)[::-1]
+    print("Most 40 important features in chi2")
+    for feature in skb_chi2.get_support(True):
+        print("Feature: {} {}".format(dv.get_feature_names()[feature], skb_chi2.scores_[feature]))
+
+    print()
+    print("Most 40 important features in f_regression")
+    for feature in skb_f_reg.get_support(True):
+        print("Feature: {} {}".format(dv.get_feature_names()[feature], skb_f_reg.scores_[feature]))
+
+    from sklearn.svm import LinearSVC
+    from sklearn.feature_selection import SelectFromModel
+    # the smaller C the fewer features selected
+    #lsvc = LinearSVC(C=0.02, penalty="l1", dual=False).fit(X_train, y_train)
+    #model = SelectFromModel(lsvc, prefit=True)
+    model = joblib.load('{}.pkl'.format('linearSVC'))
+    print()
+    print("Most {} important features in L1".format(len(model.get_support(True))))
+    for feature in model.get_support(True):
+        print("Feature: {} ".format(dv.get_feature_names()[feature]))
+
+
+
 
 
     pdb.set_trace()
