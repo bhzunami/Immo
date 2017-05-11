@@ -50,6 +50,7 @@ class CoordinatesPipeline(object):
             item['longitude'], item['latitude'] = self.askGoogle(item.get('street', None), item.get('place', None) )
             if not item.get('longitude', None):
                 logging.warning("Could not get long or lat for address {}, {} cause answer was 0 [{}]".format(item.get('street', None), item.get('place', None), item.get('url', None)))
+
         return item
 
 
