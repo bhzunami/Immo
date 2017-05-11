@@ -46,6 +46,9 @@ class Advertisement(Base):
     latitude = Column(Float)
     municipality_unparsed = Column(String)
     quality_label = Column(String)
+    lv03_easting = Column(Float)
+    lv03_northing = Column(Float)
+    noise_level = Column(Float)
 
     tags = Column(JSON) # JSON list of tags
 
