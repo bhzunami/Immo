@@ -5,6 +5,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import load_only
 from models import Advertisement
 import json
+import sys
 import requests
 from models import utils
 import pdb
@@ -52,24 +53,34 @@ def askGoogle(self, street=None, place=None):
     
 def get_lv03():
     # Get 
+    index = 0
     ads = session.query(Advertisement) \
                             .options(load_only("id", "longitude", "latitude", "lv03_easting", "lv03_northing")) \
                             .filter(and_(and_(Advertisement.longitude != None, Advertisement.longitude != 0), Advertisement.longitude != 9999,)) \
                             .all()
     for ad in ads:
+        index += 1
         url = "{}?easting={}&northing={}&format=json".format(ADMIN_GEO, ad.longitude, ad.latitude)
-        response = requests.get(url)
-        if response.status_code != 200:
-            print("Could not get X and Y for addres {}, {}".format(ad.longitude, ad.latitude))
-            continue
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                print("Could not get X and Y for addres {}, {}".format(ad.longitude, ad.latitude))
+                continue
 
-        answer = response.json()
-        if len(answer) > 0:
-            ad.lv03_easting = answer['easting']
-            ad.lv03_northing = answer['northing']
-        else:
-            print("Could not get X and Y for addres {}, {}".format(ad.longitude, ad.latitude))
-            continue
+            answer = response.json()
+            if len(answer) > 0:
+                ad.lv03_easting = answer['easting']
+                ad.lv03_northing = answer['northing']
+                if index % 100 == 0:
+                    print("Still get some data....")
+                session.add(ad)
+                session.commit()
+                time.sleep(1)
+            else:
+                print("Could not get X and Y for addres {}, {}".format(ad.longitude, ad.latitude))
+                continue
+        except Exception:
+            pass
 
 def main():
     try:
@@ -115,4 +126,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if sys.argv[1] == 'co':
+        print("Get coordinates from openstreet map or google")
+        main()
+    else:
+        print("Get LV03 positions vrom admin.ch")
+        get_lv03()
