@@ -37,18 +37,18 @@ def askGoogle(self, street=None, place=None):
 
     url = "{}{}&key={}".format(GOOGLE_MAP_API_BASE_URL, address, os.environ.get('GOOGLE_MAP_API_KEY', None))
 
-    response = requests.get(url)
-    if response.status_code != 200:
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            return (None, None)
+        res = response.json()
+        if len(res['results']) > 0:
+            long = res['results'][0]['geometry']['location']['lng']
+            lat = res['results'][0]['geometry']['location']['lat']
+            return long, lat
+    except Exception:
         return (None, None)
-
-    res = response.json()
-    if len(res['results']) > 0:
-        long = res['results'][0]['geometry']['location']['lng']
-        lat = res['results'][0]['geometry']['location']['lat']
-        return long, lat
-
-    return (None, None)
-
+    
 def get_lv03():
     # Get 
     ads = session.query(Advertisement) \
@@ -82,32 +82,31 @@ def main():
         count = len(ads)
         url = "{}".format(OPENSTREETMAP_BASE_URL)
         payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
-        for ad in ads:
+        for ad in ads[900:]:
             count -= 1
             payload['postcode'], *city = utils.get_place(ad.municipality_unparsed)
             payload['city'] = ' '.join(city)
 
             r = requests.get(url, params=payload)
-            if r.status_code != 200:
-                print("Could not get long and lat for addres {}, {}".format(ad.street, ad.municipality_unparsed))
-                continue
+            try:
+                res = r.json()
+                if len(res) > 0:
+                    ad.longitude = res[0]['lon']
+                    ad.latitude = res[0]['lat']
+            except Exception:
+                pass
 
-            res = r.json()
-            if len(res) > 0:
-                ad.longitude = res[0]['lon']
-                ad.latitude = res[0]['lat']
-            else:
+            if not ad.longitude:
                 ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipality_unparsed)
 
-            # Check if long lat is present
-            if ad.longitude is None or ad.longitude == '':
-                print("No coordinates found for {} {}".format(ad.street, ad.municipality_unparsed))
-                continue
+            if ad.longitude:
+                print("STORE AD {} to go".format(count))
+                session.add(ad)
+                session.commit()
+            else:
+                print("Could not get long and lat for addres {}, {}".format(ad.street, ad.municipality_unparsed))
 
-            print("STORE AD {} to go".format(count))
-            session.add(ad)
-            session.commit()
-            time.sleep(2)
+            time.sleep(1)
     except:
         session.rollback()
         raise
