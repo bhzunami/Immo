@@ -46,6 +46,7 @@ def askGoogle(self, street=None, place=None):
             long = res['results'][0]['geometry']['location']['lng']
             lat = res['results'][0]['geometry']['location']['lat']
             return long, lat
+        return (None, None)
     except Exception:
         return (None, None)
     
@@ -53,7 +54,7 @@ def get_lv03():
     # Get 
     ads = session.query(Advertisement) \
                             .options(load_only("id", "longitude", "latitude", "lv03_easting", "lv03_northing")) \
-                            .filter(and_(Advertisement.longitude != None, Advertisement.longitude != 0)) \
+                            .filter(and_(and_(Advertisement.longitude != None, Advertisement.longitude != 0), Advertisement.longitude != 9999,)) \
                             .all()
     for ad in ads:
         url = "{}?easting={}&northing={}&format=json".format(ADMIN_GEO, ad.longitude, ad.latitude)
@@ -82,7 +83,7 @@ def main():
         count = len(ads)
         url = "{}".format(OPENSTREETMAP_BASE_URL)
         payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
-        for ad in ads[900:]:
+        for ad in ads:
             count -= 1
             payload['postcode'], *city = utils.get_place(ad.municipality_unparsed)
             payload['city'] = ' '.join(city)
@@ -99,13 +100,14 @@ def main():
             if not ad.longitude:
                 ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipality_unparsed)
 
-            if ad.longitude:
-                print("STORE AD {} to go".format(count))
-                session.add(ad)
-                session.commit()
-            else:
+            if not ad.longitude:
                 print("Could not get long and lat for addres {}, {}".format(ad.street, ad.municipality_unparsed))
+                ad.longitude = 9999
+                ad.latitude = 9999
 
+            print("STORED AD {} - {} to go".format(ad.id, count))
+            session.add(ad)
+            session.commit()
             time.sleep(1)
     except:
         session.rollback()
