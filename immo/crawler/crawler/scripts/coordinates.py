@@ -99,8 +99,8 @@ def main():
             payload['postcode'], *city = utils.get_place(ad.municipality_unparsed)
             payload['city'] = ' '.join(city)
 
-            r = requests.get(url, params=payload)
             try:
+                r = requests.get(url, params=payload)
                 res = r.json()
                 if len(res) > 0:
                     ad.longitude = res[0]['lon']

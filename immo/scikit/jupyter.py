@@ -10,16 +10,18 @@ from a_detection import AnomalyDetection
 from feature_analysis import FeatureAnalysis
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import chi2, f_regression
-from sklearn.linear_model import LassoLarsCV, Ridge, LogisticRegression
+from sklearn.linear_model import LassoLarsCV, Ridge, RidgeCV, LassoCV, Lasso, LinearRegression, LogisticRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, make_scorer
 from sklearn import metrics
-
-
 from settings import OBJECT_TYPES, MODEL_FOLDER, IMAGE_FOLDER
+import logging
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def gen_subplots(fig, x, y):
     for i in range(x*y):
@@ -290,97 +292,13 @@ def main():
 def ape(y_true, y_pred):
     return np.abs(y_true - y_pred) / y_true
 
-def mape(y_true, y_pred): 
-    return ape(y_true, y_pred).mean() 
+def mape(y_true, y_pred):
+    return ape(y_true, y_pred).mean()
 
 def mdape(y_true, y_pred):
     return np.median(ape(y_true, y_pred))
 
-def show_results(y_true, y_pred):
-    num_elements = len(y_pred)
-    apes = ape(y_true, y_pred)
-    for i in np.arange(5, 100, 5):
-        print("I {}: {}".format(i, len(np.where(apes < i/100)[0])/num_elements))
-
-
-def calculate():
-    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
-    sl = SupervisedLearning(ads, cleanup=False)
-    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-
-    models = {'random forest': RandomForestRegressor(),
-              'ridge': Ridge(),
-              'lasso': LassoLarsCV()}
-              #'linearSVC_fit': LinearSVC(),
-              #'svc': SVC(),
-              #'logistic': LogisticRegression(),
-              #'gauss': GaussianNB()}
-    sl.fit(X_train, y_train, X_test, y_test, models, True)
-
-    for name, model in models.items():
-        #model = joblib.load('{}/{}.pkl'.format(MODEL_FOLDER, name))
-        y_predicted = model.predict(X_test)
-        print("{}: MAPE: {:.3%}, MDAPE: {:.3%}".format(name, mape(y_test, y_predicted), mdape(y_test, y_predicted)))
-
-scorer = make_scorer(mean_squared_error, greater_is_better = False)
-
-def rmse_cv_train(model, X_train, y_train):
-    rmse= np.sqrt(-cross_val_score(model, X_train, y_train, scoring = scorer, cv = 10))
-    return(rmse)
-
-def rmse_cv_test(model, X_test, y_test):
-    rmse= np.sqrt(-cross_val_score(model, X_test, y_test, scoring = scorer, cv = 10))
-    return(rmse)
-
-def calc2():
-    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
-    sl = SupervisedLearning(ads, cleanup=False)
-    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-    from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
-    #ridge = RidgeCV(alphas = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
-    #ridge.fit(X_train, y_train)
-    #alpha = ridge.alpha_
-    #print("Best alpha :", alpha)
-
-    #print("Try again for more precision with alphas centered around " + str(alpha))
-    # ridge = RidgeCV(alphas = [alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
-    #                           alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
-    #                           alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
-    #                 cv = 10)
-
-    ridge = RidgeCV(alphas=[0.54])
-    ridge.fit(X_train, y_train)
-    alpha = ridge.alpha_
-    print("Best alpha :", alpha)
-
-    #print("Ridge RMSE on Training set :", rmse_cv_train(ridge, X_train, y_train).mean())
-    #print("Ridge RMSE on Test set :", rmse_cv_test(ridge, X_test, y_test).mean())
-    y_test_rdg = ridge.predict(X_test)
-    print("MAPE: {:.3%}, MDAPE: {:.3%}".format(mape(y_test, y_test_rdg), mdape(y_test, y_test_rdg)))
-
-    fig = plt.figure(figsize=(10, 6))
-    subplots = gen_subplots(fig, 1, 1)
-    
-    ax = next(subplots)
-    ax.set_xlabel('APE')
-    my_ape = ape(y_test, y_test_rdg)
-    ax.hist(my_ape, 100)
-    m = ape(y_test, y_test_rdg).mean()
-    ax.plot((m, m), (0,400), 'r-')
-    
-    mm = np.median(ape(y_test, y_test_rdg))
-    ax.plot((mm, mm), (0,400), 'y-')
-    
-    ax.set_xticklabels(['{:.2%}'.format(x) for x in ax.get_xticks()])
-
-    plt.show()
-    values = y_test - y_test_rdg
-    print(values)
-
-    
-def plot(y_test, y_pred):
+def plot(y_test, y_pred, show=False, plot_name=""):
      # sort both array by y_test
     y_test, y_pred = zip(*sorted(zip([x for x in y_test], [x for x in y_pred])))
     y_test = np.asarray(y_test)
@@ -398,9 +316,12 @@ def plot(y_test, y_pred):
     ax.set_xlabel('Residuals')
     ax.plot(y_test - y_pred, 'bo', markersize=1)
     ax.plot((0,len(y_test)), (0,0), 'r-')
-    
+    if show:
+        plt.show()
+    else:
+        plt.savefig("{}/cumulative_prpability_{}.png".format(IMAGE_FOLDER, plot_name))
 
-    plt.show()
+    # - - - - - - - 
     fig = plt.figure(figsize=(5, 5))
     subplots = gen_subplots(fig, 1, 1)
     ax = next(subplots)
@@ -408,19 +329,36 @@ def plot(y_test, y_pred):
     my_ape = ape(y_test, y_pred)
     ax.hist(my_ape, 100)
     m = ape(y_test, y_pred).mean()
-    ax.plot((m, m), (0,400), 'r-')
+    ax.plot((m, m), (0,2000), 'r-')
     
     mm = np.median(ape(y_test, y_pred))
-    ax.plot((mm, mm), (0,400), 'y-')
+    ax.plot((mm, mm), (0,2000), 'y-')
     ax.set_xticklabels(['{:.2%}'.format(x) for x in ax.get_xticks()])
 
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.savefig("{}/verteilung_der_fehler_{}.png".format(IMAGE_FOLDER, plot_name))
+
+def statistics(y, pred):
+    diff = np.fabs(y - pred)
+    logger.info("             R²-Score: {:10n}".format(metrics.r2_score(y, pred)))
+    logger.info("                 MAPE: {:.3%}".format(mape(y, pred)))
+    logger.info("                MdAPE: {:.3%}".format(mdape(y, pred)))
+    logger.info("            Min error: {:10n}".format(np.amin(diff)))
+    logger.info("            Max error: {:10n}".format(np.amax(diff)))
+    logger.info("  Mean absolute error: {:10n}".format(metrics.mean_absolute_error(y, pred)))
+    logger.info("Median absolute error: {:10n}".format(metrics.median_absolute_error(y, pred)))
+    logger.info("   Mean squared error: {:10n}".format(metrics.mean_squared_error(y, pred)))
+
+    num_elements = len(pred)
+    apes = ape(y, pred)
+    for i in np.arange(5, 100, 5):
+        logger.info("I {}: {}".format(i, len(np.where(apes < i/100)[0])/num_elements))
 
 
-def calc3():
+def randomForest():
     ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
-
-    ads = ads[(ads['price_brutto_m2'] < 14000) & (ads['price_brutto_m2'] > 2500)]
     sl = SupervisedLearning(ads, cleanup=False)
     X, y = sl.generate_matrix(ads, 'price_brutto_m2')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
@@ -428,76 +366,11 @@ def calc3():
     model.fit(X_train, y_train)
     y_predicted = model.predict(X_test)
     statistics(y_test, y_predicted)
-    plot(y_test, y_predicted)
-    show_results(y_test, y_predicted)
-
-
-def feature():
-    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
-    best_mape = {'feature0': 'NONE', 'm0': 1000}
-    keys = list(ads.keys())
-    keys.remove('price_brutto_m2')
-    choosen_features = set(['price_brutto_m2'])
-    for i in range(0, len(keys)):
-        print("ROUND: {} with features: {}".format(i, choosen_features))
-        best_mape['feature{}'.format(i)] =  'NONE'
-        best_mape['m{}'.format(i)] = 1000
-        for feature in keys:
-            features = list(choosen_features) + [feature]
-            ad = ads[features]
-            sl = SupervisedLearning(ad, cleanup=False)
-            X, y = sl.generate_matrix(ad, 'price_brutto_m2')
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-            model = RandomForestRegressor()
-            model.fit(X_train, y_train)
-            y_predicted = model.predict(X_test)
-            m = mape(y_test, y_predicted)
-            if best_mape['m{}'.format(i)] > m:
-                print("Found new best: {} with feature {}".format(m, feature))
-                best_mape['m{}'.format(i)] = m
-                best_mape['feature{}'.format(i)] = feature
-        print("BEST Feature in i{} : {} wiht MAPE: {}".format(i,
-                                                              best_mape['feature{}'.format(i)],
-                                                              best_mape['m{}'.format(i)]))
-        choosen_features.add(best_mape['feature{}'.format(i)])
-        keys.remove(best_mape['feature{}'.format(i)])
-    print(best_mape)
-
-
-    # Select 2 best
-    best2_mape = {'feature': 'NONE', 'm': 1000}
-    for feature in ads.keys():
-        if feature == 'price_brutto_m2' or feature == best_mape['feature']:
-            continue
-        print("Run for feature {}".format(feature))
-        ad = ads[[feature, 'price_brutto_m2', best_mape['feature']]]
-        sl = SupervisedLearning(ad, cleanup=False)
-        X, y = sl.generate_matrix(ad, 'price_brutto_m2')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-        model = RandomForestRegressor()
-        model.fit(X_train, y_train)
-        y_predicted = model.predict(X_test)
-        m = mape(y_test, y_predicted)
-        if best2_mape['m'] > m:
-            print("Found new best: {} with feature {}".format(m, feature))
-            best2_mape['m'] = m
-            best2_mape['feature'] = feature
-    print("2nd BEST Feature: {} wiht MAPE: {}".format(best2_mape['feature'], best2_mape['m']))
+    plot(y_test, y_predicted, show=False, plot_name="random_forest")
 
 
 
-def statistics(y, pred):
-    diff = np.fabs(y - pred)
-    print("             R²-Score: {:10n}".format(metrics.r2_score(y, pred)))
-    print("                 MAPE: {:.3%}".format(mape(y, pred)))
-    print("                MdAPE: {:.3%}".format(mdape(y, pred)))
-    print("            Min error: {:10n}".format(np.amin(diff)))
-    print("            Max error: {:10n}".format(np.amax(diff)))
-    print("  Mean absolute error: {:10n}".format(metrics.mean_absolute_error(y, pred)))
-    print("Median absolute error: {:10n}".format(metrics.median_absolute_error(y, pred)))
-    print("   Mean squared error: {:10n}".format(metrics.mean_squared_error(y, pred)))
-
-def calc4():
+def adaBoost():
     from sklearn.datasets import make_gaussian_quantiles
     from sklearn.ensemble import AdaBoostClassifier
     from sklearn.metrics import accuracy_score
@@ -531,11 +404,124 @@ def calc4():
     #print("DISCRETE: MAPE: {:.3%}, MDAPE: {:.3%}".format(mape(y_test, y_discrete_predict), mdape(y_test, #y_discrete_predict)))
     #plot(y_test, y_discrete_predict)
     
+
+def linearRegression():
+    """
+    Doc about linear regression
+
+    Simple linear regression
+    """
+    #import warnings
+    #warnings.filterwarnings(action="ignore", module="scipy", message="^internal gelsd")
+    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
+    sl = SupervisedLearning(ads, cleanup=False)
+    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+    linreg = LinearRegression(normalize=True)
+    print("Fitting data")
+    linreg.fit(X_train, y_train)
+    print("Predicting Data")
+    y_pred = linreg.predict(X_test)
+    statistics(y_test, y_pred)
+    plot(y_test, y_pred, show=False, plot_name="simple_linear")
+
     
+def ridge():
+    """
+    Ridge Regression:
+    Ridge regression verwendet L2 regularization. Er fügt einen zusätzlichen Faktor
+    hinzu um Overfitting zu verhindern. Der Ridge algorithmus verwendet alle Features, deshalb
+    ist es wichtig, dass man vorher eine Feature analyse gemacht hat. Er bestitzt nicht die Eigenschaft
+    einzelne Features zu eliminieren.
+    Der Vorteil des Ridge Algorithmus ist, dass er die Koeffizienten schrumpft und somit auch die Komplexität
+    des model reduziert.
+    Kann auch it Matrizen umgehen die eine hohe Korrelation besitzen.
+    Formel: RSS + a *(Sum of square of coefficients)
+
+    a = 0:       Normale lineare Regression und erhalten die gleichen koeffizienten
+    a = Inf:     Die Koeffizienten werden alle 0 sein, weil die gewichte Unendlich sind durhch Inf * (sum of square)
+    0 < a < Inf: Die Magnitude von a ist das Gwicht
+
+    Je höher a ist, desto ungenauer wird die Prediction
+    """
+    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
+    sl = SupervisedLearning(ads, cleanup=False)
+    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+    
+    ridge = RidgeCV(alphas = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
+    ridge.fit(X_train, y_train)
+    alpha = ridge.alpha_
+
+    logger.info("Try again for more precision with alphas centered around " + str(alpha))
+    ridge = RidgeCV(alphas = [alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
+                              alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
+                              alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
+                    cv = 10)
+    ridge.fit(X_train, y_train)
+
+    alpha = ridge.alpha_
+    logger.info("Best alpha: {}".format(alpha))
+    ridgereg = Ridge(alpha=alpha, normalize=True)
+    ridgereg.fit(X_train, y_train)
+    y_pred = ridgereg.predict(X_test)
+    statistics(y_test, y_pred)
+    plot(y_test, y_pred, show=False, plot_name="ridge")
+
+
+def lasso():
+    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
+    sl = SupervisedLearning(ads, cleanup=False)
+    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+
+    lasso = LassoCV(alphas = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
+    lasso.fit(X_train, y_train)
+    alpha = lasso.alpha_
+
+    logger.info("Try again for more precision with alphas centered around " + str(alpha))
+    lasso = LassoCV(alphas = [alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
+                              alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
+                              alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
+                    cv = 10)
+    lasso.fit(X_train, y_train)
+
+    alpha = lasso.alpha_
+    logger.info("Best alpha: {}".format(alpha))
+
+    lassoreg = Lasso(alpha=alpha, normalize=True, max_iter=1e5)
+    lassoreg.fit(X_train, y_train)
+    y_pred = lassoreg.predict(X_test)
+    statistics(y_test, y_pred)
+    plot(y_test, y_pred, show=False, plot_name="lasso")
+
 
 if __name__ == "__main__":
+    logger.setLevel(logging.INFO)
+
+    # create a file handler
+    handler = logging.FileHandler('jupyter.log')
+    handler.setLevel(logging.INFO)
+
+    # create a logging format
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+
+    # add the handlers to the logger
+    logger.addHandler(handler)
+
     #main()
-    #calculate()
-    #calc3()
-    feature()
+    #feature()
+    logger.info("="*20)
+    logger.info("Running Linear Regression")
+    linearRegression()
+    logger.info("="*20)
+    logger.info("Running Linear Regression with Ridge")
+    ridge()
+    logger.info("="*20)
+    logger.info("Running Linear Regression with Lasso")
+    lasso()
+    logger.info("="*20)
+    logger.info("Running Linear Regression with RandomForest")
+    randomForest()
     
