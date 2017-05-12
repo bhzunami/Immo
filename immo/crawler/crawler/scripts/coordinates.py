@@ -126,9 +126,10 @@ def main():
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == 'co':
+    if len(sys.argv) < 2:
+        print("Get LV03 positions from admin.ch")
+        get_lv03()
+    else:
         print("Get coordinates from openstreet map or google")
         main()
-    else:
-        print("Get LV03 positions vrom admin.ch")
-        get_lv03()
+        
