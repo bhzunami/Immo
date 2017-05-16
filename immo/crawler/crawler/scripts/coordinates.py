@@ -2,8 +2,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import or_, and_
-from sqlalchemy.orm import load_only
-from models import Advertisement
+from sqlalchemy.orm import load_only, Load
+from models import Advertisement, Municipality
 import json
 import sys
 import requests
@@ -16,25 +16,22 @@ OPENSTREETMAP_BASE_URL = 'http://nominatim.openstreetmap.org/search/'
 GOOGLE_MAP_API_BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address='
 ADMIN_GEO = 'http://geodesy.geo.admin.ch/reframe/wgs84tolv03'
 
-engine = create_engine(os.environ.get('DATABASE_URL'))
+engine = create_engine(os.environ.get('DATABASE_URL'), connect_args={"application_name":"set_coordiantes"})
 Session = sessionmaker(bind=engine)
 
 # start transaction
 session = Session()
 
-def askGoogle(self, street=None, place=None):
+def askGoogle(self, street=None, zip=None, name=None):
     if not os.environ.get('GOOGLE_MAP_API_KEY', None):
         print("Missing Google map api key")
         return (None, None)
 
-    if not street and not place:
+    if not street or not zip:
         print("Google is good but can not lookup addresses with no streetname and no place")
         return (None, None)
 
-    if not street:
-        address = "{}".format(place)
-    else:
-        address = "{},{}".format(street, place)
+        address = "{},{} {}".format(street, zip, name)
 
     url = "{}{}&key={}".format(GOOGLE_MAP_API_BASE_URL, address, os.environ.get('GOOGLE_MAP_API_KEY', None))
 
@@ -83,12 +80,16 @@ def get_lv03():
             pass
 
 def main():
+    print("Start fetching data")
     try:
-        ads = session.query(Advertisement) \
-                            .options(load_only("id", "longitude", "latitude", "municipality_unparsed", "street")) \
-                            .filter(or_(Advertisement.longitude == None, Advertisement.longitude == 0)) \
-                            .filter(Advertisement.street != None) \
-                            .all()
+        ads = session.query(Advertisement).join(Advertisement.municipalities).options(
+                Load(Advertisement).load_only("id", "longitude", "latitude", "street"),
+                Load(Municipality).load_only("zip", "name")) \
+                .filter(
+                    or_(Advertisement.longitude == None, Advertisement.longitude == 0)) \
+                .filter(
+                    or_(Advertisement.street != None, Advertisement.street != '')) \
+                .all()
 
         print("There are {} long lat missing".format(len(ads)))
         count = len(ads)
@@ -96,8 +97,9 @@ def main():
         payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
         for ad in ads:
             count -= 1
-            payload['postcode'], *city = utils.get_place(ad.municipality_unparsed)
-            payload['city'] = ' '.join(city)
+            payload['street'] = ad.street
+            payload['postcode'] = ad.municipalities.zip
+            payload['city'] = ad.municipalities.name
 
             try:
                 r = requests.get(url, params=payload)
@@ -109,10 +111,10 @@ def main():
                 pass
 
             if not ad.longitude:
-                ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipality_unparsed)
+                ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipalities.zip, ad.municipalities.name)
 
             if not ad.longitude:
-                print("Could not get long and lat for addres {}, {}".format(ad.street, ad.municipality_unparsed))
+                print("Could not get long and lat for addres {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
                 ad.longitude = 9999
                 ad.latitude = 9999
 
