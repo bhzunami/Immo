@@ -29,3 +29,5 @@ Twisted==16.6.0
 w3lib==1.16.0
 wrapt==1.10.8
 zope.interface==4.3.3
+GDAL==2.1.3
+numpy==1.12.1
