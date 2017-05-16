@@ -9,5 +9,6 @@ class ObjectType(Base):
     __tablename__ = 'object_types'
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    grouping = Column(String)
 
 

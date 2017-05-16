@@ -31,7 +31,7 @@ def askGoogle(self, street=None, zip=None, name=None):
         print("Google is good but can not lookup addresses with no streetname and no place")
         return (None, None)
 
-        address = "{},{} {}".format(street, zip, name)
+    address = "{},{} {}".format(street, zip, name)
 
     url = "{}{}&key={}".format(GOOGLE_MAP_API_BASE_URL, address, os.environ.get('GOOGLE_MAP_API_KEY', None))
 
@@ -79,7 +79,38 @@ def get_lv03():
         except Exception:
             pass
 
-def main():
+
+def google():
+    try:
+        ads = session.query(Advertisement).join(Advertisement.municipalities).options(
+                Load(Advertisement).load_only("id", "longitude", "latitude", "street"),
+                Load(Municipality).load_only("zip", "name")) \
+                .filter(Advertisement.longitude == 8888) \
+                .filter(
+                    or_(Advertisement.street != None, Advertisement.street != '')) \
+                .all()
+
+        print("There are {} long lat missing".format(len(ads)))
+        count = len(ads)
+        for i, ad in enumerate(ads):
+            count -= 1
+            ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipalities.zip, ad.municipalities.name)
+
+            if not ad.longitude:
+                print("Could not get long and lat for addres {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
+                ad.longitude = 9999  # Not found by openstreetmap
+                ad.latitude = 9999
+            session.add(ad)
+
+            time.sleep(2)
+            session.commit()
+            print("STORED AD {} - {} to go".format(ad.id, count))
+    except:
+        session.rollback()
+        raise
+
+
+def openstreetmap():
     print("Start fetching data")
     try:
         ads = session.query(Advertisement).join(Advertisement.municipalities).options(
@@ -93,9 +124,10 @@ def main():
 
         print("There are {} long lat missing".format(len(ads)))
         count = len(ads)
-        url = "{}".format(OPENSTREETMAP_BASE_URL)
+        url = "{}".format(os.environ.get('OPENSTREETMAP_BASE_URL', OPENSTREETMAP_BASE_URL))
+        print("BASEURL: {}".format(url))
         payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
-        for ad in ads:
+        for i, ad in enumerate(ads):
             count -= 1
             payload['street'] = ad.street
             payload['postcode'] = ad.municipalities.zip
@@ -111,17 +143,15 @@ def main():
                 pass
 
             if not ad.longitude:
-                ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipalities.zip, ad.municipalities.name)
-
-            if not ad.longitude:
                 print("Could not get long and lat for addres {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
-                ad.longitude = 9999
-                ad.latitude = 9999
-
-            print("STORED AD {} - {} to go".format(ad.id, count))
+                ad.longitude = 8888  # Not found by openstreetmap
+                ad.latitude = 8888
             session.add(ad)
-            session.commit()
-            time.sleep(1)
+
+            if i % 100 == 0:
+                session.commit()
+                print("STORED AD {} - {} to go".format(ad.id, count))
+        session.commit()
     except:
         session.rollback()
         raise
@@ -129,9 +159,19 @@ def main():
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Get LV03 positions from admin.ch")
+        print("Please specify option: [google, open, lv03]")
+        sys.exit(1)
+    arg = sys.argv[1]
+    if arg == "google":
+        print("Get data from google")
+        google()
+
+    if arg == 'open':
+        print("Get data from openstreetmap")        
+        openstreetmap()
+
+    if arg == 'lv03':
+        print("Get lv03 data")        
         get_lv03()
-    else:
-        print("Get coordinates from openstreet map or google")
-        main()
+
         
