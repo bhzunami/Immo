@@ -126,7 +126,7 @@ def openstreetmap():
         count = len(ads)
         url = "{}".format(os.environ.get('OPENSTREETMAP_BASE_URL', OPENSTREETMAP_BASE_URL))
         print("BASEURL: {}".format(url))
-        payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
+        payload = {'format': 'json', 'addressdetails': 1}
         for i, ad in enumerate(ads):
             count -= 1
             payload['street'] = ad.street
@@ -143,7 +143,7 @@ def openstreetmap():
                 pass
 
             if not ad.longitude:
-                print("Could not get long and lat for addres {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
+                print("Could not get long and lat for address {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
                 ad.longitude = 8888  # Not found by openstreetmap
                 ad.latitude = 8888
             session.add(ad)
