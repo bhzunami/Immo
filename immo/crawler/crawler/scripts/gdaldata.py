@@ -54,7 +54,7 @@ session = Session()
 
 try:
     ads = session.query(Advertisement) \
-        .options(load_only("id", "lv03_easting", "lv03_northing", "noise_level")) \
+        .options(load_only("id", "lv03_easting", "lv03_northing", "noise_level", 'latitude', 'longitude', 'street', 'municipality_unparsed')) \
         .filter(and_(Advertisement.lv03_easting != None, Advertisement.lv03_northing != 0)) \
         .filter(Advertisement.noise_level == None) \
         .all()
@@ -65,18 +65,25 @@ try:
 
     i = 0
     for ad in ads:
+        try:
+            ad.noise_level = geodata.mean_by_coord(ad.lv03_easting, ad.lv03_northing)
+        except:
+            print("Exception on row id: {}, E {} N {} lat {} long {} address {} {}".format(ad.id, ad.lv03_easting, ad.lv03_northing, ad.latitude, ad.longitude, ad.street, ad.municipality_unparsed))
 
-        ad.noise_level = geodata.mean_by_coord(ad.lv03_easting, ad.lv03_northing)
-
-        session.add(ad)
-        if i + 1 % 100 == 0:
-            print("Progress: {}/{}".format(i+1, count))
-            session.commit()
+    #    session.add(ad)
+        # if (i + 1) % 100 == 0:
+        #     print("Progress: {}/{} Saving...".format(i+1, count), end="")
+        #     session.commit()
+        #     print("Saved")
 
         i += 1
 
     print("Progress: {}/{}".format(count, count))
+
+    session.bulk_update_mappings(Advertisement, [{'id': x.id, 'noise_level': x.noise_level} for x in ads])
     session.commit()
+
+
 except:
     session.rollback()
     raise
