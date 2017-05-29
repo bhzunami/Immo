@@ -46,7 +46,7 @@ geodata = GeoData("Strassenlaerm_Tag.tif")
 
 print("Open DB connection")
 
-engine = create_engine(os.environ.get('DATABASE_URL'))
+engine = create_engine(os.environ.get('DATABASE_URL'), connect_args={"application_name":"GDAL data"})
 Session = sessionmaker(bind=engine)
 
 # start transaction
@@ -55,7 +55,8 @@ session = Session()
 try:
     ads = session.query(Advertisement) \
         .options(load_only("id", "lv03_easting", "lv03_northing", "noise_level", 'latitude', 'longitude', 'street', 'municipality_unparsed')) \
-        .filter(and_(Advertisement.lv03_easting != None, Advertisement.lv03_northing != 0)) \
+        .filter(and_(Advertisement.lv03_easting != None, Advertisement.lv03_easting != 0)) \
+        .filter(Advertisement.longitude < 1000) \
         .filter(Advertisement.noise_level == None) \
         .all()
 
@@ -70,11 +71,11 @@ try:
         except:
             print("Exception on row id: {}, E {} N {} lat {} long {} address {} {}".format(ad.id, ad.lv03_easting, ad.lv03_northing, ad.latitude, ad.longitude, ad.street, ad.municipality_unparsed))
 
-    #    session.add(ad)
-        # if (i + 1) % 100 == 0:
-        #     print("Progress: {}/{} Saving...".format(i+1, count), end="")
-        #     session.commit()
-        #     print("Saved")
+        session.add(ad)
+        if i % 100 == 0:
+            print("Progress: {}/{} Saving...".format(i+1, count), end="")
+            session.commit()
+            print("Saved")
 
         i += 1
 
