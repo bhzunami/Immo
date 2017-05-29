@@ -60,7 +60,7 @@ def get_lv03():
     ads = session.query(Advertisement) \
                             .options(load_only("id", "longitude", "latitude", "lv03_easting", "lv03_northing")) \
                             .filter(and_(and_(Advertisement.longitude != None, Advertisement.longitude != 0), Advertisement.longitude != 9999)) \
-                            .filter(Advertisement.lv03_easting != None) \
+                            .filter(Advertisement.lv03_easting == None) \
                             .all()
     for i, ad in enumerate(ads):
         url = "{}?easting={}&northing={}&format=json".format(ADMIN_GEO, ad.longitude, ad.latitude)
