@@ -81,7 +81,7 @@ try:
 
     print("Progress: {}/{}".format(count, count))
 
-    session.bulk_update_mappings(Advertisement, [{'id': x.id, 'noise_level': x.noise_level} for x in ads])
+    #session.bulk_update_mappings(Advertisement, [{'id': x.id, 'noise_level': x.noise_level} for x in ads])
     session.commit()
 
 
