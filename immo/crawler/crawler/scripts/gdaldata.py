@@ -1,4 +1,5 @@
 import os
+import sys
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -40,54 +41,100 @@ class GeoData():
         all_values = np.array(all_values)
         return np.mean(all_values[np.where(all_values != self.ndval)])
 
-print("Loading tiff file...")
-# this file is not checked in, get it here (GeoTiff): https://opendata.swiss/dataset/larmbelastung-durch-strassenverkehr-tag
-geodata = GeoData("Strassenlaerm_Tag.tif")
+def noise_level_ad():
+    try:
+        ads = session.query(Advertisement) \
+            .options(load_only("id", "lv03_easting", "lv03_northing", "noise_level", 'latitude', 'longitude', 'street', 'municipality_unparsed')) \
+            .filter(and_(Advertisement.lv03_easting != None, Advertisement.lv03_easting != 0)) \
+            .filter(Advertisement.longitude < 1000) \
+            .filter(Advertisement.noise_level == None) \
+            .all()
 
-print("Open DB connection")
+        count = len(ads)
 
-engine = create_engine(os.environ.get('DATABASE_URL'), connect_args={"application_name":"GDAL data"})
-Session = sessionmaker(bind=engine)
+        print("Found {} entries to do.".format(count))
 
-# start transaction
-session = Session()
+        i = 0
+        for ad in ads:
+            try:
+                ad.noise_level = geodata.mean_by_coord(ad.lv03_easting, ad.lv03_northing)
+            except:
+                print("Exception on row id: {}, E {} N {} lat {} long {} address {} {}".format(ad.id, ad.lv03_easting, ad.lv03_northing, ad.latitude, ad.longitude, ad.street, ad.municipality_unparsed))
 
-try:
-    ads = session.query(Advertisement) \
-        .options(load_only("id", "lv03_easting", "lv03_northing", "noise_level", 'latitude', 'longitude', 'street', 'municipality_unparsed')) \
-        .filter(and_(Advertisement.lv03_easting != None, Advertisement.lv03_easting != 0)) \
-        .filter(Advertisement.longitude < 1000) \
-        .filter(Advertisement.noise_level == None) \
-        .all()
+            session.add(ad)
+            if i % 100 == 0:
+                print("Progress: {}/{} Saving...".format(i+1, count), end="")
+                session.commit()
+                print("Saved")
 
-    count = len(ads)
+            i += 1
 
-    print("Found {} entries to do.".format(count))
+        print("Progress: {}/{}".format(count, count))
 
-    i = 0
-    for ad in ads:
-        try:
-            ad.noise_level = geodata.mean_by_coord(ad.lv03_easting, ad.lv03_northing)
-        except:
-            print("Exception on row id: {}, E {} N {} lat {} long {} address {} {}".format(ad.id, ad.lv03_easting, ad.lv03_northing, ad.latitude, ad.longitude, ad.street, ad.municipality_unparsed))
+        #session.bulk_update_mappings(Advertisement, [{'id': x.id, 'noise_level': x.noise_level} for x in ads])
+        session.commit()
+    except:
+        session.rollback()
+        raise
 
-        session.add(ad)
-        if i % 100 == 0:
-            print("Progress: {}/{} Saving...".format(i+1, count), end="")
-            session.commit()
-            print("Saved")
+def noise_level_municipality():
+    try:
+        municipalities = session.query(Municipality) \
+            .options(load_only("id", "lv03_easting", "lv03_northing", "noise_level", 'lat', 'long')) \
+            .filter(and_(Municipality.lv03_easting != None, Municipality.lv03_easting != 0)) \
+            .filter(Municipality.long < 1000) \
+            .filter(Municipality.noise_level == None) \
+            .all()
 
-        i += 1
+        count = len(municipalities)
 
-    print("Progress: {}/{}".format(count, count))
+        print("Found {} entries to do.".format(count))
 
-    #session.bulk_update_mappings(Advertisement, [{'id': x.id, 'noise_level': x.noise_level} for x in ads])
-    session.commit()
+        for i, mun in enumerate(municipalities):
+            try:
+                mun.noise_level = geodata.mean_by_coord(mun.lv03_easting, mun.lv03_northing)
+            except:
+                print("Exception on row id: {}, E {} N {} lat {} long {} address {} {}".format(mun.id, mun.lv03_easting, mun.lv03_northing, mun.lat, mun.long))
 
+            session.add(mun)
+            if i % 100 == 0:
+                print("Progress: {}/{} Saving...".format(i+1, count), end="")
+                session.commit()
+                print("Saved")
 
-except:
-    session.rollback()
-    raise
+            i += 1
 
-print()
-print("Finished.")
+        print("Progress: {}/{}".format(count, count))
+        session.commit()
+    except:
+        session.rollback()
+        raise
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Please specify option: [ad, mun]")
+        sys.exit(1)
+
+    print("Loading tiff file...")
+    # this file is not checked in, get it here (GeoTiff): https://opendata.swiss/dataset/larmbelastung-durch-strassenverkehr-tag
+    geodata = GeoData("Strassenlaerm_Tag.tif")
+
+    print("Open DB connection")
+
+    engine = create_engine(os.environ.get('DATABASE_URL'), connect_args={"application_name":"GDAL data"})
+    Session = sessionmaker(bind=engine)
+
+    # start transaction
+    session = Session()
+
+    arg = sys.argv[1]
+    if arg == "ad":
+        print("Get data for advertisements")
+        noise_level_ad()
+
+    if arg == 'mun':
+        print("Get data for municipalities")
+        noise_level_municipality()
+
+    print()
+    print("Finished.")
