@@ -3,23 +3,18 @@ FROM buildpack-deps:xenial
 ENV LANG C.UTF-8
 
 RUN apt-get update \
- && apt-get install -y python3 make cmake g++ libboost-dev libboost-system-dev \
-      libboost-filesystem-dev libexpat1-dev zlib1g-dev \
-      libbz2-dev libpq-dev libproj-dev lua5.2 liblua5.2-dev \
- && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN apt-get update \
  && apt-get install -y software-properties-common \
  && apt-add-repository ppa:ubuntugis/ubuntugis-unstable \
  && apt-get update \
- && apt-get install -y gdal-bin python3-gdal python3-pip \
+ && apt-get install -y python3 make cmake g++ libboost-dev libboost-system-dev \
+      libboost-filesystem-dev libexpat1-dev zlib1g-dev \
+      libbz2-dev libpq-dev libproj-dev lua5.2 liblua5.2-dev \
+      gdal-bin python3-gdal python3-pip \
+      vim postgresql-client \
  && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
-
-#ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-#ENV C_INCLUDE_PATH=/usr/include/gdal
 
 # requirements
 COPY crawler/requirements.txt /usr/src/app/
@@ -35,6 +30,3 @@ WORKDIR /usr/src/app/crawler
 
 ENTRYPOINT ["scrapy", "crawl"]
 
-# build: docker build -t "ip6-crawler" .
-
-# usage example: docker run --rm ip6-crawler homegate
