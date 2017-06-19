@@ -40,41 +40,76 @@ def askGoogle(self, street=None, zip=None, name=None):
         if response.status_code != 200:
             return (None, None)
         res = response.json()
+        if res['status'] == "OVER_QUERY_LIMIT":
+            return ("OVER_QUERY_LIMIT", None)
+
+        if res['status'] == "ZERO_RESULTS":
+            return (None, None)
+
         if len(res['results']) > 0:
             long = res['results'][0]['geometry']['location']['lng']
             lat = res['results'][0]['geometry']['location']['lat']
             return long, lat
+
+        print(res['status'])
         return (None, None)
     except Exception:
         return (None, None)
-    
+
 def get_lv03():
-    # Get 
-    index = 0
     ads = session.query(Advertisement) \
                             .options(load_only("id", "longitude", "latitude", "lv03_easting", "lv03_northing")) \
-                            .filter(and_(and_(Advertisement.longitude != None, Advertisement.longitude != 0), Advertisement.longitude != 9999,)) \
+                            .filter(and_(and_(Advertisement.longitude != None, Advertisement.longitude != 0), Advertisement.longitude != 9999)) \
+                            .filter(Advertisement.lv03_easting == None) \
                             .all()
-    for ad in ads:
-        index += 1
+    for i, ad in enumerate(ads):
         url = "{}?easting={}&northing={}&format=json".format(ADMIN_GEO, ad.longitude, ad.latitude)
         try:
             response = requests.get(url)
             if response.status_code != 200:
-                print("Could not get X and Y for addres {}, {}".format(ad.longitude, ad.latitude))
+                print("Could not get X and Y for address {}, {}".format(ad.longitude, ad.latitude))
                 continue
 
             answer = response.json()
             if len(answer) > 0:
                 ad.lv03_easting = answer['easting']
                 ad.lv03_northing = answer['northing']
-                if index % 100 == 0:
-                    print("Still get some data....")
+                if i % 100 == 0:
+                    print("Progress: {}/{}".format(i, len(ads)))
                 session.add(ad)
                 session.commit()
                 time.sleep(1)
             else:
-                print("Could not get X and Y for addres {}, {}".format(ad.longitude, ad.latitude))
+                print("Could not get X and Y for address {}, {}".format(ad.longitude, ad.latitude))
+                continue
+        except Exception:
+            pass
+
+def get_lv03_municipalities():
+    municipalities = session.query(Municipality) \
+                            .options(load_only("id", "long", "lat", "lv03_easting", "lv03_northing")) \
+                            .filter(and_(Municipality.long != None, Municipality.long != 0)) \
+                            .filter(Municipality.lv03_easting == None) \
+                            .all()
+    for i, municipality in enumerate(municipalities):
+        url = "{}?easting={}&northing={}&format=json".format(ADMIN_GEO, municipality.long, municipality.lat)
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                print("Could not get X and Y for address {}, {}".format(municipality.long, municipality.lat))
+                continue
+
+            answer = response.json()
+            if len(answer) > 0:
+                municipality.lv03_easting = answer['easting']
+                municipality.lv03_northing = answer['northing']
+                if i % 100 == 0:
+                    print("Progress: {}/{}".format(i, len(municipalities)))
+                session.add(municipality)
+                session.commit()
+                time.sleep(1)
+            else:
+                print("Could not get X and Y for address {}, {}".format(municipality.long, municipality.lat))
                 continue
         except Exception:
             pass
@@ -96,13 +131,17 @@ def google():
             count -= 1
             ad.longitude, ad.latitude = askGoogle(ad.street, ad.municipalities.zip, ad.municipalities.name)
 
+            if ad.longitude == "OVER_QUERY_LIMIT":
+                print("Hit Google API Limit")
+                return
+
             if not ad.longitude:
-                print("Could not get long and lat for addres {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
+                print("Could not get long and lat for address {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
                 ad.longitude = 9999  # Not found by openstreetmap
                 ad.latitude = 9999
             session.add(ad)
 
-            time.sleep(2)
+            time.sleep(.5)
             session.commit()
             print("STORED AD {} - {} to go".format(ad.id, count))
     except:
@@ -114,7 +153,7 @@ def openstreetmap():
     print("Start fetching data")
     try:
         ads = session.query(Advertisement).join(Advertisement.municipalities).options(
-                Load(Advertisement).load_only("id", "longitude", "latitude", "street"),
+                Load(Advertisement).load_only("id", "longitude", "latitude", "street", "municipality_unparsed"),
                 Load(Municipality).load_only("zip", "name")) \
                 .filter(
                     or_(Advertisement.longitude == None, Advertisement.longitude == 0)) \
@@ -126,12 +165,14 @@ def openstreetmap():
         count = len(ads)
         url = "{}".format(os.environ.get('OPENSTREETMAP_BASE_URL', OPENSTREETMAP_BASE_URL))
         print("BASEURL: {}".format(url))
-        payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
+        payload = {'format': 'json', 'addressdetails': 1}
         for i, ad in enumerate(ads):
             count -= 1
             payload['street'] = ad.street
-            payload['postcode'] = ad.municipalities.zip
-            payload['city'] = ad.municipalities.name
+            payload['postcode'], *city = utils.get_place(ad.municipality_unparsed)
+            payload['city'] = ' '.join(city)
+#            payload['postcode'] = ad.municipalities.zip
+#            payload['city'] = ad.municipalities.name
 
             try:
                 r = requests.get(url, params=payload)
@@ -143,7 +184,7 @@ def openstreetmap():
                 pass
 
             if not ad.longitude:
-                print("Could not get long and lat for addres {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
+                print("Could not get long and lat for address {}, {} {}".format(ad.street, ad.municipalities.zip, ad.municipalities.name))
                 ad.longitude = 8888  # Not found by openstreetmap
                 ad.latitude = 8888
             session.add(ad)
@@ -159,19 +200,21 @@ def openstreetmap():
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Please specify option: [google, open, lv03]")
+        print("Please specify option: [google, osm, lv03, lv03m]")
         sys.exit(1)
     arg = sys.argv[1]
     if arg == "google":
         print("Get data from google")
         google()
 
-    if arg == 'open':
-        print("Get data from openstreetmap")        
+    if arg == 'osm':
+        print("Get data from openstreetmap")
         openstreetmap()
 
     if arg == 'lv03':
-        print("Get lv03 data")        
+        print("Get lv03 data")
         get_lv03()
 
-        
+    if arg == 'lv03m':
+        print("Get lv03 data for municipalities")
+        get_lv03_municipalities()

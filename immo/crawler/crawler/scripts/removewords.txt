@@ -74,6 +74,7 @@ inkl
 dass
 sein
 zugang
+none
 minutes
 minuten
 informationen
