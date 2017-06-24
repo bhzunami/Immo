@@ -102,3 +102,5 @@ immo/crawler/env
 immo/crawler/urls
 immo/scikit/all.csv
 *pkl
+*.png
+*.csv
