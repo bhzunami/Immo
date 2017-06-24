@@ -7,6 +7,11 @@ FIELDS = {
     'Kaufpreis': 'price_brutto',  # immoscout24
     'Preis Garage': 'additional_costs',  # newhome
     'Preis Abstellplatz': 'additional_costs', # newhome
+    'Miete / Monat': 'price_brutto',  # newhome
+    'Nebenkosten / Monat': 'additional_costs',  # newhome
+    'Nettomiete / Monat': 'price_netto',  # newhome
+    'Nettomiete (pro Monat)': 'price_netto',  # immoscout
+    'Bruttomiete (pro Monat)': 'price_brutto',  # immoscout
 
     'Etage': 'floor',     # homegate, urbanhome
     'Stockwerk': 'floor', # newhome, immoscout24
@@ -22,7 +27,7 @@ FIELDS = {
     'Objektart': 'objecttype', # newhome
 
     'Zimmer': 'num_rooms',  # homegate, newhome, urbanhome
-    'Anzahl Zimmer': 'num_rooms',
+    'Anzahl Zimmer': 'num_rooms',  # immoscout
 
     'Wohnfläche': 'living_area',  # homegate, newhome, urbanhome
 

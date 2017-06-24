@@ -78,6 +78,9 @@ class Advertisement(Base):
         self.assign(data, 'longitude')
         self.assign(data, 'latitude')
         self.assign(data, 'quality_label')
+        self.assign(data, 'lv03_easting')
+        self.assign(data, 'lv03_northing')
+        self.assign(data, 'noise_level')
 
         self.crawled_at = self.crawled_at or datetime.datetime.now()
         self.last_seen = self.last_seen or datetime.datetime.now()

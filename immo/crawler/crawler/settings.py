@@ -53,6 +53,7 @@ TELNETCONSOLE_ENABLED = False
 DATABASE_URL = os.environ.get('DATABASE_URL', '12345')
 OPENSTREETMAP_BASE_URL = 'http://nominatim.openstreetmap.org/search/'
 GOOGLE_MAP_API_BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address='
+ADMIN_GEO_BASE_URL = 'http://geodesy.geo.admin.ch/reframe/wgs84tolv03'
 
 # Proxy
 PROXY = os.environ.get('PROXY_URL')
@@ -91,8 +92,10 @@ ITEM_PIPELINES = {
     'crawler.pipelines.objectTypeFinder.ObjectTypeFinderPipeline': 120,
     'crawler.pipelines.duplicateCheck.DuplicateCheckPipeline': 150,
     'crawler.pipelines.tags.TagsPipeline': 160,
+    'crawler.pipelines.coordinates.CoordinatesPipeline': 180,
+    'crawler.pipelines.noise.NoisePipeline': 190,
     'crawler.pipelines.databaseWriter.DatabaseWriterPipeline': 200,
-    #'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
+    # 'crawler.pipelines.jsonWriter.JSONWriterPipeline': 300,
 }
 
 # custom setting for item pipeline in respider.py

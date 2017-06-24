@@ -7,7 +7,7 @@ import os
 import logging
 import requests
 from models import utils
-from ..settings import OPENSTREETMAP_BASE_URL, GOOGLE_MAP_API_BASE_URL
+from ..settings import OPENSTREETMAP_BASE_URL, GOOGLE_MAP_API_BASE_URL, ADMIN_GEO_BASE_URL
 
 
 class CoordinatesPipeline(object):
@@ -16,73 +16,104 @@ class CoordinatesPipeline(object):
     def process_item(self, item, spider):
         """after item is processed
         """
-        url = "{}".format(OPENSTREETMAP_BASE_URL)
-        payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
+        logging.debug("Get coordnates for item")
+        # Initalize default values to return at any time item
+        item['longitude'] = None
+        item['latitude'] = None
+        item['lv03_easting'] = None
+        item['lv03_northing'] = None
 
         # Check if we have a streetname
-        if item.get('street', None) is not None:
-            payload['street'] = item.get('street', None)
-
-        # check if we have a city -> this should be set
-        if item.get('place', None) is not None:
-            payload['postcode'], *city = utils.get_place(item.get('place'))
-            payload['city'] = ' '.join(city)
-
-        # Do GET request and check if answer is ok
-        response = requests.get(url, params=payload)
-        if response.status_code != 200:
-            logging.error("Could not get long and lat for addres %s, %s",
-                          item.get('street', None),
-                          item.get('place', None))
+        if item.get('street', None) is None or item.get('place', None) is None:
+            logging.warn("Address is incomplete to get coordinates")
             return item
 
-        # At the moment always get frist element
-        res = response.json()
-        logging.debug("Answer %s", res)
-        if len(res) > 0:
-            item['longitude'] = res[0]['lon']
-            item['latitude'] = res[0]['lat']
-            logging.debug("Nice found long lat for item %s, %s",
-                          item.get('longitude'),
-                          item.get('latitude'))
-        else:
-            # Check google:
-            item['longitude'], item['latitude'] = self.askGoogle(item.get('street', None), item.get('place', None) )
-            if not item.get('longitude', None):
-                logging.warning("Could not get long or lat for address {}, {} cause answer was 0 [{}]".format(item.get('street', None), item.get('place', None), item.get('url', None)))
+        street = item.get('street')
+        zip, *city = utils.get_place(item.get('place'))
+        city = ' '.join(city)
+        logging.debug("Extract street {}, zip {} and city {}".format(street, zip, city))
+        # 1. First check openstreetmap
+        long, lat = self.get_long_lat_openstreetmap(street, zip, city)
+
+        # If openstreetmap does not find coordinates ask google
+        if long is None or lat is None:
+            logging.warn("Could not find long lat from openstreetmap try google now")
+            long, lat = self.get_long_lat_google(street, zip, city)
+
+            # If google does not have the address it is a wrong address
+            if long is None or lat is None:
+                logging.warn("Longitude and latitude could not be extracted form {}, {} {}".format(street, zip, city))
+                return item
+
+        logging.debug("Found long {}, lat {} for address".format(long, lat))
+        item['longitude'] = long
+        item['latitude'] = lat
+        lv03_easting, lv03_northing = self.get_lv03(long, lat)
+        logging.debug("Get lv03 easting {} and lv03 northing {}".format(lv03_easting, lv03_northing))
+        item['lv03_easting'] = lv03_easting
+        item['lv03_northing'] = lv03_northing
 
         return item
 
 
-    def askGoogle(self, street=None, place=None):
-        if not os.environ.get('GOOGLE_MAP_API_KEY', None):
-            logging.error("Missing Google map api key")
+    def get_long_lat_openstreetmap(self, street=None, zip=None, city=None):
+        url = "{}".format(os.environ.get('OPENSTREETMAP_BASE_URL', OPENSTREETMAP_BASE_URL))
+        payload = {'country': 'ch', 'format': 'json', 'addressdetails': 1}
+        payload['street'] = street
+        payload['postcode'] = zip
+        payload['city'] = city
+        try:
+            response = requests.get(url, params=payload)
+            res = response.json()
+            if len(res) > 0:
+                return (res[0]['lon'], res[0]['lat'])
+
+        except Exception:
             return (None, None)
-
-        if not street and not place:
-            logging.warning("Google is good but can not lookup addresses with no streetname and no place")
-            return (None, None)
-
-        logging.debug("Ask google for coordinates")
-        if not street:
-            address = "{}".format(place)
-        else:
-            address = "{},{}".format(street, place)
-
-        url = "{}{}&key={}".format(GOOGLE_MAP_API_BASE_URL, address, os.environ.get('GOOGLE_MAP_API_KEY', None))
-
-        response = requests.get(url)
-        if response.status_code != 200:
-            return (None, None)
-
-        res = response.json()
-        if len(res['results']) > 0:
-            long = res['results'][0]['geometry']['location']['lng']
-            lat = res['results'][0]['geometry']['location']['lat']
-            return long, lat
-
         return (None, None)
 
+    def get_long_lat_google(self, street=None, zip=None, city=None):
+        if (not os.environ.get('GOOGLE_MAP_API_KEY', None)) or (not street and not zip):
+            logging.warning("Missing API Key or address")
+            return (None, None)
 
+        address = "{},{} {}".format(street, zip, city)
+        url = "{}{}&key={}".format(GOOGLE_MAP_API_BASE_URL,
+                                   address,
+                                   os.environ.get('GOOGLE_MAP_API_KEY'))
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                return (None, None)
+            res = response.json()
+            if res['status'] == "OVER_QUERY_LIMIT":
+                return ("OVER_QUERY_LIMIT", None)
 
+            if res['status'] == "ZERO_RESULTS":
+                return (None, None)
 
+            if len(res['results']) > 0:
+                long = res['results'][0]['geometry']['location']['lng']
+                lat = res['results'][0]['geometry']['location']['lat']
+                return long, lat
+
+            logging.debug(res['status'])
+
+        except Exception:
+            return (None, None)
+        return (None, None)
+
+    def get_lv03(self, long, lat):
+        url = "{}?easting={}&northing={}&format=json".format(ADMIN_GEO_BASE_URL, long, lat)
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                print("Could not get X and Y for address {}, {}".format(long, lat))
+                return (None, None)
+
+            answer = response.json()
+            if len(answer) > 0:
+                return (answer['easting'], answer['northing'])
+        except Exception:
+            return (None, None)
+        return (None, None)

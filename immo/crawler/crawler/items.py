@@ -46,6 +46,9 @@ class Ad(scrapy.Item):
     tags = scrapy.Field(serializer=json.dumps)
     municipality_id = scrapy.Field()  # The municiplaity id
     obtype_id = scrapy.Field()        # The Object type id from the database. The objecttype is the string
+    noise_level = scrapy.Field()      # Noise level
+    lv03_easting = scrapy.Field()      # Swiss coordinates
+    lv03_northing = scrapy.Field()      # Swiss coordinates
 
 
     def __str__(self):

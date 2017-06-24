@@ -30,6 +30,7 @@ class JSONWriterPipeline(object):
     def process_item(self, item, spider):
         """after item is processed
         """
+        del item['raw_data']
         line = json.dumps(dict(item)) + ",\n"
         self.file.write(line.encode())
         self.logger.debug("Crawled {}".format(item.get('object_id')))
