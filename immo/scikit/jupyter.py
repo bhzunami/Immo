@@ -11,13 +11,16 @@ from feature_analysis import FeatureAnalysis
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import chi2, f_regression
 from sklearn.linear_model import LassoLarsCV, Ridge, RidgeCV, LassoCV, Lasso, LinearRegression, LogisticRegression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, make_scorer
 from sklearn import metrics
+from skgarden import MondrianForestRegressor, ExtraTreesRegressor, ExtraTreesQuantileRegressor, RandomForestRegressor, RandomForestQuantileRegressor
+
 from settings import OBJECT_TYPES, MODEL_FOLDER, IMAGE_FOLDER
 import logging
+import xgboost as xgb
 
 
 logging.basicConfig(level=logging.INFO)
@@ -298,9 +301,57 @@ def mape(y_true, y_pred):
 def mdape(y_true, y_pred):
     return np.median(ape(y_true, y_pred))
 
+
 def plot(y_test, y_pred, show=False, plot_name=""):
+    # sort both arrays by y_test
+    y_test, y_pred = zip(*sorted(zip(y_test, y_pred)))
+    y_test = np.asarray(y_test)
+    y_pred = np.asarray(y_pred)
+    
+    markersize = 1
+    
+    fig = plt.figure(figsize=(10, 10))
+    subplots = gen_subplots(fig, 3, 1)
+    
+    ax = next(subplots)    
+    ax.set_xlabel('Actual vs. Predicted values')
+    ax.plot(y_test, 'bo', markersize=markersize, label="Actual")
+    ax.plot(y_pred, 'ro', markersize=markersize, label="Predicted")
+    
+    ax = next(subplots)
+    ax.set_xlabel('Predicted value')
+    ax.set_ylabel('Residuals')
+    ax.plot(y_pred, y_test - y_pred, 'bo', markersize=markersize)
+    ax.plot((np.min(y_pred),np.max(y_pred)), (0,0), 'r-')
+    
+    if show:
+        plt.show()
+    else:
+        plt.savefig("{}/cumulative_prpability_{}.png".format(IMAGE_FOLDER, plot_name))
+    
+
+    fig = plt.figure(figsize=(5, 5))
+    subplots = gen_subplots(fig, 1, 1)
+    ax = next(subplots)
+    ax.set_xlabel('APE')
+    my_ape = ape(y_test, y_pred)
+    ax.hist(my_ape, 100)
+    mape = ape(y_test, y_pred).mean()
+    ax.plot((mape, mape), (0,400), 'r-')
+    
+    mdape = np.median(ape(y_test, y_pred))
+    ax.plot((mdape, mdape), (0,400), 'y-')
+    
+    ax.set_xticklabels(['{:.2%}'.format(x) for x in ax.get_xticks()])
+
+    if show:
+        plt.show()
+    else:
+        plt.savefig("{}/verteilung_der_fehler_{}.png".format(IMAGE_FOLDER, plot_name))
+
+def plot2(y_test, y_pred, show=False, plot_name=""):
      # sort both array by y_test
-    y_test, y_pred = zip(*sorted(zip([x for x in y_test], [x for x in y_pred])))
+    #y_test, y_pred = zip(*sorted(zip([x for x in y_test], [x for x in y_pred])))
     y_test = np.asarray(y_test)
     y_pred = np.asarray(y_pred)
     
@@ -329,10 +380,10 @@ def plot(y_test, y_pred, show=False, plot_name=""):
     my_ape = ape(y_test, y_pred)
     ax.hist(my_ape, 100)
     m = ape(y_test, y_pred).mean()
-    ax.plot((m, m), (0,2000), 'r-')
+    ax.plot((m, m), (0,6000), 'r-')
     
     mm = np.median(ape(y_test, y_pred))
-    ax.plot((mm, mm), (0,2000), 'y-')
+    ax.plot((mm, mm), (0,6000), 'y-')
     ax.set_xticklabels(['{:.2%}'.format(x) for x in ax.get_xticks()])
 
     if show:
@@ -362,8 +413,13 @@ def randomForest():
     sl = SupervisedLearning(ads, cleanup=False)
     X, y = sl.generate_matrix(ads, 'price_brutto_m2')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-    model = RandomForestRegressor()
+    #model = RandomForestRegressor()
+    model = RandomForestRegressor(n_estimators=800, max_features="auto",
+                                  n_jobs=4, min_samples_leaf=1,
+                                  max_depth=None)
+    print("FIT")
     model.fit(X_train, y_train)
+    print("predict  ")
     y_predicted = model.predict(X_test)
     statistics(y_test, y_predicted)
     plot(y_test, y_predicted, show=False, plot_name="random_forest")
@@ -495,10 +551,46 @@ def lasso():
     statistics(y_test, y_pred)
     plot(y_test, y_pred, show=False, plot_name="lasso")
 
+def xgboost():
+    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
+    sl = SupervisedLearning(ads, cleanup=False)
+    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
+    dtrain = xgb.DMatrix(X_train, label=y_train)
+    dtest = xgb.DMatrix(X_test)
+
+    params = {"max_depth":100, "eta":0.1}
+    model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
+    model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
+    plt.show()
+
+    model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
+    model_xgb.fit(X_train, y_train)
+    y_pred = model_xgb.predict(X_test)
+    statistics(y_test, y_pred)
+    plot(y_test, y_pred, show=False, plot_name="xgboost")
+
+def garden():
+    ads = pd.read_csv('clean_all.csv', index_col=0, engine='c', dtype=OBJECT_TYPES)
+    sl = SupervisedLearning(ads, cleanup=False)
+    X, y = sl.generate_matrix(ads, 'price_brutto_m2')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+    # ExtraTreesRegressor, RandomForestRegressor, RandomForestQuantileRegressor
+    mfr = MondrianForestRegressor(n_estimators=100)
+    mfr.fit(X_train, y_train)
+    y_pred = mfr.predict(X_test)
+    statistics(y_test, y_pred)
+    plot(y_test, y_pred, show=True, plot_name="MondrianForest")
+
+
+def readCSV(file):
+    ads = pd.read_csv(file, index_col=0, engine='c', dtype=OBJECT_TYPES)
+    print("READED")
+    
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)
-
+    readCSV('all_transformed.csv')
     # create a file handler
     handler = logging.FileHandler('jupyter.log')
     handler.setLevel(logging.INFO)
@@ -512,16 +604,20 @@ if __name__ == "__main__":
 
     #main()
     #feature()
-    logger.info("="*20)
-    logger.info("Running Linear Regression")
-    linearRegression()
-    logger.info("="*20)
-    logger.info("Running Linear Regression with Ridge")
-    ridge()
-    logger.info("="*20)
-    logger.info("Running Linear Regression with Lasso")
-    lasso()
-    logger.info("="*20)
-    logger.info("Running Linear Regression with RandomForest")
-    randomForest()
+    # logger.info("="*20)
+    # logger.info("Running Linear Regression")
+    # linearRegression()
+    #logger.info("="*20)
+    #logger.info("Running Linear Regression with Ridge")
+    #ridge()
+    # logger.info("="*20)
+    # logger.info("Running Linear Regression with Lasso")
+    # lasso()
+    # logger.info("="*20)
+    # logger.info("Running Linear Regression with RandomForest")
+    # randomForest()
+
+    #xgboost()
+    #
+    #garden()
     

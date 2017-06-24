@@ -1,3 +1,10 @@
+"""
+https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/
+
+https://www.analyticsvidhya.com/blog/2015/06/tuning-random-forest-model/
+
+https://www.analyticsvidhya.com/blog/2016/04/complete-tutorial-tree-based-modeling-scratch-in-python/
+"""
 import matplotlib
 matplotlib.use('Agg')
 import os
@@ -157,7 +164,8 @@ class TrainPipeline(Pipeline):
 
 
     def extraTreeRegression(self, ads):
-        filterd_ads = ads.drop(['characteristics', 'description'], axis=1)
+        remove = ['characteristics', 'description']
+        filterd_ads = ads.drop(remove, axis=1)
         logging.debug("Find best estimator for ExtraTreesRegressor")
         X, y = generate_matrix(filterd_ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)

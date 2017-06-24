@@ -48,6 +48,8 @@ class Pipeline():
         self.model_folder = os.path.abspath(os.path.join(directory, settings['model_folder']))
 
     def simple_stats(sefl, title):
+        """Show how many NaN has one Feature and how many we can use
+        """
         def run(ads):
             total_amount_of_data = ads.shape[0]
             logging.info("{}".format(title))
@@ -101,14 +103,18 @@ class Pipeline():
         return ads
 
     def transform_misc_living_area(self, ads):
-        ads['price_brutto_m2'] = ads['price_brutto'] / ads['living_area']
+        # ads['price_brutto_m2'] = ads['price_brutto'] / ads['living_area']
         ads['avg_room_area'] = ads['living_area'] / ads['num_rooms']
         return ads
 
     def transform_build_year(self, ads):
+        """Drop all houses which are build 2030 or later
+        """
         return ads.drop(ads.index[np.where(ads['build_year'] > 2030)[0]])
 
     def transform_build_renovation(self, ads):
+        """Set was_renovated to 1 if we have a date in renovation_year
+        """
         ads['was_renovated'] = ads.apply(lambda row: not np.isnan(row['last_renovation_year']), axis=1)
 
         def last_const(row):
@@ -124,6 +130,8 @@ class Pipeline():
         return ads.drop(['last_renovation_year'], axis=1)
 
     def transform_floor(self, ads):
+        """if type is house there is always floor 0
+        """
         def lambdarow(row):
             if not np.isnan(row['floor']):
                 return row['floor']
@@ -137,18 +145,29 @@ class Pipeline():
         return ads
 
     def transform_num_rooms(self, ads):
+        """remove all elements where num_rooms is NaN
+        """
         return ads.dropna(subset=['num_rooms'])
 
     def drop_floor(self, ads):
+        """Remove floor
+        """
         return ads.drop(['floor'], axis=1)
 
     def transform_living_area(self, ads):
+        """remove ad area where living area is NaN
+        """
         return ads.dropna(subset=['living_area'])
 
     def transfrom_description(self, ads):
+        """remove ad where description is NaN
+        """
         return ads.dropna(subset=['description'])
 
     def transform_onehot(self, ads):
+        """Build one hot encoding for all columns with string as value
+        """
+        logging.debug("Features: {}".format(ads.keys()))
         ads = pd.get_dummies(ads, columns=['canton_id', 'ogroup',
                                            'otype', 'tourism_region_id', 'district_id',
                                            'mountain_region_id', 'job_market_region_id',
@@ -157,6 +176,8 @@ class Pipeline():
         return ads
 
     def transform_tags(self, ads):
+        """Transform tags
+        """
         with open(os.path.join(self.directory, '../crawler/taglist.txt')) as f:
             search_words = set(["tags_" + x.split(':')[0] for x in f.read().splitlines()])
 
@@ -174,7 +195,10 @@ class Pipeline():
         return ads.drop(['tags'], axis=1).merge(tag_columns, left_index=True, right_index=True)
 
 
-    def predict_living_area(self, ads):    
+    def predict_living_area(self, ads):   
+        """If living area is missing try to predict one
+        and set the predicted flag to 1
+        """ 
         try:
             model = joblib.load('{}/living_area.pkl'.format(self.model_folder))
         except FileNotFoundError:
@@ -192,6 +216,9 @@ class Pipeline():
         return ads
 
     def outlier_detection(self, ads):
+        """Detect outliers we do not want in our training phase
+        The outlier model must be trained first
+        """
         meshgrid = {
             'build_year': np.meshgrid(np.linspace(0, max(ads['build_year']), 400), 
                                       np.linspace(0, max(ads['price_brutto']), 1000)),
@@ -225,6 +252,8 @@ class Pipeline():
         return ads
 
     def transform_features(self, ads):
+        """Transfrom features to more global one
+        """
         # Merge some Features:
         ads['bath'] = np.where((ads['tags_badewanne'] == 1) |
                                (ads['tags_badezimmer'] == 1) |

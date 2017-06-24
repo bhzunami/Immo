@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-
+http://bbengfort.github.io/tutorials/2016/05/19/text-classification-nltk-sckit-learn.html
+https://www.kaggle.com/c/word2vec-nlp-tutorial/details/part-1-for-beginners-bag-of-words
 """
 import matplotlib
 matplotlib.use('Agg')
