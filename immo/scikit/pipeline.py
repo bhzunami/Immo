@@ -156,7 +156,7 @@ class Pipeline():
         """Build one hot encoding for all columns with string as value
         """
         logging.debug("Features: {}".format(ads.keys()))
-        ads = pd.get_dummies(ads, columns=self.settings.one_hot_columns)
+        ads = pd.get_dummies(ads, columns=self.settings.get('one_hot_columns'))
         return ads
 
     def transform_tags(self, ads):
