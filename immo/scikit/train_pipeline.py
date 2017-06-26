@@ -66,9 +66,8 @@ class TrainPipeline(Pipeline):
             self.train_outlier_detection,
             self.outlier_detection,
             #self.transform_description,
-            #self.train_living_area,
+            self.train_living_area,
             self.predict_living_area,
-            #self.transform_desc,
             self.transform_misc_living_area,
             self.train_extraReeRegression]
 
