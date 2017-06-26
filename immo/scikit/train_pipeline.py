@@ -32,6 +32,18 @@ from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_
 RNG = np.random.RandomState(42)
 from pipeline import Pipeline
 
+def detect_language(text):
+    """ detect the language by the text where 
+    the most stopwords for a language are found
+    """
+    languages_ratios = {}
+    tokens = nltk.wordpunct_tokenize(text)
+    words_set = set([word.lower() for word in tokens])
+    for language in ['german', 'french', 'italian']:
+        stopwords_set = set(stopwords.words(language))
+        languages_ratios[language] = len(words_set.intersection(stopwords_set)) # language "score"
+
+    return max(languages_ratios, key=languages_ratios.get)
 
 class TrainPipeline(Pipeline):
     def __init__(self, goal, settings, directory):
@@ -48,17 +60,38 @@ class TrainPipeline(Pipeline):
             self.transform_living_area,
             self.drop_floor,
             self.simple_stats('After Transformation'),
+            #self.transform_description,
             self.transform_tags,
             self.transform_onehot,
             self.transform_features,
-            #self.train_outlier_detection,
+            self.train_outlier_detection,
             self.outlier_detection,
             #self.train_living_area,
             self.predict_living_area,
             #self.transform_desc,
-            #self.transform_misc_living_area,
+            self.transform_misc_living_area,
             self.extraTreeRegression]
 
+
+    def transform_description(self, ads):
+        pdb.set_trace()
+
+        def stemm_words(row):
+            language = detect_language(row.description)
+            #letters_only = re.sub("[^a-z0-9üäöèéàêâ]", " ", str(row.desc.lower()))
+            letters_only = row.description.split()
+            stops = set(json.load(open('{}_stop_words.json'.format(language))))
+            #stops = set(stopwords.words(language))
+            meaningful_words = [w for w in letters_only if not w in stops]
+            stemmer = SnowballStemmer(language)
+            stemmed_words = [stemmer.stem(w) for w in meaningful_words]
+            return " ".join(stemmed_words)
+
+        ads['desc'] = ads.apply(stemm_words, axis=1)
+        return ads
+
+
+        return ads
     def train_living_area(self, ads):
         filterd_ads = ads.dropna(subset=['living_area'])
         filterd_ads = filterd_ads.drop(['characteristics', 'price_brutto', 'description'], axis=1)

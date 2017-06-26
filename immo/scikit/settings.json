@@ -22,5 +22,17 @@
         "estimator": 100,
         "limit": 101,
         "step": 100
-    }
+    },
+    "one_hot_columns": [
+        "canton_id",
+        "ogroup",
+        "otype",
+        "tourism_region_id",
+        "district_id",
+        "mountain_region_id",
+        "job_market_region_id",
+        "agglomeration_id",
+        "metropole_region_id",
+        "municipality"
+    ]
 }

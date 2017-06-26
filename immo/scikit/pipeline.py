@@ -5,6 +5,7 @@ import pdb
 import logging
 import json
 import argparse
+import datetime
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -24,19 +25,6 @@ from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_
 
 RNG = np.random.RandomState(42)
 
-
-def detect_language(text):
-    """ detect the language by the text where 
-    the most stopwords for a language are found
-    """
-    languages_ratios = {}
-    tokens = nltk.wordpunct_tokenize(text)
-    words_set = set([word.lower() for word in tokens])
-    for language in ['german', 'french', 'italian']:
-        stopwords_set = set(stopwords.words(language))
-        languages_ratios[language] = len(words_set.intersection(stopwords_set)) # language "score"
-
-    return max(languages_ratios, key=languages_ratios.get)
 
 class Pipeline():
 
@@ -99,11 +87,10 @@ class Pipeline():
         """ replace 0 values into np.nan for statistic
         """
         ads.loc[ads.living_area == 0, 'living_area'] = np.nan
-        ads.loc[ads.living_area == 0, 'num_rooms'] = np.nan
+        ads.loc[ads.num_rooms == 0, 'num_rooms'] = np.nan
         return ads
 
     def transform_misc_living_area(self, ads):
-        # ads['price_brutto_m2'] = ads['price_brutto'] / ads['living_area']
         ads['avg_room_area'] = ads['living_area'] / ads['num_rooms']
         return ads
 
@@ -118,12 +105,13 @@ class Pipeline():
         ads['was_renovated'] = ads.apply(lambda row: not np.isnan(row['last_renovation_year']), axis=1)
 
         def last_const(row):
-            if row['build_year'] >= 2017 or row['last_renovation_year'] >= 2017:
+            current_year = datetime.date.today().year
+            if row['build_year'] >= current_year or row['last_renovation_year'] >= current_year:
                 return 0
             elif np.isnan(row['last_renovation_year']):
-                return 2017 - row['build_year']
+                return current_year - row['build_year']
             else:
-                return 2017 - row['last_renovation_year']
+                return current_year - row['last_renovation_year']
 
         ads['last_construction'] = ads.apply(last_const, axis=1)
 
@@ -168,11 +156,7 @@ class Pipeline():
         """Build one hot encoding for all columns with string as value
         """
         logging.debug("Features: {}".format(ads.keys()))
-        ads = pd.get_dummies(ads, columns=['canton_id', 'ogroup',
-                                           'otype', 'tourism_region_id', 'district_id',
-                                           'mountain_region_id', 'job_market_region_id',
-                                           'agglomeration_id', 'metropole_region_id',
-                                           'municipality'])
+        ads = pd.get_dummies(ads, columns=self.settings.one_hot_columns)
         return ads
 
     def transform_tags(self, ads):
@@ -195,10 +179,10 @@ class Pipeline():
         return ads.drop(['tags'], axis=1).merge(tag_columns, left_index=True, right_index=True)
 
 
-    def predict_living_area(self, ads):   
+    def predict_living_area(self, ads):
         """If living area is missing try to predict one
         and set the predicted flag to 1
-        """ 
+        """
         try:
             model = joblib.load('{}/living_area.pkl'.format(self.model_folder))
         except FileNotFoundError:
@@ -234,22 +218,6 @@ class Pipeline():
         anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
         return anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
                                                   meshgrid, self.goal)
-
-
-    def transform_desc(self, ads):
-
-        def stemm_words(row):
-            language = detect_language(row.description)
-            #letters_only = re.sub("[^a-z0-9üäöèéàêâ]", " ", str(row.desc.lower()))
-            letters_only = row.description.split()
-            stops = set(stopwords.words(language))
-            meaningful_words = [w for w in letters_only if not w in stops]
-            stemmer = SnowballStemmer(language)
-            stemmed_words = [stemmer.stem(w) for w in meaningful_words]
-            return " ".join(stemmed_words)
-
-        ads['desc'] = ads.apply(stemm_words, axis=1)
-        return ads
 
     def transform_features(self, ads):
         """Transfrom features to more global one
