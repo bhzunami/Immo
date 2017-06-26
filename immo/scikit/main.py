@@ -14,11 +14,12 @@ import numpy as np
 import pandas as pd
 
 from train_pipeline import TrainPipeline
+from predict_pipeline import PredictPipeline
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 settings = json.load(open('{}/settings.json'.format(DIRECTORY)))
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s - %(message)s')
 
 parser = argparse.ArgumentParser(description=__doc__)
 # Some default config arguments
@@ -46,9 +47,12 @@ def main(args):
     
     if args.train:
         tp = TrainPipeline(args.goal, settings, DIRECTORY)
-        for f in tp.pipeline:
-            logging.info("Apply transformation: {}".format(f.__name__))
-            ads = f(ads)
+    if args.predict:
+        tp = PredictPipeline(args.goal, settings, DIRECTORY)
+
+    for f in tp.pipeline:
+        logging.info("Apply transformation: {}".format(f.__name__))
+        ads = f(ads)
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)

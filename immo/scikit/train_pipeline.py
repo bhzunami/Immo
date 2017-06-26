@@ -50,27 +50,27 @@ class TrainPipeline(Pipeline):
         super().__init__(goal, settings, directory)
         self.pipeline = [
             self.simple_stats('Before Transformation'),
+            self.replace_zeros_with_nan,
             self.transform_build_year,
             self.transform_build_renovation,
-            self.replace_zeros_with_nan,
             self.transform_noise_level,
-            self.transform_floor,
+            # self.transform_floor,  Floor will be droped
+            self.drop_floor,
             self.transform_num_rooms,
             self.transfrom_description,
             self.transform_living_area,
-            self.drop_floor,
             self.simple_stats('After Transformation'),
-            #self.transform_description,
             self.transform_tags,
-            self.transform_onehot,
             self.transform_features,
+            self.transform_onehot,
             self.train_outlier_detection,
             self.outlier_detection,
+            #self.transform_description,
             #self.train_living_area,
             self.predict_living_area,
             #self.transform_desc,
             self.transform_misc_living_area,
-            self.extraTreeRegression]
+            self.train_extraReeRegression]
 
 
     def transform_description(self, ads):
@@ -176,9 +176,9 @@ class TrainPipeline(Pipeline):
             # Plot the standard derivation for this feature
             fig, ax1 = plt.subplots()
             ax1.set_title('{}'.format(feature))
-            ax1.plot(list(np.arange(0.0, self.settings['anomaly_detection']['limit'],
-                                    self.settings['anomaly_detection']['step'])),
-                    std_percent, c='r')
+            ax1.plot(list(map(lambda x: x*100, np.arange(0.0, self.settings['anomaly_detection']['limit'],
+                                    self.settings['anomaly_detection']['step']))),
+                     std_percent, c='r')
             ax1.set_ylabel('Reduction of STD deviation in %')
             ax1.set_xlabel('% removed of {}'.format(feature))
             plt.savefig('{}/{}_std.png'.format(self.image_folder, feature))
@@ -195,16 +195,36 @@ class TrainPipeline(Pipeline):
             f.write(json.dumps(self.settings))
         return ads
 
-
-    def extraTreeRegression(self, ads):
+    def train_extraReeRegression(self, ads):
         remove = ['characteristics', 'description']
         filterd_ads = ads.drop(remove, axis=1)
-        logging.debug("Find best estimator for ExtraTreesRegressor")
         X, y = generate_matrix(filterd_ads, 'price_brutto')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-        model = ExtraTreesRegressor(n_estimators=700)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        train_statistics(y_test, y_pred, title="ExtraTree")
-        plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree")
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        best_md = 100
+        best_estimator = None
+        model = ExtraTreesRegressor(n_estimators=100, warm_start=True, n_jobs=-1, random_state=RNG)
+        logging.debug("Find best estimator for ExtraTreesRegressor")
+        for estimator in range(100,
+                               self.settings['extraTreeRegression']['limit'],
+                               self.settings['extraTreeRegression']['step']):
+            logging.debug("Estimator: {}".format(estimator))
+            model.n_estimators = estimator
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            md = mdape(y_test, y_pred)
+            # Wenn altes md grösser ist als neues md haben wir ein kleiners md somit bessers Ergebnis
+            if best_md > md:
+                best_estimator = estimator
+                best_md = md
+                logging.info("Better result with estimator: {}".format(estimator))
+                train_statistics(y_test, y_pred, title="ExtraTree_train")
+                plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train")
+                # Store model
+                joblib.dump(model, '{}/extraTree.pkl'.format(self.model_folder))
+
+        self.settings['extraTreeRegression']['estimator'] = best_estimator
+        # Save best c for all features
+        with open('{}/settings.json'.format(self.directory), 'w') as f:
+            f.write(json.dumps(self.settings))
         return ads
+
