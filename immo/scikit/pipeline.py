@@ -71,6 +71,16 @@ class Pipeline():
 
         return run
 
+    def export(self, ads):
+        logging.info("Export ads")
+        ads.to_csv('ready_to_predict.csv', header=True, encoding='utf-8')
+        return ads
+
+    def import_csv(self, ads):
+        logging.info("Import ads")
+        return pd.read_csv('ready_to_predict.csv', index_col=0, engine='c')
+
+
     def transform_noise_level(self, ads):
         """ If we have no nose_level at the address
         we use the municipality noise_level
@@ -288,7 +298,7 @@ class Pipeline():
         filterd_ads = ads.drop(remove, axis=1)
         X, y = generate_matrix(filterd_ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        logging.info("Size of train: {}, size of test: {}".format(X_train.shape, X_test.shape()))
+        logging.info("Size of train: {}, size of test: {}".format(X_train.shape, X_test.shape))
         try:
             model = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
         except FileNotFoundError:
@@ -296,6 +306,7 @@ class Pipeline():
             raise Exception("Missing trained model")
 
         # Check quality
+        logging.info("Predict values")
         y_pred = model.predict(X_test)
         train_statistics(y_test, y_pred, title="ExtraTree")
         plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree")

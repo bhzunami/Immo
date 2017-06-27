@@ -14,17 +14,16 @@ class AnomalyDetection(object):
         self.model_folder = model_folder
 
     def plot_isolation_forest(self, data, cls_, x, y, outlierIdx, elements):
-        fig = plt.figure(figsize=(40, 30))
         for i, feature in enumerate(elements):
+            fig, ax = plt.subplots()
             Z = cls_[feature].decision_function(np.c_[x[feature].ravel(), y[feature].ravel()])
             Z = Z.reshape(x[feature].shape)
-
-            ax = fig.add_subplot(3, 2, i+1)
+            ax.set_title('Price - {}'.format(feature.replace("_", " ")))
             ax.set_ylabel('Price')
-            ax.set_title('Price - {}'.format(feature))
+            ax.set_xlabel('{}'.format(feature.replace("_", " ")))
 
             ax.contourf(x[feature],
-                        y[feature], Z, 
+                        y[feature], Z,
                         cmap=plt.cm.Blues_r)
 
             a1 = ax.scatter(data[feature][np.where(outlierIdx[feature] == -1)][:, 0].tolist(),
@@ -35,13 +34,15 @@ class AnomalyDetection(object):
                             data[feature][np.where(outlierIdx[feature] == 1)][:, 1].tolist(),
                             c='green', s=2)
 
+            ax.set_xlim((min(x[feature][0]), max(x[feature][0])))
+            ax.set_ylim(0, 35e6)
             ax.legend([a1, a2],
                       ["Outlier", "Accepted values"],
                       loc="upper left")
 
-        plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
-        plt.savefig("{}/IsolationForest.png".format(self.image_folder))
-        plt.close()
+            #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+            plt.savefig("{}/{}_IsolationForest.png".format(self.image_folder, feature))
+            plt.close()
 
     def isolation_forest(self,
                          settings,

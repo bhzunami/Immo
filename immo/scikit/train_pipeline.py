@@ -65,10 +65,10 @@ class TrainPipeline(Pipeline):
             self.transform_onehot,
             self.train_outlier_detection,
             self.outlier_detection,
-            #self.transform_description,
             self.train_living_area,
             self.predict_living_area,
             self.transform_misc_living_area,
+            self.import_csv,
             self.train_extraReeRegression]
 
 
@@ -97,7 +97,7 @@ class TrainPipeline(Pipeline):
         logging.debug("Find best estimator for ExtraTreesRegressor")
         X, y = generate_matrix(filterd_ads, 'living_area')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
-        best_md = 100
+        best_md = None
         best_estimator = None
         # Use Warm start to use calculated trees
         model = ExtraTreesRegressor(n_estimators=100, warm_start=True, n_jobs=-1, random_state=RNG)
@@ -108,8 +108,8 @@ class TrainPipeline(Pipeline):
             model.n_estimators = estimator
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
-            md = mdape(y_test, y_pred)
-            if best_md > md:  # Wenn altes md grösser ist als neues md
+            md = mape(y_test, y_pred)
+            if best_md is None or best_md > md:  # Wenn altes md grösser ist als neues md
                 best_estimator = estimator
                 best_md = md
                 logging.info("Better result with estimator: {}".format(estimator))
@@ -141,6 +141,7 @@ class TrainPipeline(Pipeline):
             # We are in train phase so best_c should always be 0
             best_c, self.settings['anomaly_detection'][feature] = 0, 0
             last_model, cls_ = None, None
+            chosen_std_percent = 0
 
             # Run isolation forest for diffrent contamination
             for c in np.arange(0.01, self.settings['anomaly_detection']['limit'],
@@ -165,27 +166,40 @@ class TrainPipeline(Pipeline):
                 if diff < 2.5 and best_c == 0:
                     # We do not need this c, we need the last c - step
                     best_c = np.around(c - self.settings['anomaly_detection']['step'], 2)
+                    chosen_std_percent = std_percent[-2]
                     joblib.dump(last_model, '{}/isolation_forest_{}.pkl'.format(self.model_folder, feature))
                 difference.append(diff)
 
             # Store best c in our settings to use it later
             self.settings['anomaly_detection'][feature] = best_c if best_c > 0 else 0 + self.settings['anomaly_detection']['step']
+
             # Plot stuff
-            logging.info("Best C for feature {}: {}".format(feature, best_c))
+            logging.info("Best C for feature {}: {} chosen_std: {}".format(feature, best_c, chosen_std_percent))
             # Plot the standard derivation for this feature
             fig, ax1 = plt.subplots()
-            ax1.set_title('{}'.format(feature))
+            ax1.set_title('Reduction of σ for feature {}'.format(feature.replace("_", " ")))
             ax1.plot(list(map(lambda x: x*100, np.arange(0.0, self.settings['anomaly_detection']['limit'],
                                     self.settings['anomaly_detection']['step']))),
                      std_percent, c='r')
-            ax1.set_ylabel('Reduction of STD deviation in %')
-            ax1.set_xlabel('% removed of {}'.format(feature))
+            ax1.set_ylabel('Decline of σ in %')
+            ax1.set_xlabel('% removed of {} outliers'.format(feature.replace("_", " ")))
+            # Draw lines to choosen c
+            ax1.plot([best_c*100, best_c*100], [40, chosen_std_percent], linewidth=1, color='b', linestyle='--')
+            ax1.plot([0, best_c*100], [chosen_std_percent, chosen_std_percent], linewidth=1, color='b', linestyle='--')
+
+            ax1.set_xlim([0, 10])
+            ax1.set_ylim([40, 100])
             plt.savefig('{}/{}_std.png'.format(self.image_folder, feature))
             plt.close()
 
             # Plot the difference between the standard derivation
-            plt.plot(list(np.arange(0.0, self.settings['anomaly_detection']['limit'],
+            fig, ax1 = plt.subplots()
+            ax1.set_title('Difference of σ from previous σ for feature: {}'.format(feature.replace("_", " ")))
+            ax1.plot(list(np.arange(0.0, self.settings['anomaly_detection']['limit'],
                                     self.settings['anomaly_detection']['step'])), difference, c='r')
+
+            ax1.set_ylabel('% decline of σ to previous σ')
+            ax1.set_xlabel('% removed of {} outliers'.format(feature.replace("_", " ")))
             plt.savefig('{}/{}_diff_of_std.png'.format(self.image_folder, feature))
             plt.close()
 
@@ -199,7 +213,7 @@ class TrainPipeline(Pipeline):
         filterd_ads = ads.drop(remove, axis=1)
         X, y = generate_matrix(filterd_ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        best_md = 100
+        best_md = None
         best_estimator = None
         model = ExtraTreesRegressor(n_estimators=100, warm_start=True, n_jobs=-1, random_state=RNG)
         logging.debug("Find best estimator for ExtraTreesRegressor")
@@ -210,9 +224,9 @@ class TrainPipeline(Pipeline):
             model.n_estimators = estimator
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
-            md = mdape(y_test, y_pred)
+            md = mape(y_test, y_pred)
             # Wenn altes md grösser ist als neues md haben wir ein kleiners md somit bessers Ergebnis
-            if best_md > md:
+            if best_md is None or best_md > md:
                 best_estimator = estimator
                 best_md = md
                 logging.info("Better result with estimator: {}".format(estimator))

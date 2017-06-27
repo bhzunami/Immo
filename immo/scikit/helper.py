@@ -5,6 +5,7 @@ from sklearn import metrics
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import pdb
 
 def generate_matrix(df, goal):
     X = df.drop([goal], axis=1)
@@ -12,7 +13,7 @@ def generate_matrix(df, goal):
     return X, y
 
 def ape(y_test, y_pred):
-    return np.abs(y_test - y_pred) / y_test
+    return np.abs((y_test - y_pred) / y_test)
 
 def mape(y_test, y_pred):
     return ape(y_test, y_pred).mean()
