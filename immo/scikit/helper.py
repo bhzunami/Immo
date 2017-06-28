@@ -1,5 +1,4 @@
 import matplotlib
-matplotlib.use('Agg')
 import logging
 from sklearn import metrics
 import pandas as pd

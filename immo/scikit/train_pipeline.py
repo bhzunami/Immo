@@ -5,15 +5,13 @@ https://www.analyticsvidhya.com/blog/2015/06/tuning-random-forest-model/
 
 https://www.analyticsvidhya.com/blog/2016/04/complete-tutorial-tree-based-modeling-scratch-in-python/
 """
-import matplotlib
-matplotlib.use('Agg')
 import os
 import pdb
 import logging
 import json
 import argparse
 import numpy as np
-import seaborn as sns
+#import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 import ast
@@ -68,7 +66,6 @@ class TrainPipeline(Pipeline):
             self.train_living_area,
             self.predict_living_area,
             self.transform_misc_living_area,
-            self.import_csv,
             self.train_extraReeRegression]
 
 
@@ -177,18 +174,19 @@ class TrainPipeline(Pipeline):
             logging.info("Best C for feature {}: {} chosen_std: {}".format(feature, best_c, chosen_std_percent))
             # Plot the standard derivation for this feature
             fig, ax1 = plt.subplots()
-            ax1.set_title('Reduction of σ for feature {}'.format(feature.replace("_", " ")))
-            ax1.plot(list(map(lambda x: x*100, np.arange(0.0, self.settings['anomaly_detection']['limit'],
+            plt.title('Reduction of σ for feature {}'.format(feature.replace("_", " ")))
+            plt.plot(list(map(lambda x: x*100, np.arange(0.0, self.settings['anomaly_detection']['limit'],
                                     self.settings['anomaly_detection']['step']))),
                      std_percent, c='r')
-            ax1.set_ylabel('Decline of σ in %')
-            ax1.set_xlabel('% removed of {} outliers'.format(feature.replace("_", " ")))
+            plt.ylabel('Decline of σ in %')
+            plt.xlabel('% removed of {} outliers'.format(feature.replace("_", " ")))
             # Draw lines to choosen c
-            ax1.plot([best_c*100, best_c*100], [40, chosen_std_percent], linewidth=1, color='b', linestyle='--')
-            ax1.plot([0, best_c*100], [chosen_std_percent, chosen_std_percent], linewidth=1, color='b', linestyle='--')
+            plt.plot([best_c*100, best_c*100], [40, chosen_std_percent], linewidth=1, color='b', linestyle='--')
+            plt.plot([0, best_c*100], [chosen_std_percent, chosen_std_percent], linewidth=1, color='b', linestyle='--')
 
             ax1.set_xlim([0, 10])
-            ax1.set_ylim([40, 100])
+            ax1.set_ylim([35, 100])
+            plt.axis('tight')
             plt.savefig('{}/{}_std.png'.format(self.image_folder, feature))
             plt.close()
 

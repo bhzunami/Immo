@@ -8,40 +8,37 @@ import logging
 
 class AnomalyDetection(object):
 
-    def __init__(self, data, image_folder, model_folder):
+    def __init__(self, data, image_folder, model_folder, goal='price_brutto'):
         self.data = data
+        self.goal = goal
         self.image_folder = image_folder
         self.model_folder = model_folder
 
     def plot_isolation_forest(self, data, cls_, x, y, outlierIdx, elements):
         for i, feature in enumerate(elements):
-            fig, ax = plt.subplots()
             Z = cls_[feature].decision_function(np.c_[x[feature].ravel(), y[feature].ravel()])
             Z = Z.reshape(x[feature].shape)
-            ax.set_title('Price - {}'.format(feature.replace("_", " ")))
-            ax.set_ylabel('Price')
-            ax.set_xlabel('{}'.format(feature.replace("_", " ")))
+            plt.contourf(x[feature],
+                         y[feature], Z,
+                         cmap=plt.cm.Blues_r)
 
-            ax.contourf(x[feature],
-                        y[feature], Z,
-                        cmap=plt.cm.Blues_r)
+            b1 = plt.scatter(data[feature][np.where(outlierIdx[feature] == -1)][:, 0].tolist(),
+                             data[feature][np.where(outlierIdx[feature] == -1)][:, 1].tolist(),
+                             c='red', s=2)
 
-            a1 = ax.scatter(data[feature][np.where(outlierIdx[feature] == -1)][:, 0].tolist(),
-                            data[feature][np.where(outlierIdx[feature] == -1)][:, 1].tolist(),
-                            c='red', s=2)
+            b2 = plt.scatter(data[feature][np.where(outlierIdx[feature] == 1)][:, 0].tolist(),
+                             data[feature][np.where(outlierIdx[feature] == 1)][:, 1].tolist(),
+                             c='green', s=2)
 
-            a2 = ax.scatter(data[feature][np.where(outlierIdx[feature] == 1)][:, 0].tolist(),
-                            data[feature][np.where(outlierIdx[feature] == 1)][:, 1].tolist(),
-                            c='green', s=2)
+            plt.title('Price - {}'.format(feature.replace("_", " ")))
+            plt.ylabel('Price')
+            plt.xlabel('{}'.format(feature.replace("_", " ")))
+            plt.axis('tight')
 
-            ax.set_xlim((min(x[feature][0]), max(x[feature][0])))
-            ax.set_ylim(0, 35e6)
-            ax.legend([a1, a2],
-                      ["Outlier", "Accepted values"],
-                      loc="upper left")
-
-            #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
-            plt.savefig("{}/{}_IsolationForest.png".format(self.image_folder, feature))
+            plt.xlim((min(x[feature][0]), max(x[feature][0])))
+            plt.ylim(0, max(self.data[self.goal]))
+            plt.legend([b1, b2], ["Outlier", "Accepted values"], loc="upper left", frameon=True)
+            plt.savefig("{}/{}_IsolationForest.png".format(self.image_folder, feature), transparent=True)
             plt.close()
 
     def isolation_forest(self,

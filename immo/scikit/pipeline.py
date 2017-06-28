@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
 import os
 import pdb
 import logging
@@ -292,13 +290,14 @@ class Pipeline():
 
         return ads.drop(drop_features, axis=1)
 
+    def delete_all_nan(self, ads):
+        return ads.dropna()
+
 
     def extraTreeRegression(self, ads):
         remove = ['characteristics', 'description']
         filterd_ads = ads.drop(remove, axis=1)
         X, y = generate_matrix(filterd_ads, 'price_brutto')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        logging.info("Size of train: {}, size of test: {}".format(X_train.shape, X_test.shape))
         try:
             model = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
         except FileNotFoundError:
@@ -307,7 +306,7 @@ class Pipeline():
 
         # Check quality
         logging.info("Predict values")
-        y_pred = model.predict(X_test)
-        train_statistics(y_test, y_pred, title="ExtraTree")
-        plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree")
+        y_pred = model.predict(X)
+        train_statistics(y, y_pred, title="ExtraTree")
+        plot(y, y_pred, self.image_folder, show=False, title="ExtraTree")
         return ads
