@@ -5,6 +5,7 @@ Send noise level for ad
 import logging
 import numpy as np
 from osgeo import gdal
+from models.utils import get_float
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,13 @@ class NoisePipeline(object):
 
         num_pix = 15
 
-        easting = item.get('lv03_easting')
-        northing = item.get('lv03_northing')
+        easting = get_float(item.get('lv03_easting'))
+        northing = get_float(item.get('lv03_northing'))
+
+        if not easting or not northing:
+            item['noise_level'] = None
+            return item
+
         all_values = []
         for x in range(-num_pix, num_pix+1):
             for y in range(-num_pix, num_pix+1):
