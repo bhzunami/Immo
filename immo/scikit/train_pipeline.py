@@ -47,6 +47,7 @@ class TrainPipeline(Pipeline):
     def __init__(self, goal, settings, directory):
         super().__init__(goal, settings, directory)
         self.pipeline = [
+            self.cutoff,
             self.simple_stats('Before Transformation'),
             self.replace_zeros_with_nan,
             self.transform_build_year,
@@ -68,6 +69,9 @@ class TrainPipeline(Pipeline):
             self.transform_misc_living_area,
             self.train_extraReeRegression]
 
+    
+    def cutoff(self, ads):
+        return ads
 
     def transform_description(self, ads):
         pdb.set_trace()
@@ -106,11 +110,12 @@ class TrainPipeline(Pipeline):
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
             md = mape(y_test, y_pred)
+            logging.info("Train Livint area with estimator: {}".format(estimator))
+            train_statistics(y_test, y_pred, 'Living area')
             if best_md is None or best_md > md:  # Wenn altes md grösser ist als neues md
                 best_estimator = estimator
                 best_md = md
                 logging.info("Better result with estimator: {}".format(estimator))
-                train_statistics(y_test, y_pred, 'Living area')
                 # Store model
                 joblib.dump(model, '{}/living_area.pkl'.format(self.model_folder))
 
@@ -141,9 +146,10 @@ class TrainPipeline(Pipeline):
             chosen_std_percent = 0
 
             # Run isolation forest for diffrent contamination
+            logging.info("Isolation forest with max_samples = 0.6, n_estimator: {}".format(self.settings['anomaly_detection']))
             for c in np.arange(0.01, self.settings['anomaly_detection']['limit'],
                               self.settings['anomaly_detection']['step']):
-                last_model, cls_ = cls_ , IsolationForest(max_samples=0.7,
+                last_model, cls_ = cls_ , IsolationForest(max_samples=0.6,
                                                         contamination=c,
                                                         n_estimators=self.settings['anomaly_detection']['estimator'],
                                                         random_state=RNG)
@@ -155,11 +161,13 @@ class TrainPipeline(Pipeline):
                 # Calculate standard derivation of the new filtered ads
                 std.append(np.std(filtered[feature].astype(int)))
                 std_percent.append((std[-1]/std[0])*100)
+                logging.info("New std: with c {}: {}".format(c, std[-1]))
+                logging.info("New std in percent with c {}: {}".format(c, std_percent[-1]))
                 # Calculate diff from last standard derivation to check if we found our contamination
                 diff = std_percent[-2] - std_percent[-1]
+                logging.info("Diff when using c {}: {}".format(c, diff))
                 # We stop after diff is the first time < 1. So best_c must be 0
                 # But we can not stop the calculation because we want to make the whole diagramm
-                logging.debug("Diff: {}".format(diff))
                 if diff < 2.5 and best_c == 0:
                     # We do not need this c, we need the last c - step
                     best_c = np.around(c - self.settings['anomaly_detection']['step'], 2)
@@ -223,13 +231,14 @@ class TrainPipeline(Pipeline):
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
             md = mape(y_test, y_pred)
+            logging.info("Stats for estimator: {}".format(estimator))
+            train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
+            plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train_{}".format(estimator))
             # Wenn altes md grösser ist als neues md haben wir ein kleiners md somit bessers Ergebnis
             if best_md is None or best_md > md:
                 best_estimator = estimator
                 best_md = md
                 logging.info("Better result with estimator: {}".format(estimator))
-                train_statistics(y_test, y_pred, title="ExtraTree_train")
-                plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train")
                 # Store model
                 joblib.dump(model, '{}/extraTree.pkl'.format(self.model_folder))
 

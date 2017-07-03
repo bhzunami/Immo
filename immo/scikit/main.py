@@ -19,7 +19,7 @@ from predict_pipeline import PredictPipeline
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 settings = json.load(open('{}/settings.json'.format(DIRECTORY)))
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s - %(message)s', filename='train.log')
 
 parser = argparse.ArgumentParser(description=__doc__)
 # Some default config arguments
