@@ -43,4 +43,5 @@ class ObjectTypeFinderPipeline(object):
         logger.debug("Objecttype: {}".format(obtype.name))
         item['obtype_id'] = obtype.id
 
+        session.close()
         return item
