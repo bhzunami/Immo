@@ -107,6 +107,7 @@ class Urbanhome(scrapy.Spider):
         ad = Ad()
         ad['crawler'] = 'urbanhome'
         ad['url'] = response.url
+        ad['buy'] = 1
         ad['raw_data'] = response.body.decode()
         ad['price_brutto'] = getattr(response, 'meta', {}).get('price_brutto', None)
         ad['additional_data'] = {}

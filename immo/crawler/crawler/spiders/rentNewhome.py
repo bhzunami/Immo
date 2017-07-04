@@ -82,6 +82,7 @@ class RentNewhome(scrapy.Spider):
         ad = Ad()
         ad['crawler'] = 'newhome'
         ad['url'] = response.url
+        ad['buy'] = 0
         ad['raw_data'] = response.body.decode()
 
         # Owner

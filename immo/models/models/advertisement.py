@@ -20,6 +20,7 @@ class Advertisement(Base):
     raw_data = Column(String)          # The whole html site
     crawler = Column(String)           # which company was crawled
     url = Column(String)               # The url of the site
+    buy = Column(Integer)              # this ad is to buy
     available = Column(Date)
     street = Column(String)
     price_brutto = Column(Integer)
@@ -81,6 +82,7 @@ class Advertisement(Base):
         self.assign(data, 'lv03_easting')
         self.assign(data, 'lv03_northing')
         self.assign(data, 'noise_level')
+        self.assign(data, 'buy')
 
         self.crawled_at = self.crawled_at or datetime.datetime.now()
         self.last_seen = self.last_seen or datetime.datetime.now()

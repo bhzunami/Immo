@@ -87,6 +87,7 @@ class Homegate(scrapy.Spider):
         ad['object_id'] = response.url.split("/")[-1]
         ad['crawler'] = 'homegate'
         ad['url'] = response.url
+        ad['buy'] = 1
         ad['raw_data'] = response.body.decode()
 
         # Owner

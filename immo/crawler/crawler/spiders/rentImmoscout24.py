@@ -41,6 +41,7 @@ class Rentimmoscout24(scrapy.Spider):
         ad['crawler'] = 'immoscout24'
         ad['url'] = response.url
         ad['raw_data'] = response.body.decode()
+        ad['buy'] = 0
         ad['objecttype'] = response.url.split("/")[5].split("-")[0]
         ad['additional_data'] = {}
 

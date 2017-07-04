@@ -86,6 +86,7 @@ class RentHomegate(scrapy.Spider):
         # object id
         ad['object_id'] = response.url.split("/")[-1]
         ad['crawler'] = 'homegate'
+        ad['buy'] = 0
         ad['url'] = response.url
         ad['raw_data'] = response.body.decode()
 

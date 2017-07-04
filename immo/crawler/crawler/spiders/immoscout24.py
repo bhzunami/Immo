@@ -39,6 +39,7 @@ class Immoscout24(scrapy.Spider):
         ad = Ad()
         ad['crawler'] = 'immoscout24'
         ad['url'] = response.url
+        ad['buy'] = 1
         ad['raw_data'] = response.body.decode()
         ad['objecttype'] = response.url.split("/")[5].split("-")[0]
         ad['additional_data'] = {}
