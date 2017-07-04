@@ -17,6 +17,7 @@ class Ad(scrapy.Item):
     raw_data = scrapy.Field(serializer=str)          # The whole html site
     crawler = scrapy.Field()           # which company was crawled
     url = scrapy.Field()               # The url of the site
+    buy = scrapy.Field()               # Buy ad
     available = scrapy.Field()
     street = scrapy.Field()
     place = scrapy.Field()
