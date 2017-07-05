@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import ast
 # Scikit
 from sklearn.ensemble import ExtraTreesRegressor, IsolationForest
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.externals import joblib
 # NLTK
 import nltk
@@ -30,6 +30,7 @@ from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_
 RNG = np.random.RandomState(42)
 from pipeline import Pipeline
 
+import pdb
 def detect_language(text):
     """ detect the language by the text where 
     the most stopwords for a language are found
@@ -48,6 +49,7 @@ class TrainPipeline(Pipeline):
         super().__init__(goal, settings, directory)
         self.pipeline = [
             self.cutoff,
+            self.remove_duplicate,
             self.simple_stats('Before Transformation'),
             self.replace_zeros_with_nan,
             self.transform_build_year,
@@ -62,15 +64,38 @@ class TrainPipeline(Pipeline):
             self.transform_tags,
             self.transform_features,
             self.transform_onehot,
-            self.train_outlier_detection,
+            #self.train_outlier_detection,
             self.outlier_detection,
-            self.train_living_area,
-            self.predict_living_area,
             self.transform_misc_living_area,
-            self.train_extraReeRegression]
+            #self.train_test_validate_split,
+            #self.train_living_area,
+            self.predict_living_area,
+            self.train_extraTreeRegrission_withKFold]
+            #self.train_extraTeeRegression]
 
-    
     def cutoff(self, ads):
+        return ads
+
+    def remove_duplicate(self, ads):
+        return ads.drop_duplicates(keep='first')
+
+    def train_test_validate_split(self, ads):
+        # Shuffle the ads
+        # drop=True prevents .reset_index from creating a column containing the old index entries.
+        ads = ads.sample(frac=1).reset_index(drop=True)
+
+        # train 70%
+        train_ads = ads.sample(frac=0.7, random_state=RNG)
+        ads = ads.drop(train_ads.index)
+
+        # test 20%
+        test_ads = ads.sample(frac=0.7, random_state=RNG)
+        test_ads.to_csv('train_ads.csv', header=True, encoding='utf-8')
+
+        validate_ads = ads.drop(test_ads.index)
+        validate_ads.to_csv('validate_ads.csv', header=True, encoding='utf-8')
+
+        ads = train_ads
         return ads
 
     def transform_description(self, ads):
@@ -90,8 +115,6 @@ class TrainPipeline(Pipeline):
         ads['desc'] = ads.apply(stemm_words, axis=1)
         return ads
 
-
-        return ads
     def train_living_area(self, ads):
         filterd_ads = ads.dropna(subset=['living_area'])
         filterd_ads = filterd_ads.drop(['characteristics', 'price_brutto', 'description'], axis=1)
@@ -146,7 +169,6 @@ class TrainPipeline(Pipeline):
             chosen_std_percent = 0
 
             # Run isolation forest for diffrent contamination
-            logging.info("Isolation forest with max_samples = 0.6, n_estimator: {}".format(self.settings['anomaly_detection']))
             for c in np.arange(0.01, self.settings['anomaly_detection']['limit'],
                               self.settings['anomaly_detection']['step']):
                 last_model, cls_ = cls_ , IsolationForest(max_samples=0.6,
@@ -214,11 +236,36 @@ class TrainPipeline(Pipeline):
             f.write(json.dumps(self.settings))
         return ads
 
-    def train_extraReeRegression(self, ads):
-        remove = ['characteristics', 'description']
-        filterd_ads = ads.drop(remove, axis=1)
-        X, y = generate_matrix(filterd_ads, 'price_brutto')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    def train_extraTreeRegrission_withKFold(self, ads):
+        kf = KFold(n_splits=5)
+        X, y = generate_matrix(ads.reindex(), 'price_brutto')
+        X, y = X.values, y.values
+        sum_mape = 0
+        sum_mdape = 0
+        for train_index, test_index in kf.split(X):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            model = ExtraTreesRegressor(n_estimators=100, warm_start=False, n_jobs=-1, random_state=RNG)
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(100))
+            sum_mape += mape(y_test, y_pred)
+            sum_mdape += mdape(y_test, y_pred)
+        logging.info("MAPE: {}".format(sum_mape/kf.get_n_splits(X)))
+        logging.info("MdAPE: {}".format(sum_mdape/kf.get_n_splits(X)))
+        return ads
+
+    def train_extraTeeRegression(self, ads):
+        # remove = ['characteristics', 'description']
+        # filterd_ads = ads.drop(remove, axis=1)
+        X_train, y_train = generate_matrix(ads, 'price_brutto')
+
+        test_ads = pd.read_csv('train_ads.csv', index_col=0, engine='c')
+        X_test, y_test = generate_matrix(test_ads, 'price_brutto')
+
+        valid_ads = pd.read_csv('validate_ads.csv', index_col=0, engine='c')
+        X_valid, y_valid = generate_matrix(valid_ads, 'price_brutto')
+        #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         best_md = None
         best_estimator = None
         model = ExtraTreesRegressor(n_estimators=100, warm_start=True, n_jobs=-1, random_state=RNG)
@@ -228,11 +275,16 @@ class TrainPipeline(Pipeline):
                                self.settings['extraTreeRegression']['step']):
             logging.debug("Estimator: {}".format(estimator))
             model.n_estimators = estimator
+
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
             md = mape(y_test, y_pred)
             logging.info("Stats for estimator: {}".format(estimator))
             train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
+            logging.info("VALIDATION")
+            y_pred = model.predict(X_valid)
+            train_statistics(y_valid, y_pred, title="ExtraTree_train_{}".format(estimator))
+
             plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train_{}".format(estimator))
             # Wenn altes md grösser ist als neues md haben wir ein kleiners md somit bessers Ergebnis
             if best_md is None or best_md > md:

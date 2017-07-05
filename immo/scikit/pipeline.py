@@ -158,7 +158,9 @@ class Pipeline():
     def transfrom_description(self, ads):
         """remove ad where description is NaN
         """
-        return ads.dropna(subset=['description'])
+        remove = ['characteristics', 'description']
+        return ads.drop(remove, axis=1)
+        #return ads.dropna(subset=['description'])
 
     def transform_onehot(self, ads):
         """Build one hot encoding for all columns with string as value
@@ -293,7 +295,21 @@ class Pipeline():
     def delete_all_nan(self, ads):
         return ads.dropna()
 
+    def validate_extraTreeRegression(self, ads):
+        X, y = generate_matrix(ads, 'price_brutto')
+        try:
+            model = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
+        except FileNotFoundError:
+            logging.error("Could not load extra tree model. Did you forget to train extra Tree?")
+            raise Exception("Missing trained model")
 
+        # Check quality
+        logging.info("Predict values")
+        y_pred = model.predict(X)
+        train_statistics(y, y_pred, title="ExtraTree")
+        plot(y, y_pred, self.image_folder, show=False, title="ExtraTree")
+        return ads
+    
     def extraTreeRegression(self, ads):
         remove = ['characteristics', 'description']
         filterd_ads = ads.drop(remove, axis=1)
