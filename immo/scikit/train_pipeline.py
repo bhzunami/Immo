@@ -19,10 +19,13 @@ import ast
 from sklearn.ensemble import ExtraTreesRegressor, IsolationForest
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.externals import joblib
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostRegressor
 # NLTK
-import nltk
-from nltk.corpus import stopwords # Import the stop word list
-from nltk.stem import SnowballStemmer
+#import nltk
+#from nltk.corpus import stopwords # Import the stop word list
+#from nltk.stem import SnowballStemmer
 
 from a_detection import AnomalyDetection
 from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
@@ -70,7 +73,9 @@ class TrainPipeline(Pipeline):
             #self.train_test_validate_split,
             #self.train_living_area,
             self.predict_living_area,
-            self.train_extraTreeRegrission_withKFold]
+            self.adaBoost]
+            # self.kneighbours
+            #self.train_extraTreeRegrission_withKFold]
             #self.train_extraTeeRegression]
 
     def cutoff(self, ads):
@@ -78,6 +83,38 @@ class TrainPipeline(Pipeline):
 
     def remove_duplicate(self, ads):
         return ads.drop_duplicates(keep='first')
+
+
+    def adaBoost(self, ads):
+        """http://scikit-learn.org/stable/auto_examples/ensemble/plot_adaboost_regression.html#sphx-glr-auto-examples-ensemble-plot-adaboost-regression-py
+
+        https://www.analyticsvidhya.com/blog/2016/02/complete-guide-parameter-tuning-gradient-boosting-gbm-python/
+
+        """
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+        # learning rate 0.05 - 0.2
+        for i in [5, 10, 20, 50, 70]:
+            logging.info("Adaboost with estimator: {}".format(i))
+            boost = AdaBoostRegressor(DecisionTreeRegressor(),
+                                      n_estimators=i, random_state=RNG)
+            boost.fit(X_train, y_train)
+            y_pred = boost.predict(X_test)
+            train_statistics(y_test, y_pred, title="Adaboost with estimator: {}".format(i))
+        
+    def kneighbours(self, ads):
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+
+        for i in [50, 100, 200, 400, 500]:
+            logging.info("KNeighborsRegressor with leaf size: {}".format(i))
+            neigh = KNeighborsRegressor(n_neighbors=2, weights='distance', leaf_size=i, n_jobs=6)
+            neigh.fit(X_train, y_train)
+            y_pred = neigh.predict(X_test)
+            train_statistics(y_test, y_pred, title="KNeighbour with leaf size: {}".format(i))
+        
+        return ads
+
 
     def train_test_validate_split(self, ads):
         # Shuffle the ads
@@ -96,23 +133,6 @@ class TrainPipeline(Pipeline):
         validate_ads.to_csv('validate_ads.csv', header=True, encoding='utf-8')
 
         ads = train_ads
-        return ads
-
-    def transform_description(self, ads):
-        pdb.set_trace()
-
-        def stemm_words(row):
-            language = detect_language(row.description)
-            #letters_only = re.sub("[^a-z0-9üäöèéàêâ]", " ", str(row.desc.lower()))
-            letters_only = row.description.split()
-            stops = set(json.load(open('{}_stop_words.json'.format(language))))
-            #stops = set(stopwords.words(language))
-            meaningful_words = [w for w in letters_only if not w in stops]
-            stemmer = SnowballStemmer(language)
-            stemmed_words = [stemmer.stem(w) for w in meaningful_words]
-            return " ".join(stemmed_words)
-
-        ads['desc'] = ads.apply(stemm_words, axis=1)
         return ads
 
     def train_living_area(self, ads):
@@ -237,7 +257,7 @@ class TrainPipeline(Pipeline):
         return ads
 
     def train_extraTreeRegrission_withKFold(self, ads):
-        kf = KFold(n_splits=5)
+        kf = KFold(n_splits=10)
         X, y = generate_matrix(ads.reindex(), 'price_brutto')
         X, y = X.values, y.values
         sum_mape = 0
