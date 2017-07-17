@@ -33,6 +33,8 @@ from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_
 RNG = np.random.RandomState(42)
 from pipeline import Pipeline
 
+import xgboost as xgb
+
 import pdb
 def detect_language(text):
     """ detect the language by the text where 
@@ -67,13 +69,15 @@ class TrainPipeline(Pipeline):
             self.transform_tags,
             self.transform_features,
             self.transform_onehot,
+            self.transform_misc_living_area,
             #self.train_outlier_detection,
             self.outlier_detection,
-            self.transform_misc_living_area,
+            #self.old_outliers_detection,
             #self.train_test_validate_split,
             #self.train_living_area,
             self.predict_living_area,
-            self.adaBoost]
+            self.xgboost]
+            #self.adaBoost]
             # self.kneighbours
             #self.train_extraTreeRegrission_withKFold]
             #self.train_extraTeeRegression]
@@ -84,7 +88,14 @@ class TrainPipeline(Pipeline):
     def remove_duplicate(self, ads):
         return ads.drop_duplicates(keep='first')
 
-
+    def old_outliers_detection(self, ads):
+        from sklearn import svm
+        clf = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
+        clf.fit(ads)
+        predicted = clf.predict(ads)
+        logging.info(ads[np.where(predicted == 1)].shape)
+        logging.info(ads[np.where(predicted == -1)].shape)
+        
     def adaBoost(self, ads):
         """http://scikit-learn.org/stable/auto_examples/ensemble/plot_adaboost_regression.html#sphx-glr-auto-examples-ensemble-plot-adaboost-regression-py
 
@@ -115,6 +126,33 @@ class TrainPipeline(Pipeline):
         
         return ads
 
+
+    def xgboost(self, ads):
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+
+        dtrain = xgb.DMatrix(X_train, label=y_train)
+        dtest = xgb.DMatrix(X_test)
+
+        params = {"max_depth":100, "eta":0.1}
+        logging.info("Start makeing model")
+        model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
+        joblib.dump(model, '{}/xgb.pkl'.format(self.model_folder))
+        
+        model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
+        plt.show()
+        logging.info("Start making regressio model")
+
+        model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
+        logging.info("Start fit model")
+        model_xgb.fit(X_train, y_train)
+        joblib.dump(model_xgb, '{}/xgb_fit.pkl'.format(self.model_folder))
+        logging.info("Predict")        
+        y_pred = model_xgb.predict(X_test)
+        train_statistics(y_test, y_pred)
+        #plot(y_test, y_pred, show=False, plot_name="xgboost")
+
+        return ads
 
     def train_test_validate_split(self, ads):
         # Shuffle the ads
