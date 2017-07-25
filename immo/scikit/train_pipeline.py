@@ -34,8 +34,10 @@ RNG = np.random.RandomState(42)
 from pipeline import Pipeline
 
 import xgboost as xgb
+import lightgbm as lgb
+from sklearn.metrics import confusion_matrix, mean_squared_error
+from sklearn.grid_search import GridSearchCV
 
-import pdb
 def detect_language(text):
     """ detect the language by the text where 
     the most stopwords for a language are found
@@ -77,6 +79,7 @@ class TrainPipeline(Pipeline):
             #self.train_living_area,
             self.predict_living_area,
             self.xgboost]
+            #self.lgb]
             #self.adaBoost]
             # self.kneighbours
             #self.train_extraTreeRegrission_withKFold]
@@ -95,6 +98,28 @@ class TrainPipeline(Pipeline):
         predicted = clf.predict(ads)
         logging.info(ads[np.where(predicted == 1)].shape)
         logging.info(ads[np.where(predicted == -1)].shape)
+
+    def lgb(self, ads):
+
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6) 
+        train_data=lgb.Dataset(X_train, label=y_train)
+
+        #param = {'num_leaves':500, 'objective':'regression', 'max_depth':7, 'learning_rate':.05,'max_bin':200}
+        params = {
+            'task': 'train',
+            'boosting_type': 'gbdt',
+            'objective': 'regression',
+            'metric': {'l2', 'auc'},
+            'verbose': 0
+        }
+        #param['metric'] = ['auc', 'binary_logloss']
+
+        num_round = 50
+        lgbm = lgb.train(params, train_data, num_boost_round=10000)
+        y_pred = lgbm.predict(X_test, num_iteration=lgbm.best_iteration)
+        train_statistics(y_test, y_pred, title="Lgb")
+        return ads
         
     def adaBoost(self, ads):
         """http://scikit-learn.org/stable/auto_examples/ensemble/plot_adaboost_regression.html#sphx-glr-auto-examples-ensemble-plot-adaboost-regression-py
@@ -126,12 +151,22 @@ class TrainPipeline(Pipeline):
         
         return ads
 
-
+    # Best 200 depth n_estimators=50
     def xgboost(self, ads):
         # http://www.xavierdupre.fr/app/pymyinstall/helpsphinx/notebooks/example_xgboost.html
         X, y = generate_matrix(ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
+        xgb_model = xgb.XGBRegressor()
+        clf = GridSearchCV(xgb_model,
+                           {'max_depth': [100, 200, 300],
+                            'n_estimators': [10, 50, 80]},
+                           verbose=1,
+                           n_jobs=1)
+
+        clf.fit(X_train, y_train)
+        logging.info(clf.best_score_, clf.best_params_)
+        return ads
         dtrain = xgb.DMatrix(X_train, label=y_train)
         dtest = xgb.DMatrix(X_test)
 
