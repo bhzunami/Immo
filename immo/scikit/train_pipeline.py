@@ -71,7 +71,7 @@ class TrainPipeline(Pipeline):
             self.transform_onehot,
             self.transform_misc_living_area,
             #self.train_outlier_detection,
-            self.outlier_detection,
+            #self.outlier_detection,
             #self.old_outliers_detection,
             #self.train_test_validate_split,
             #self.train_living_area,
@@ -128,6 +128,7 @@ class TrainPipeline(Pipeline):
 
 
     def xgboost(self, ads):
+        # http://www.xavierdupre.fr/app/pymyinstall/helpsphinx/notebooks/example_xgboost.html
         X, y = generate_matrix(ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
