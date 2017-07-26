@@ -43,7 +43,8 @@ class DataAnalysis():
     def __init__(self, from_file=True, file='./homegate.csv'):
         self.from_file = from_file
         if from_file:
-            self.ads = self.load_dataset_from_file(file)
+            ads = self.load_dataset_from_file(file)
+            self.ads = ads.drop(['id'], axis=1)
         else:
             try:
                 engine = create_engine(os.environ.get('DATABASE_URL', None))
@@ -77,9 +78,9 @@ class DataAnalysis():
                 'cubature',
                 'room_height',
                 'effective_area',
-                'floors_house',
                 'longitude',
                 'latitude',
+                'noise_level',
                 'plot_area',
                 'municipalities_id',
                 'tags'
@@ -243,13 +244,77 @@ class DataAnalysis():
                                                                                self.X.shape[1] - X_new.shape[1]))
         print(X_new)
 
+    def plotting(self):
+        import seaborn as sns
+        # Price distplot
+        # Clean up ads
+        ads = self.ads[self.ads.price_brutto <= 10000000]
+        ax = plt.axes()
+
+        ax.set_title("Vertielung des Kaufpreises")
+        sns.distplot(ads['price_brutto'], kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
+        ax.set_xlabel("Kaufpreis")
+        ax.get_xaxis().get_major_formatter().set_useOffset(False)
+        plt.savefig("images/Verteilung_des_kauf_preises.png")
+        print("Distplot - OK")
+        plt.clf()
+        plt.close()
+
+        # Heatmap of features:
+        corr = ads.select_dtypes(include = ['float64', 'int64']).iloc[:, 1:].corr()
+        plt.figure(figsize=(12, 12))
+        hm = sns.heatmap(corr, vmin=-1, vmax=1, square=True)
+        hm.set_xticklabels(hm.get_xticklabels(), rotation=90)
+        hm.set_yticklabels(reversed(hm.get_xticklabels()), rotation=0)
+        plt.savefig("images/Heatmap.png")
+        print("Heatmap - OK")
+        plt.clf()
+        plt.close()
+
+        cor_dict = corr['price_brutto'].to_dict()
+        del cor_dict['price_brutto']
+        print("List the numerical features decendingly by their correlation with Sale Price:\n")
+        for ele in sorted(cor_dict.items(), key = lambda x: -abs(x[1])):
+            print("{0}: \t{1}".format(*ele))
+
+        # Now all features compared to price_brutto
+        plt.figure(1)
+        f, ax = plt.subplots(3, 2, figsize=(10, 9))
+        price = ads.price_brutto.values
+        ax[0, 0].scatter(ads.num_rooms.values, price)
+        ax[0, 0].set_title('Anzahl Zimmer')
+        #ax[0, 0].set_ylabel('Preis')
+        ax[0, 1].scatter(ads.living_area.values, price)
+        ax[0, 1].set_title('Wohnfläche')
+        #ax[0, 1].set_ylabel('Preis')
+        ax[1, 0].scatter(ads.effective_area.values, price)
+        ax[1, 0].set_title('Effektive Fläche')
+        ax[1, 0].set_ylabel('Preis')
+        ax[1, 1].scatter(ads.build_year.values, price)
+        ax[1, 1].set_title('Baujahr')
+        #ax[1, 1].set_ylabel('Preis')
+        ax[2, 0].scatter(ads.num_floors.values, price)
+        ax[2, 0].set_title('Anzahl Stockwerke')
+        #ax[2, 0].set_ylabel('Preis')
+        ax[2, 1].scatter(ads.noise_level.values, price)
+        ax[2, 1].set_title('Lärmbelastung')
+        #ax[2, 1].set_ylabel('Preis')
+        #f.text(10.01, 0.5, 'Kaufpreis', va='center', rotation='vertical', fontsize = 32)
+        plt.tight_layout()
+        plt.savefig("images/Vergleich_zum_preis.png")
+        print("Vergleich - OK")
+        plt.clf()
+        plt.close()
+
 
 
 def main():
-    data_analysis = DataAnalysis(from_file=False, file='all.csv')
+    data_analysis = DataAnalysis(from_file=True, file='all_noise.csv')
+    data_analysis.plotting()
+    return
     data_analysis.transform_tags()
     data_analysis.simple_stats()
-    # data_analysis.draw_features(show_null_values=True)
+    data_analysis.draw_features(show_null_values=True)
     data_analysis.prepare_dataset()
     # data_analysis.select_k_best()
     # data_analysis.recursive_feature_elimination()
