@@ -39,3 +39,5 @@ class Municipality(Base):
     lat = Column(Float)
     long = Column(Float)
     noise_level = Column(Float)
+    steuerfuss_gde = Column(Float)
+    steuerfuss_kanton = Column(Float)
