@@ -21,8 +21,9 @@ from sklearn import linear_model
 import pdb
 import matplotlib.pyplot as plt
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, defer, load_only
-from models import Advertisement
+from sqlalchemy.orm import sessionmaker, defer, load_only, Load, aliased
+
+from models import Advertisement, Municipality, ObjectType
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectKBest, SelectFromModel, chi2, RFE
 from sklearn.linear_model import LogisticRegression
@@ -34,6 +35,13 @@ from sklearn.svm import LinearSVC
 KEYS = [(0, 'living_area'), (0, 'floor'), (1, 'num_rooms'), (1, 'num_floors'), (2, 'build_year'),
         (2, 'last_renovation_year'), (3, 'cubature'), (3, 'room_height'), (4, 'effective_area'),
         (4, 'plot_area')]
+
+CANTONS = ["ZH", "BE", "LU", "UR", "SZ",
+           "OW", "NW", "GL", "ZG", "FR",
+           "SO", "BS", "BL", "SH",
+           "AR", "AI", "SG",
+           "GR", "AG", "TG", "TI", "VD", "VS",
+           "NE", "GE", "JU"]
 
 # Set precision to 3
 numpy.set_printoptions(precision=3)
@@ -50,41 +58,80 @@ class DataAnalysis():
                 engine = create_engine(os.environ.get('DATABASE_URL', None))
                 Session = sessionmaker(bind=engine)
                 self.session = Session()
-                self.ads = self.load_dataset_from_database()
+                ads = self.load_dataset_from_database()
+                # Remove id from municipality and object type
+                self.ads = ads.loc[:, ~ads.columns.duplicated()]
                 self.ads.to_csv(file, header=True, encoding='utf-8')
-            except AttributeError:
+            except AttributeError as e:
+                print("{}".format(e))
                 raise Exception("If you want to load data from the database you have to export the DATABASE_URL environment")
 
 
     def load_dataset_from_file(self, file):
         """loads data from a csv file
         """
-        return pd.read_csv(file)
+        return pd.read_csv(file, index_col=0, engine='c')
 
     def load_dataset_from_database(self):
         """ load data from database
         """
+        statement = self.session.query(Advertisement, Municipality, ObjectType).join(Municipality, ObjectType).options(
+            Load(Advertisement).load_only(
+                "price_brutto",
+                "num_floors",
+                "living_area",
+                "floor",
+                "num_rooms",
+                "object_types_id",
+                "build_year",
+                "last_renovation_year",
+                "cubature",
+                "room_height",
+                "effective_area",
+                "longitude",
+                "latitude",
+                "noise_level",
+                "plot_area",
+                "tags"),
+            Load(Municipality).load_only(
+                "canton_id",
+                "canton_id",
+                "district_id",
+                "mountain_region_id",
+                "language_region_id",
+                "job_market_region_id",
+                "agglomeration_id",
+                "metropole_region_id",
+                "tourism_region_id",
+                "is_town",
+                "noise_level",
+                "urban_character_id",
+                "steuerfuss_gde",
+                "steuerfuss_kanton"),
+            Load(ObjectType).load_only("name", "grouping")
+        ).statement
+        return pd.read_sql_query(statement, self.session.bind)
 
-        return pd.read_sql_query(self.session.query(Advertisement).options(
-            load_only(
-                'num_floors',
-                'living_area',
-                'floor',
-                'price_brutto',
-                'num_rooms',
-                'object_types_id',
-                'build_year',
-                'last_renovation_year',
-                'cubature',
-                'room_height',
-                'effective_area',
-                'longitude',
-                'latitude',
-                'noise_level',
-                'plot_area',
-                'municipalities_id',
-                'tags'
-                )).statement, self.session.bind)
+        # return pd.read_sql_query(self.session.query(Advertisement).join(Municipality, Advertisement.municipalities_id == Municipality.id).options(
+        #     Load(Advertisement).load_only(
+        #         'num_floors',
+        #         'living_area',
+        #         'floor',
+        #         'price_brutto',
+        #         'num_rooms',
+        #         'object_types_id',
+        #         'build_year',
+        #         'last_renovation_year',
+        #         'cubature',
+        #         'room_height',
+        #         'effective_area',
+        #         'longitude',
+        #         'latitude',
+        #         'noise_level',
+        #         'plot_area',
+        #         'municipalities_id',
+        #         'tags'
+        #         )).statement, self.session.bind)
 
         # return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).statement,
         #                          self.session.bind,
@@ -248,12 +295,19 @@ class DataAnalysis():
         import seaborn as sns
         # Price distplot
         # Clean up ads
-        ads = self.ads[self.ads.price_brutto <= 10000000]
+        ads = self.ads[(self.ads.living_area <= 1000) &
+                       (self.ads.living_area > 0) &
+                       (self.ads.effective_area <= 1000) &
+                       (self.ads.effective_area > 0) &
+                       (self.ads.num_floors < 50) &
+                       (self.ads.build_year > 1200) &
+                       (self.ads.num_rooms < 20) &
+                       (self.ads.price_brutto <= 10000000)]
         ax = plt.axes()
 
         ax.set_title("Vertielung des Kaufpreises")
         sns.distplot(ads['price_brutto'], kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
-        ax.set_xlabel("Kaufpreis")
+        ax.set_xlabel("Kaufpreis CHF")
         ax.get_xaxis().get_major_formatter().set_useOffset(False)
         plt.savefig("images/Verteilung_des_kauf_preises.png")
         print("Distplot - OK")
@@ -261,7 +315,7 @@ class DataAnalysis():
         plt.close()
 
         # Heatmap of features:
-        corr = ads.select_dtypes(include = ['float64', 'int64']).iloc[:, 1:].corr()
+        corr = ads.select_dtypes(include = ['float64', 'int64']).corr()
         plt.figure(figsize=(12, 12))
         hm = sns.heatmap(corr, vmin=-1, vmax=1, square=True)
         hm.set_xticklabels(hm.get_xticklabels(), rotation=90)
@@ -285,10 +339,10 @@ class DataAnalysis():
         ax[0, 0].set_title('Anzahl Zimmer')
         #ax[0, 0].set_ylabel('Preis')
         ax[0, 1].scatter(ads.living_area.values, price)
-        ax[0, 1].set_title('Wohnfläche')
+        ax[0, 1].set_title('Wohnfläche [m²]')
         #ax[0, 1].set_ylabel('Preis')
         ax[1, 0].scatter(ads.effective_area.values, price)
-        ax[1, 0].set_title('Effektive Fläche')
+        ax[1, 0].set_title('Effektive Fläche [m²]')
         ax[1, 0].set_ylabel('Preis')
         ax[1, 1].scatter(ads.build_year.values, price)
         ax[1, 1].set_title('Baujahr')
@@ -297,7 +351,7 @@ class DataAnalysis():
         ax[2, 0].set_title('Anzahl Stockwerke')
         #ax[2, 0].set_ylabel('Preis')
         ax[2, 1].scatter(ads.noise_level.values, price)
-        ax[2, 1].set_title('Lärmbelastung')
+        ax[2, 1].set_title('Lärmbelastung [db]')
         #ax[2, 1].set_ylabel('Preis')
         #f.text(10.01, 0.5, 'Kaufpreis', va='center', rotation='vertical', fontsize = 32)
         plt.tight_layout()
@@ -306,10 +360,57 @@ class DataAnalysis():
         plt.clf()
         plt.close()
 
+        fig = plt.figure()
+        from scipy import stats
+        res = stats.probplot(ads['price_brutto'], plot=plt)
+        plt.savefig("images/skewness.png")
+        print("skewness - OK")
+        plt.clf()
+        plt.close()
+        fig = plt.figure()
+        res = stats.probplot(np.log(ads['price_brutto']), plot=plt)
+        plt.savefig("images/log_skewness.png")
+        print("Log skewness - OK")
+        plt.clf()
+        plt.close()
+
+        ax = plt.axes()
+        b = sns.boxplot(x='canton_id', y='price_brutto', data=ads, ax=ax)
+        b.set_xticklabels(CANTONS, rotation=90)
+        plt.tight_layout()
+        ax.set_xlabel("")
+        ax.set_ylabel("Kaufpreis CHF")
+        plt.savefig("images/boxPlot_cantons.png")
+        print("boxplot cantons - OK")
+        plt.clf()
+        plt.close()
+
+        ax = plt.axes()
+        b = sns.barplot(x='canton_id', y='price_brutto', data=ads, ax=ax)
+        b.set_xticklabels(CANTONS, rotation=90)
+        plt.tight_layout()
+        ax.set_xlabel("")
+        ax.set_ylabel("Kaufpreis CHF")
+        plt.savefig("images/barplot_canton.png")
+        print("barplot canton - OK")
+        plt.clf()
+        plt.close()
+
+        for key in ['floor', 'num_rooms', 'num_floors',
+                    'district_id',
+                    'mountain_region_id', 'language_region_id', 'job_market_region_id',
+                    'agglomeration_id', 'metropole_region_id', 'tourism_region_id',
+                    'urban_character_id', 'is_town', 'steuerfuss_gde', 'steuerfuss_kanton',
+                    'name', 'grouping']:
+            ax = plt.axes()
+            b = sns.boxplot(x=key, y='price_brutto', data=ads, ax=ax)
+            plt.tight_layout()
+            ax.set_ylabel("Kaufpreis CHF")
+            plt.show()
 
 
 def main():
-    data_analysis = DataAnalysis(from_file=True, file='all_noise.csv')
+    data_analysis = DataAnalysis(from_file=True, file='all_all.csv')
     data_analysis.plotting()
     return
     data_analysis.transform_tags()
