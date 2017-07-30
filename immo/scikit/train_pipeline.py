@@ -89,57 +89,7 @@ class TrainPipeline(Pipeline):
 
         self.pipeline = train_pipleine if os.path.isfile("{}/ads_prepared.pkl".format(self.model_folder)) else self.preparation_pipeline + train_pipleine
 
-<<<<<<< HEAD
-    def old_outliers_detection(self, ads):
-        from sklearn import svm
-        clf = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
-        clf.fit(ads)
-        predicted = clf.predict(ads)
-        logging.info(ads[np.where(predicted == 1)].shape)
-        logging.info(ads[np.where(predicted == -1)].shape)
-
-    def rmse_cv(self, model, X, y_train):
-        kf = KFold(5, shuffle=True, random_state=42).get_n_splits(X.values)
-        rmse = np.sqrt(-cross_val_score(model, X.values, y_train, scoring="neg_mean_squared_error", cv=kf))
-        return(rmse)
-
-
-    def test(self, ads):
-        X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
-
-        lasso = make_pipeline(RobustScaler(), Lasso(alpha =0.0005, random_state=42))
-        score = self.rmse_cv(lasso, X_train, y_train)
-        print("\nLasso score: {:.4f} (+/-{:.4f})\n".format(score.mean(), score.std()))
-
-
-        ENet = make_pipeline(RobustScaler(), ElasticNet(alpha=0.0005, l1_ratio=.9, random_state=3))
-
-        KRR = KernelRidge(alpha=0.6, kernel='polynomial', degree=2, coef0=2.5)
-
-        GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.05,
-                                           max_depth=4, max_features='sqrt',
-                                           min_samples_leaf=15, min_samples_split=10,
-                                           loss='huber', random_state =5)
-
-        model_xgb = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0,
-                                     learning_rate=0.05, max_depth=6,
-                                     min_child_weight=1.5, n_estimators=7200,
-                                     reg_alpha=0.9, reg_lambda=0.6,
-                                     subsample=0.2,seed=42, silent=1,
-                                     random_state =7)
-
-        model_lgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
-                                      learning_rate=0.05, n_estimators=720,
-                                      max_bin = 55, bagging_fraction = 0.8,
-                                      bagging_freq = 5, feature_fraction = 0.2319,
-                                      feature_fraction_seed=9, bagging_seed=9,
-                                      min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
-
-
-=======
         
->>>>>>> Add hihger DPI for images
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price')
