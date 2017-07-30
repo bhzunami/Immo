@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('agg')
 """
     Data Analysis
 
