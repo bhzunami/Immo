@@ -48,6 +48,7 @@ class Pipeline():
             self.transform_build_renovation,
             self.transform_noise_level,
             self.simple_stats('After Transformation'),
+            self.show_crawler_stats,
             self.transform_tags,
             self.transform_features,
             self.transform_onehot,
@@ -122,6 +123,9 @@ class Pipeline():
         return inner_load_df
 
 
+    def show_crawler_stats(self, ads):
+        logging.info(ads.groupby('crawler')['price'].count())
+        return ads
     def transform_noise_level(self, ads):
         """ If we have no nose_level at the address
         we use the municipality noise_level
@@ -217,6 +221,10 @@ class Pipeline():
         """Detect outliers we do not want in our training phase
         The outlier model must be trained first
         """
+        if os.path.isfile("{}/ads_clean.pkl".format(self.model_folder)):
+            logging.info("Clean file found skipping outlier detection load data from file.")
+            return self.load_df("{}/ads_clean.pkl".format(self.model_folder))(ads)
+
         meshgrid = {
             'build_year': np.meshgrid(np.linspace(0, max(ads['build_year']), 400),
                                       np.linspace(0, max(ads['price']), 1000)),
@@ -230,8 +238,9 @@ class Pipeline():
                                        np.linspace(0, max(ads['price']), 1000))
         }
         anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
-        return anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
+        ads = anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
                                                   meshgrid, self.goal)
+        return self.save_as_df("{}/ads_clean.pkl".format(self.model_folder))(ads)
 
     def transform_features(self, ads):
         """Transfrom features to more global one

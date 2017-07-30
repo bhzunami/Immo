@@ -43,7 +43,7 @@ class AnomalyDetection(object):
             plt.xlim((min(x[feature][0]), max(x[feature][0])))
             plt.ylim(0, max(self.data[self.goal]))
             plt.legend([b1, b2], ["Outlier", "Accepted values"], loc="upper left", frameon=True)
-            plt.savefig("{}/outlier_detection/{}_IsolationForest.png".format(self.image_folder, feature), transparent=True)
+            plt.savefig("{}/outlier_detection/{}_IsolationForest.png".format(self.image_folder, feature), transparent=True, dpi=250)
             plt.close()
 
     def isolation_forest(self,

@@ -35,8 +35,6 @@ from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train
 RNG = np.random.RandomState(42)
 from .pipeline import Pipeline
 
-#import xgboost as xgb
-#import lightgbm as lgb
 from sklearn.metrics import confusion_matrix, mean_squared_error
 from sklearn.grid_search import GridSearchCV
 
@@ -77,11 +75,7 @@ class TrainPipeline(Pipeline):
             self.train_outlier_detection,
             self.outlier_detection,
             #self.train_living_area
-            #self.xgboost
-            #self.lgb
-            #self.adaBoost
-            self.extraTreeRegression2,
-            #self.xgboost]
+            self.xgboost,
             #self.lgb]
             #self.adaBoost]
             #self.kneighbours
@@ -95,6 +89,7 @@ class TrainPipeline(Pipeline):
 
         self.pipeline = train_pipleine if os.path.isfile("{}/ads_prepared.pkl".format(self.model_folder)) else self.preparation_pipeline + train_pipleine
 
+<<<<<<< HEAD
     def old_outliers_detection(self, ads):
         from sklearn import svm
         clf = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
@@ -142,26 +137,26 @@ class TrainPipeline(Pipeline):
                                       min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
 
 
+=======
+        
+>>>>>>> Add hihger DPI for images
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
-        train_data=lgb.Dataset(X_train, label=y_train)
+        model = lgb.LGBMRegressor(objective='regression',num_leaves=800,
+                                  learning_rate=0.05, n_estimators=720,
+                                  max_bin = 55, bagging_fraction = 0.8,
+                                  bagging_freq = 5, feature_fraction = 0.2319,
+                                  feature_fraction_seed=9, bagging_seed=9,
+                                  min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
 
-        #param = {'num_leaves':500, 'objective':'regression', 'max_depth':7, 'learning_rate':.05,'max_bin':200}
-        params = {
-            'task': 'train',
-            'boosting_type': 'gbdt',
-            'objective': 'regression',
-            'metric': {'l2', 'auc'},
-            'verbose': 0
-        }
-        #param['metric'] = ['auc', 'binary_logloss']
+        model.fit(X_train, y_train)
+        joblib.dump(model, '{}/lgb.pkl'.format(self.model_folder))
+        y_pred = model.predict(X_test)
+        train_statistics(y_test, y_pred, title="lgb")
+        plot(y_test, y_pred, self.image_folder, show=True, title="lgb")
 
-        num_round = 50
-        lgbm = lgb.train(params, train_data, num_boost_round=10000)
-        y_pred = lgbm.predict(X_test, num_iteration=lgbm.best_iteration)
-        train_statistics(y_test, y_pred, title="Lgb")
         return ads
 
     def adaBoost(self, ads):
@@ -196,41 +191,36 @@ class TrainPipeline(Pipeline):
 
     # Best 200 depth n_estimators=50
     def xgboost(self, ads):
-        # http://www.xavierdupre.fr/app/pymyinstall/helpsphinx/notebooks/example_xgboost.html
         X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
-        xgb_model = xgb.XGBRegressor()
-        clf = GridSearchCV(xgb_model,
-                           {'max_depth': [100, 200, 300],
-                            'n_estimators': [10, 50, 80]},
-                           verbose=1,
-                           n_jobs=1)
-
-        clf.fit(X_train, y_train)
-        logging.info(clf.best_score_, clf.best_params_)
-        return ads
         dtrain = xgb.DMatrix(X_train, label=y_train)
         dtest = xgb.DMatrix(X_test)
 
         params = {"max_depth":100, "eta":0.1}
-        logging.info("Start makeing model")
         model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
-        joblib.dump(model, '{}/xgb.pkl'.format(self.model_folder))
-
         model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
         plt.show()
-        logging.info("Start making regressio model")
 
         model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
-        logging.info("Start fit model")
         model_xgb.fit(X_train, y_train)
-        joblib.dump(model_xgb, '{}/xgb_fit.pkl'.format(self.model_folder))
-        logging.info("Predict")
         y_pred = model_xgb.predict(X_test)
-        train_statistics(y_test, y_pred)
-        #plot(y_test, y_pred, show=False, plot_name="xgboost")
+        statistics(y_test, y_pred)
+        plot(y_test, y_pred, show=False, plot_name="xgboost")
 
+        # model = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0, 
+        #                          learning_rate=0.15, max_depth=200, 
+        #                          min_child_weight=1.5, n_estimators=7200,
+        #                          reg_alpha=0.9, reg_lambda=0.6,
+        #                          subsample=0.2,seed=42, silent=1,
+        #                          random_state=RNG)
+
+        # model.fit(X_train, y_train)
+        # joblib.dump(model, '{}/xgboost.pkl'.format(self.model_folder))
+        # y_pred = model.predict(X_test)
+        # train_statistics(y_test, y_pred, title="XGBOOST")
+        # plot(y_test, y_pred, self.image_folder, show=True, title="XGBOOST")
+        
         return ads
 
     def train_test_validate_split(self, ads):
@@ -364,7 +354,7 @@ class TrainPipeline(Pipeline):
             ax1.set_xlim([0, 10])
             ax1.set_ylim([35, 100])
             plt.axis('tight')
-            plt.savefig('{}/outlier_detection/{}_std.png'.format(self.image_folder, feature))
+            plt.savefig('{}/outlier_detection/{}_std.png'.format(self.image_folder, feature), dpi=250)
             plt.close()
 
             # Plot the difference between the standard derivation
@@ -375,7 +365,7 @@ class TrainPipeline(Pipeline):
 
             ax1.set_ylabel('% decline of σ to previous σ')
             ax1.set_xlabel('% removed of {} outliers'.format(feature.replace("_", " ")))
-            plt.savefig('{}/outlier_detection/{}_diff_of_std.png'.format(self.image_folder, feature))
+            plt.savefig('{}/outlier_detection/{}_diff_of_std.png'.format(self.image_folder, feature), dpi=250)
             plt.close()
 
         # Save best c for all features

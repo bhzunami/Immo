@@ -41,18 +41,13 @@ parser.add_argument('-f', '--file',
 
 args = parser.parse_args()
 
-
-
-def spinning_coursor():
-    while True:
-        for cursor in '|/-\\':
-            yield cursor
-
-
 def main(args):
     logging.info("Start with args {}".format(args))
-    ads = pd.read_csv(args.file, index_col=0, engine='c')
-
+    try:
+        ads = pd.read_csv(args.file, index_col=0, engine='c')
+    except FileNotFoundError:
+        print("File {} does not exists please run data_analyse.py first".format(args.file))
+        return
     if args.train:
         tp = TrainPipeline(args.goal, settings, DIRECTORY)
     if args.predict:
