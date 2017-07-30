@@ -12,7 +12,7 @@ import json
 from sklearn.externals import joblib
 
 
-from pipeline import Pipeline
+from .pipeline import Pipeline
 import logging
 import json
 import numpy as np
@@ -27,12 +27,10 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostRegressor
 
-from a_detection import AnomalyDetection
-from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
+from .a_detection import AnomalyDetection
+from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
 
 RNG = np.random.RandomState(42)
-from pipeline import Pipeline
-from train_pipeline import TrainPipeline
 
 class PredictPipeline(Pipeline):
     def __init__(self, goal, settings, directory):

@@ -71,7 +71,6 @@ class DataAnalysis():
             Load(Municipality).load_only(
                 "name",
                 "canton_id",
-                "canton_id",
                 "district_id",
                 "mountain_region_id",
                 "language_region_id",
@@ -216,7 +215,7 @@ class DataAnalysis():
         print("Heatmap all - OK")
         plt.clf()
         plt.close()
-        
+
         corr = self.ads.select_dtypes(include = ['float64']).corr()
         plt.figure(figsize=(12, 12))
         hm = sns.heatmap(corr, vmin=-1, vmax=1, square=True)
@@ -292,7 +291,7 @@ class DataAnalysis():
         b.set_xticklabels(self.synopsis['CANTON_ID'], rotation=90)
         ax.set_xlabel("")
         ax.set_ylabel("Kaufpreis CHF (Durchschnitt)")
-        ax.set_title("Kaufpreise auf Kantone")        
+        ax.set_title("Kaufpreise auf Kantone")
         plt.tight_layout()
         plt.savefig("images/analysis/barplot_canton.png")
         print("barplot canton - OK")
@@ -328,7 +327,7 @@ class DataAnalysis():
 
             # Boxplot only have data where price is lower 5 millions (Graphical better)
             ax = plt.axes()
-            b = sns.boxplot(x=key.lower(), y='price', 
+            b = sns.boxplot(x=key.lower(), y='price',
                             data=self.ads[self.ads.price < 5000000],
                             ax=ax)
             b.set_xticklabels(self.synopsis[key], rotation=90)
