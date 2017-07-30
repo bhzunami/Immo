@@ -33,6 +33,26 @@ class Pipeline():
         self.image_folder = os.path.abspath(os.path.join(directory, settings['image_folder']))
         self.model_folder = os.path.abspath(os.path.join(directory, settings['model_folder']))
 
+
+        #  self.cutoff,
+        #     self.cleanup,
+        #     self.remove_unwanted_cols,
+        #     self.simple_stats('Before Transformation'),
+        #     self.replace_zeros_with_nan,
+        #     self.transform_build_year,
+        #     self.transform_build_renovation,
+        #     self.transform_noise_level,
+        #     # self.transform_floor,  Floor will be droped
+        #     self.drop_floor,
+        #     self.transform_num_rooms,
+        #     #self.transfrom_description,
+        #     self.transform_living_area,
+        #     self.simple_stats('After Transformation'),
+        #     self.transform_tags,
+        #     self.transform_features,
+        #     self.transform_onehot,
+        #     self.transform_misc_living_area,
+
         self.preparation_pipeline = [
             self.remove_duplicate,
             self.simple_stats('Before Transformation'),
@@ -143,6 +163,8 @@ class Pipeline():
     def transform_build_year(self, ads):
         """Drop all houses which are build 2030 or later
         """
+        ads = ads.drop(ads[ads['build_year'] < 1200].index)
+        ads = ads.dropna(subset=['build_year'])
         return ads.drop(ads.index[np.where(ads['build_year'] > 2030)[0]])
 
     def transform_build_renovation(self, ads):
@@ -177,6 +199,11 @@ class Pipeline():
         """remove ad area where living area is NaN
         """
         return ads.dropna(subset=['living_area'])
+
+    def remove_unwanted_cols(self, ads):
+        remove = ['cubature', 'room_height', 'effective_area',
+                  'plot_area', 'longitude', 'latitude', 'num_floors']
+        return ads.drop(remove, axis=1)
 
     def transfrom_description(self, ads):
         """remove ad where description is NaN
@@ -334,9 +361,7 @@ class Pipeline():
         return ads
 
     def extraTreeRegression(self, ads):
-        remove = ['characteristics', 'description']
-        filterd_ads = ads.drop(remove, axis=1)
-        X, y = generate_matrix(filterd_ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price_brutto')
         try:
             model = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
         except FileNotFoundError:

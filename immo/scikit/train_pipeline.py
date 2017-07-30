@@ -41,6 +41,16 @@ from sklearn.metrics import confusion_matrix, mean_squared_error
 from sklearn.grid_search import GridSearchCV
 
 from combined_ensemble import CombinedEnsemble
+from sklearn.linear_model import ElasticNet, Lasso,  BayesianRidge, LassoLarsIC
+from sklearn.ensemble import RandomForestRegressor,  GradientBoostingRegressor
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import RobustScaler
+from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
+from sklearn.model_selection import KFold, cross_val_score, train_test_split
+from sklearn.metrics import mean_squared_error
+import xgboost as xgb
+import lightgbm as lgb
 
 def detect_language(text):
     """ detect the language by the text where
@@ -71,15 +81,33 @@ class TrainPipeline(Pipeline):
             #self.xgboost
             #self.lgb
             #self.adaBoost
+            self.predict_living_area,
+            self.extraTreeRegression2,
+            #self.xgboost]
+            #self.lgb]
+            #self.adaBoost]
             # self.kneighbours
             # self.train_extraTreeRegression_withKFold
             #self.train_extraTeeRegression
-
-            self.combinedEnsemble_settings,
-#            self.combinedEnsemble_train,
-            self.combinedEnsemble_load,
-            self.combinedEnsemble_test,
+            #self.combinedEnsemble_settings,
+            #self.combinedEnsemble_train,
+            #self.combinedEnsemble_load,
+            #self.combinedEnsemble_test,
         ]
+    def cutoff(self, ads):
+        return ads
+
+    def cleanup(self, ads):
+        ads = ads.drop(ads[ads['num_floors'] > 20].index)
+        ads = ads.drop(ads[ads['price'] < 10].index)
+        #ads = ads.drop(ads[ads['living_area'] > 5000].index)
+        #ads = ads.drop(ads[ads['num_rooms'] > 20].index)
+        ads = ads.drop(ads[ads['build_year'] < 1200].index)
+        ads = ads.drop(ads[(ads['ogroup'] == 'raum') | (ads['ogroup'] == 'invalid')].index)
+
+        # Delete empty prices
+        ads = ads.dropna(subset=['price'])
+        return ads.drop_duplicates(keep='first')
 
     def old_outliers_detection(self, ads):
         from sklearn import svm
@@ -89,6 +117,45 @@ class TrainPipeline(Pipeline):
         logging.info(ads[np.where(predicted == 1)].shape)
         logging.info(ads[np.where(predicted == -1)].shape)
 
+    def rmse_cv(self, model, X, y_train):
+        kf = KFold(5, shuffle=True, random_state=42).get_n_splits(X.values)
+        rmse = np.sqrt(-cross_val_score(model, X.values, y_train, scoring="neg_mean_squared_error", cv=kf))
+        return(rmse)
+
+
+    def test(self, ads):
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6) 
+
+        lasso = make_pipeline(RobustScaler(), Lasso(alpha =0.0005, random_state=42))
+        score = self.rmse_cv(lasso, X_train, y_train)
+        print("\nLasso score: {:.4f} (+/-{:.4f})\n".format(score.mean(), score.std()))
+
+
+        ENet = make_pipeline(RobustScaler(), ElasticNet(alpha=0.0005, l1_ratio=.9, random_state=3))
+
+        KRR = KernelRidge(alpha=0.6, kernel='polynomial', degree=2, coef0=2.5)
+
+        GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.05,
+                                           max_depth=4, max_features='sqrt',
+                                           min_samples_leaf=15, min_samples_split=10, 
+                                           loss='huber', random_state =5)
+
+        model_xgb = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0, 
+                                     learning_rate=0.05, max_depth=6, 
+                                     min_child_weight=1.5, n_estimators=7200,
+                                     reg_alpha=0.9, reg_lambda=0.6,
+                                     subsample=0.2,seed=42, silent=1,
+                                     random_state =7)
+
+        model_lgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
+                                      learning_rate=0.05, n_estimators=720,
+                                      max_bin = 55, bagging_fraction = 0.8,
+                                      bagging_freq = 5, feature_fraction = 0.2319,
+                                      feature_fraction_seed=9, bagging_seed=9,
+                                      min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
+
+        
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price_brutto')
@@ -345,6 +412,20 @@ class TrainPipeline(Pipeline):
         logging.info("MdAPE: {}".format(sum_mdape/kf.get_n_splits(X)))
         return ads
 
+
+    def extraTreeRegression2(self, ads):
+        X, y = generate_matrix(ads, 'price')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        model = ExtraTreesRegressor(n_estimators=700, n_jobs=-1, random_state=RNG)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        md = mape(y_test, y_pred)
+        train_statistics(y_test, y_pred, title="ExtraTree_train")
+        plot(y_test, y_pred, self.image_folder, show=True, title="ExtraTree_train")
+        
+
+    
     def train_extraTeeRegression(self, ads):
         # remove = ['characteristics', 'description']
         # filterd_ads = ads.drop(remove, axis=1)

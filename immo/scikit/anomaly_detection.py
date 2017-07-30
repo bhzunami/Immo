@@ -173,7 +173,7 @@ def main():
     classifiers = {
         'Linear regression': LinearRegression(),
         'Isolation forest': IsolationForest(max_samples=100, contamination=0.01, random_state=rng),
-        #'KNeighbors': KNeighborsClassifier(n_neighbors=20)
+        #'KNeighbors':  (n_neighbors=20)
     }
 
     for name, clf in classifiers.items():

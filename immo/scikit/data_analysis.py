@@ -11,78 +11,51 @@
 """
 
 import os
-import sys
-import time
-import numpy
-from threading import Thread
+import pdb
+import json
+
 import numpy as np
 import pandas as pd
-from sklearn import linear_model
-import pdb
+import seaborn as sns
 import matplotlib.pyplot as plt
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, defer, load_only, Load, aliased
-
+from sqlalchemy.orm import sessionmaker, load_only, Load
 from models import Advertisement, Municipality, ObjectType
-from sklearn.metrics import accuracy_score
-from sklearn.feature_selection import SelectKBest, SelectFromModel, chi2, RFE
-from sklearn.linear_model import LogisticRegression
-from sklearn.decomposition import PCA
-from sklearn.svm import LinearSVC
-
-
-
-KEYS = [(0, 'living_area'), (0, 'floor'), (1, 'num_rooms'), (1, 'num_floors'), (2, 'build_year'),
-        (2, 'last_renovation_year'), (3, 'cubature'), (3, 'room_height'), (4, 'effective_area'),
-        (4, 'plot_area')]
-
-CANTONS = ["ZH", "BE", "LU", "UR", "SZ",
-           "OW", "NW", "GL", "ZG", "FR",
-           "SO", "BS", "BL", "SH",
-           "AR", "AI", "SG",
-           "GR", "AG", "TG", "TI", "VD", "VS",
-           "NE", "GE", "JU"]
 
 # Set precision to 3
-numpy.set_printoptions(precision=3)
+np.set_printoptions(precision=3)
 
 class DataAnalysis():
+    def __init__(self, file='./homegate.csv'):
 
-    def __init__(self, from_file=True, file='./homegate.csv'):
-        self.from_file = from_file
-        if from_file:
-            ads = self.load_dataset_from_file(file)
-            self.ads = ads.drop(['id'], axis=1)
+        self.synopsis = json.load(open('synopsis.json'))
+
+        if os.path.isfile(file):
+            print("Use file")
+            ads = pd.read_csv(file, index_col=0, engine='c')
         else:
             try:
                 engine = create_engine(os.environ.get('DATABASE_URL', None))
                 Session = sessionmaker(bind=engine)
                 self.session = Session()
                 ads = self.load_dataset_from_database()
-                # Remove id from municipality and object type
-                self.ads = ads.loc[:, ~ads.columns.duplicated()]
-                self.ads.to_csv(file, header=True, encoding='utf-8')
+                ads.to_csv(file, header=True, encoding='utf-8')
             except AttributeError as e:
-                print("{}".format(e))
                 raise Exception("If you want to load data from the database you have to export the DATABASE_URL environment")
 
-
-    def load_dataset_from_file(self, file):
-        """loads data from a csv file
-        """
-        return pd.read_csv(file, index_col=0, engine='c')
-
+        self.ads = ads
     def load_dataset_from_database(self):
         """ load data from database
         """
         statement = self.session.query(Advertisement, Municipality, ObjectType).join(Municipality, ObjectType).options(
             Load(Advertisement).load_only(
                 "price_brutto",
+                "crawler",
                 "num_floors",
                 "living_area",
                 "floor",
                 "num_rooms",
-                "object_types_id",
                 "build_year",
                 "last_renovation_year",
                 "cubature",
@@ -94,6 +67,7 @@ class DataAnalysis():
                 "plot_area",
                 "tags"),
             Load(Municipality).load_only(
+                "name",
                 "canton_id",
                 "canton_id",
                 "district_id",
@@ -107,333 +81,273 @@ class DataAnalysis():
                 "noise_level",
                 "urban_character_id",
                 "steuerfuss_gde",
-                "steuerfuss_kanton"),
+                "steuerfuss_kanton",
+                "degurba_id",
+                "planning_region_id",
+                "ase",
+                "greater_region_id",
+                "ms_region_id",
+                "municipal_size_class_id",
+                "agglomeration_size_class_id",
+                "municipal_type22_id",
+                "municipal_type9_id"),
             Load(ObjectType).load_only("name", "grouping")
-        ).statement
-        return pd.read_sql_query(statement, self.session.bind)
+        ).with_labels().statement
+        data = pd.read_sql_query(statement, self.session.bind)
 
-        # return pd.read_sql_query(self.session.query(Advertisement).join(Municipality, Advertisement.municipalities_id == Municipality.id).options(
-        #     Load(Advertisement).load_only(
-        #         'num_floors',
-        #         'living_area',
-        #         'floor',
-        #         'price_brutto',
-        #         'num_rooms',
-        #         'object_types_id',
-        #         'build_year',
-        #         'last_renovation_year',
-        #         'cubature',
-        #         'room_height',
-        #         'effective_area',
-        #         'longitude',
-        #         'latitude',
-        #         'noise_level',
-        #         'plot_area',
-        #         'municipalities_id',
-        #         'tags'
-        #         )).statement, self.session.bind)
+        data.drop(['advertisements_id', 'municipalities_id', 'object_types_id'], axis=1, inplace=True)
+        # Rename
+        return data.rename(columns={'advertisements_price_brutto': 'price',
+                                    'advertisements_crawler': 'crawler',
+                                    'advertisements_living_area': 'living_area',
+                                    'advertisements_floor': 'floor',
+                                    'advertisements_num_rooms': 'num_rooms',
+                                    'advertisements_num_floors': 'num_floors',
+                                    'advertisements_build_year': 'build_year',
+                                    'advertisements_last_renovation_year': 'last_renovation_year',
+                                    'advertisements_cubature': 'cubature',
+                                    'advertisements_room_height': 'room_height',
+                                    'advertisements_effective_area': 'effective_area',
+                                    'advertisements_plot_area': 'plot_area',
+                                    'advertisements_longitude': 'longitude',
+                                    'advertisements_latitude': 'latitude',
+                                    'advertisements_noise_level': 'noise_level',
+                                    'advertisements_tags': 'tags',
+                                    'municipalities_name': 'municipality',
+                                    'municipalities_canton_id': 'canton_id',
+                                    'municipalities_district_id': 'district_id',
+                                    'municipalities_planning_region_id': 'planning_region_id',
+                                    'municipalities_mountain_region_id': 'mountain_region_id',
+                                    'municipalities_ase': 'ase',
+                                    'municipalities_greater_region_id': 'greater_region_id',
+                                    'municipalities_language_region_id': 'language_region_id',
+                                    'municipalities_ms_region_id': 'ms_region_id',
+                                    'municipalities_job_market_region_id': 'job_market_region_id',
+                                    'municipalities_agglomeration_id': 'agglomeration_id',
+                                    'municipalities_metropole_region_id': 'metropole_region_id',
+                                    'municipalities_tourism_region_id': 'tourism_region_id',
+                                    'municipalities_municipal_size_class_id': 'municipal_size_class_id',
+                                    'municipalities_urban_character_id': 'urban_character_id',
+                                    'municipalities_agglomeration_size_class_id': 'agglomeration_size_class_id',
+                                    'municipalities_is_town': 'is_town',
+                                    'municipalities_degurba_id': 'degurba_id',
+                                    'municipalities_municipal_type22_id': 'municipal_type22_id',
+                                    'municipalities_municipal_type9_id': 'municipal_type9_id',
+                                    'municipalities_noise_level': 'm_noise_level',
+                                    'municipalities_steuerfuss_gde': 'steuerfuss_gde',
+                                    'municipalities_steuerfuss_kanton': 'steuerfuss_kanton',
+                                    'object_types_name': 'otype',
+                                    'object_types_grouping': 'ogroup'})
 
-        # return pd.read_sql_query(self.session.query(Advertisement).options(defer('raw_data')).statement,
-        #                          self.session.bind,
-        #                          parse_dates=['crawled_at'])
-
+        # Cleanup the datakeys
 
     def simple_stats(self):
-        total_amount_of_data = self.ads.shape[0]
-        print("We have total {} values".format(total_amount_of_data))
-        print("{:25} | {:6} | {:6} | {:6}".format("Feature",
-                                                  "0-Values",
-                                                  "NaN-Values",
-                                                  "usable Values"))
+        print("We have total {} values".format(len(self.ads)))
+        print("{:25} | {:6} | {:6}".format("Feature",
+                                           "NaN-Values",
+                                           "usable Values"))
         print("-"*70)
-        total_zero = 0
-        total_nan = 0
-        total_use = 0
-
         for i, key in enumerate(self.ads.keys()):
             if key == 'id' or key == 'Unnamed':  # Keys from pandas we do not want
                 continue
-        # for i, key in KEYS:
-            zero_values = self.ads.loc[self.ads[key] == 0][key].shape[0]
             nan_values = self.ads[key].isnull().sum()
-            useful_values = total_amount_of_data - zero_values - nan_values
+            useful_values = len(self.ads) - nan_values
 
-            # Sum up
-            total_zero += zero_values
-            total_nan += nan_values
-            total_use += useful_values
+            print("{:25} {:6} ({:02.2f}%) | {:6} ({:02.0f}%)".format(key,
+                                                                    nan_values,
+                                                                    (nan_values/len(self.ads))*100,
+                                                                    useful_values,
+                                                                    (useful_values/len(self.ads))*100))
+        # Missing data
+        # Calculate percent of missing data
+        missing_data = (self.ads.isnull().sum() / len(self.ads)) * 100
+        # Remove itmes we have 100% and sort
+        missing_data = missing_data.drop(missing_data[missing_data == 0].index).sort_values(ascending=False)
+        sns.barplot(x=missing_data.index, y=missing_data)
+        plt.xlabel('Features')
+        plt.ylabel('Percent of missing values')
+        plt.title('Percent missing data by feature')
+        plt.xticks(rotation='90')
+        plt.tight_layout()
+        plt.savefig("images/analysis/missing_values.png")
+        plt.clf()
+        plt.close()
 
-            print("{:25} {:6} ({:02.2f}%) | {:6} ({:02.2f}%) | {:6} ({:02.0f}%)".format(key, zero_values, (zero_values/total_amount_of_data)*100,
-                                                                                        nan_values, (nan_values/total_amount_of_data)*100,
-                                                                                        useful_values, (useful_values/total_amount_of_data)*100))
-
-        print("-"*70)
-        print("{:25} {:6} | {:6} | {}".format('Total', total_zero, total_nan, total_use))
-
-
-    def draw_features(self, show_null_values=False):
-        """draw all features assicuiated to the price
-        """
-        fig, ax = plt.subplots(nrows=5, ncols=2)
-
-        for i, key in enumerate(KEYS):
-            current_axis = ax[key[0], i%2]
-            zero_values = self.ads.loc[self.ads[key[1]] == 0][key[1]]
-            non_zero_values = self.ads.loc[self.ads[key[1]] != 0][key[1]]
-
-            df = pd.concat([zero_values, non_zero_values, self.ads.price_brutto],
-                            axis=1, keys=['zero', 'non_zero', 'price_brutto'])
-
-            df.plot(kind='scatter', x='price_brutto',
-                    y='non_zero', color='DarkBlue', ax=current_axis, s=2)
-
-            if show_null_values:
-                df.plot(kind='scatter', x='price_brutto',
-                        y='zero', color='Red', ax=current_axis, s=2)
-            # set label and
-            current_axis.set_xlabel('Price')
-            current_axis.set_ylabel(key[1])
-            current_axis.set_title('Price - {}'.format(key[1]))
-            current_axis.get_xaxis().get_major_formatter().set_useOffset(False)
-            current_axis.ticklabel_format(useOffset=False, style='plain')  # Do not show e^7 as label
-
-        plt.show()
-
-    def prepare_dataset(self):
+    def clean_dataset(self):
         print("="*70)
         print("Dataset preparation:")
         print("-"*70)
-        # Remove all entries with NaN / None
-        self.ads_cleanup = self.ads.dropna()
-        print("After remove all NaN the size of our dataset is {}".format(self.ads_cleanup.shape))
-        self.y = self.ads_cleanup['price_brutto'].values
-        # pdb.set_trace()
-        self.X = self.ads_cleanup.drop(['price_brutto', 'id'], axis=1)
-        self.keys = list(self.X.keys())[1:]
-        self.X = self.X.values
+        # Remove elements with no price
+        ads = self.ads.dropna(subset=['price'])
+        # Cleanup some outliers
+        ads = ads.drop(ads[ads['num_floors'] > 20].index)
+        ads = ads.drop(ads[ads['price'] > 20000000].index)
+        ads = ads.drop(ads[ads['price'] < 10].index)
+        ads = ads.drop(ads[ads['living_area'] > 5000].index)
+        ads = ads.drop(ads[ads['num_rooms'] > 20].index)
+        ads = ads.drop(ads[ads['build_year'] < 1200].index)
+        ads = ads.drop(ads[ads['cubature'] > 20000].index)
+        ads = ads.drop(ads[ads['floor'] > 30].index)
+        print("Removed {} outliers. Dataset size: {}".format(len(self.ads) - len(ads), len(ads)))
+        self.ads = ads
 
-    def transform_tags(self):
-        with open('../crawler/taglist.txt') as f:
-            search_words = set([x.split(':')[0] for x in f.read().splitlines()])
-
-        template_dict = dict.fromkeys(search_words, 0)
-
-        def transformer(row):
-            the_dict = template_dict.copy()
-
-            for tag in row.tags:
-                the_dict[tag] = 1
-
-            return pd.Series(the_dict)
-
-        tag_columns = self.ads.apply(transformer, axis=1)
-
-        self.ads = self.ads.drop(['tags'], axis=1).merge(tag_columns, left_index=True, right_index=True)
-
-
-    # Features Selection
-    def select_k_best(self):
-        # Use the chi squared statistical test for the best 5 features
-        k_best = SelectKBest(score_func=chi2, k=5)
-
-        fit = k_best.fit(self.X, self.y)
-        # summarize scores
-        print("="*70)
-        print("Select K Best fit scores:")
-        print("-"*70)
-        for key, fit_score in sorted(zip(self.keys, fit.scores_), key=lambda x: x[1], reverse=True):
-            print("{:25}: {:6}".format(key, fit_score))
-
-        features = fit.transform(self.X)  # fit.fit_transform(self.X, self.y)
-
-        # summarize selected features
-        print("The first 5 features \n{}".format(features[0:6,:]))
-
-
-    def recursive_feature_elimination(self):
-        print("="*70)
-        print("Recursive Feature elimination")
-        print("="*70)
-        model = LogisticRegression()
-        rfe = RFE(model, 5)  # Get the top 5 features
-        fit = rfe.fit(self.X, self.y)
-
-        for key, f in zip(self.keys, fit.support_):
-            print("{:25} {}".format(key, f))
-
-        print("Rankin: {}".format(fit.ranking_))
-
-    def pricipal_component_analysis(self):
-        print("="*70)
-        print("Principal Component Analysis")
-        print("="*70)
-
-        pca = PCA(n_components=5)
-        fit = pca.fit(self.X)
-
-        # summarize components
-        print("Explained Variance: {}".format(fit.explained_variance_ratio_))
-        print(fit.components_)
-
-
-    def L1(self):
-        print("="*70)
-        print("L1-Based")
-        print("="*70)
-
-        lsvc = LinearSVC(C=0.01, penalty="l1", dual=False)
-        fit = lsvc.fit(self.X, self.y)
-
-        model = SelectFromModel(lsvc, prefit=True)
-        X_new = model.transform(self.X)
-        print("New shape of the matrix: {} old was {}. Removed {} cols".format(X_new.shape,
-                                                                               self.X.shape,
-                                                                               self.X.shape[1] - X_new.shape[1]))
-        print(X_new)
-
-    def plotting(self):
-        import seaborn as sns
-        # Price distplot
-        # Clean up ads
-        ads = self.ads[(self.ads.living_area <= 1000) &
-                       (self.ads.living_area > 0) &
-                       (self.ads.effective_area <= 1000) &
-                       (self.ads.effective_area > 0) &
-                       (self.ads.num_floors < 50) &
-                       (self.ads.build_year > 1200) &
-                       (self.ads.num_rooms < 20) &
-                       (self.ads.price_brutto <= 10000000)]
+    def plot_numerical_values(self):
         ax = plt.axes()
-
         ax.set_title("Vertielung des Kaufpreises")
-        sns.distplot(ads['price_brutto'], kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
+        sns.distplot(self.ads['price'], kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
         ax.set_xlabel("Kaufpreis CHF")
-        ax.get_xaxis().get_major_formatter().set_useOffset(False)
-        plt.savefig("images/Verteilung_des_kauf_preises.png")
+        plt.savefig("images/analysis/Verteilung_des_kauf_preises.png")
         print("Distplot - OK")
         plt.clf()
         plt.close()
 
         # Heatmap of features:
-        corr = ads.select_dtypes(include = ['float64', 'int64']).corr()
+        corr = self.ads.select_dtypes(include = ['float64', 'int64']).corr()
         plt.figure(figsize=(12, 12))
         hm = sns.heatmap(corr, vmin=-1, vmax=1, square=True)
+        for text in hm.get_xticklabels():
+            text.set_text(text.get_text().replace("_", " ").replace("id", "").title())
         hm.set_xticklabels(hm.get_xticklabels(), rotation=90)
         hm.set_yticklabels(reversed(hm.get_xticklabels()), rotation=0)
-        plt.savefig("images/Heatmap.png")
-        print("Heatmap - OK")
+        hm.set_title("Heatmap aller Features", fontsize=20)
+        plt.savefig("images/analysis/Heatmap_all.png")
+        print("Heatmap all - OK")
+        plt.clf()
+        plt.close()
+        
+        corr = self.ads.select_dtypes(include = ['float64']).corr()
+        plt.figure(figsize=(12, 12))
+        hm = sns.heatmap(corr, vmin=-1, vmax=1, square=True)
+        for text in hm.get_xticklabels():
+            text.set_text(text.get_text().replace("_", " ").replace("id", "").title())
+        hm.set_xticklabels(hm.get_xticklabels(), rotation=90)
+        hm.set_yticklabels(reversed(hm.get_xticklabels()), rotation=0)
+        hm.set_title("Heatmap numerischer Features", fontsize=20)
+        plt.savefig("images/analysis/Heatmap_numerical.png")
+        print("Heatmap Numerical - OK")
         plt.clf()
         plt.close()
 
-        cor_dict = corr['price_brutto'].to_dict()
-        del cor_dict['price_brutto']
+        cor_dict = corr['price'].to_dict()
+        del cor_dict['price']
         print("List the numerical features decendingly by their correlation with Sale Price:\n")
         for ele in sorted(cor_dict.items(), key = lambda x: -abs(x[1])):
             print("{0}: \t{1}".format(*ele))
 
-        # Now all features compared to price_brutto
+        # Now all features compared to price
         plt.figure(1)
         f, ax = plt.subplots(3, 2, figsize=(10, 9))
-        price = ads.price_brutto.values
-        ax[0, 0].scatter(ads.num_rooms.values, price)
+        price = self.ads.price.values
+        ax[0, 0].scatter(self.ads.num_rooms.values, price)
         ax[0, 0].set_title('Anzahl Zimmer')
-        #ax[0, 0].set_ylabel('Preis')
-        ax[0, 1].scatter(ads.living_area.values, price)
+        ax[0, 1].scatter(self.ads.living_area.values, price)
         ax[0, 1].set_title('Wohnfläche [m²]')
-        #ax[0, 1].set_ylabel('Preis')
-        ax[1, 0].scatter(ads.effective_area.values, price)
-        ax[1, 0].set_title('Effektive Fläche [m²]')
+        ax[1, 0].scatter(self.ads.build_year.values, price)
+        ax[1, 0].set_title('Baujahr')
         ax[1, 0].set_ylabel('Preis')
-        ax[1, 1].scatter(ads.build_year.values, price)
-        ax[1, 1].set_title('Baujahr')
-        #ax[1, 1].set_ylabel('Preis')
-        ax[2, 0].scatter(ads.num_floors.values, price)
-        ax[2, 0].set_title('Anzahl Stockwerke')
-        #ax[2, 0].set_ylabel('Preis')
-        ax[2, 1].scatter(ads.noise_level.values, price)
-        ax[2, 1].set_title('Lärmbelastung [db]')
-        #ax[2, 1].set_ylabel('Preis')
-        #f.text(10.01, 0.5, 'Kaufpreis', va='center', rotation='vertical', fontsize = 32)
+        ax[1, 1].scatter(self.ads.num_floors.values, price)
+        ax[1, 1].set_title('Anzahl Stockwerke')
+        ax[2, 0].scatter(self.ads.cubature.values, price)
+        ax[2, 0].set_title('Cubature')
+        ax[2, 1].scatter(self.ads.floor.values, price)
+        ax[2, 1].set_title('Stockwerk')
         plt.tight_layout()
-        plt.savefig("images/Vergleich_zum_preis.png")
+        plt.savefig("images/analysis/Vergleich_zum_preis.png")
         print("Vergleich - OK")
         plt.clf()
         plt.close()
 
         fig = plt.figure()
         from scipy import stats
-        res = stats.probplot(ads['price_brutto'], plot=plt)
-        plt.savefig("images/skewness.png")
+        res = stats.probplot(self.ads['price'], plot=plt)
+        plt.savefig("images/analysis/skewness.png")
         print("skewness - OK")
         plt.clf()
         plt.close()
         fig = plt.figure()
-        res = stats.probplot(np.log(ads['price_brutto']), plot=plt)
-        plt.savefig("images/log_skewness.png")
+        res = stats.probplot(np.log1p(self.ads['price']), plot=plt)
+        plt.savefig("images/analysis/log_skewness.png")
         print("Log skewness - OK")
         plt.clf()
         plt.close()
 
+    def plot_categorical_features(self):
+
         ax = plt.axes()
-        b = sns.boxplot(x='canton_id', y='price_brutto', data=ads, ax=ax)
-        b.set_xticklabels(CANTONS, rotation=90)
-        plt.tight_layout()
+        b = sns.boxplot(x='canton_id', y='price', data=self.ads, ax=ax)
+        b.set_xticklabels(self.synopsis['CANTON_ID'], rotation=90)
         ax.set_xlabel("")
         ax.set_ylabel("Kaufpreis CHF")
-        plt.savefig("images/boxPlot_cantons.png")
+        ax.set_title("Kaufpreise auf Kantone")
+        plt.tight_layout()
+        plt.savefig("images/analysis/boxPlot_cantons.png")
         print("boxplot cantons - OK")
         plt.clf()
         plt.close()
 
         ax = plt.axes()
-        b = sns.barplot(x='canton_id', y='price_brutto', data=ads, ax=ax)
-        b.set_xticklabels(CANTONS, rotation=90)
-        plt.tight_layout()
+        b = sns.barplot(x='canton_id', y='price', data=self.ads, ax=ax)
+        b.set_xticklabels(self.synopsis['CANTON_ID'], rotation=90)
         ax.set_xlabel("")
-        ax.set_ylabel("Kaufpreis CHF")
-        plt.savefig("images/barplot_canton.png")
+        ax.set_ylabel("Kaufpreis CHF (Durchschnitt)")
+        ax.set_title("Kaufpreise auf Kantone")        
+        plt.tight_layout()
+        plt.savefig("images/analysis/barplot_canton.png")
         print("barplot canton - OK")
         plt.clf()
         plt.close()
 
-        for key in ['floor', 'num_rooms', 'num_floors',
-                    'district_id',
-                    'mountain_region_id', 'language_region_id', 'job_market_region_id',
-                    'agglomeration_id', 'metropole_region_id', 'tourism_region_id',
-                    'urban_character_id', 'is_town', 'steuerfuss_gde', 'steuerfuss_kanton',
-                    'name', 'grouping']:
+        ax = plt.axes()
+        b = sns.barplot(x='otype', y='price', data=self.ads, ax=ax)
+        b.set_xticklabels(b.get_xticklabels(), rotation=90)
+        plt.tight_layout()
+        ax.set_xlabel("")
+        ax.set_ylabel("Kaufpreis CHF (Durchschnitt)")
+        plt.savefig("images/analysis/barplot_gruppen.png")
+        print("barplot Gruppen - OK")
+        plt.clf()
+        plt.close()
+
+        for key in ['TOURISM_REGION_ID', 'METROPOLE_REGION_ID', 'JOB_MARKET_REGION_ID',
+                    'MOUNTAIN_REGION_ID', 'LANGUAGE_REGION_ID', 'MUNICIPAL_SIZE_CLASS_ID',
+                    'GREATER_REGION_ID', 'AGGLOMERATION_SIZE_CLASS_ID',
+                    'IS_TOWN', 'DEGURBA_ID']:
             ax = plt.axes()
-            b = sns.boxplot(x=key, y='price_brutto', data=ads, ax=ax)
+            b = sns.barplot(x=key.lower(), y='price', data=self.ads, ax=ax)
+            b.set_xticklabels(self.synopsis[key], rotation=90)
+            ax.set_xlabel("")
+            ax.set_ylabel("Kaufpreis CHF (Durchschnitt)")
+            ax.set_title(key.replace('_', ' ').replace('ID', '').title())
             plt.tight_layout()
-            ax.set_ylabel("Kaufpreis CHF")
-            plt.show()
+            plt.savefig("images/analysis/barplot_{}.png".format(key.lower()))
+            print("barplot {} - OK".format(key.lower()))
+            plt.clf()
+            plt.close()
+
+            # Boxplot only have data where price is lower 5 millions (Graphical better)
+            ax = plt.axes()
+            b = sns.boxplot(x=key.lower(), y='price', 
+                            data=self.ads[self.ads.price < 5000000],
+                            ax=ax)
+            b.set_xticklabels(self.synopsis[key], rotation=90)
+            ax.set_xlabel("")
+            ax.set_ylabel("Kaufpreis CHF (Durchschnitt)")
+            ax.set_title(key.replace('_', ' ').replace('ID', '').title())
+            plt.tight_layout()
+            plt.savefig("images/analysis/boxplot_{}.png".format(key.lower()))
+            print("boxplot {} - OK".format(key.lower()))
+            plt.clf()
+            plt.close()
+
+
 
 
 def main():
-    data_analysis = DataAnalysis(from_file=True, file='all_all.csv')
-    data_analysis.plotting()
-    return
-    data_analysis.transform_tags()
+    data_analysis = DataAnalysis(file='advertisements.csv')
     data_analysis.simple_stats()
-    data_analysis.draw_features(show_null_values=True)
-    data_analysis.prepare_dataset()
-    # data_analysis.select_k_best()
-    # data_analysis.recursive_feature_elimination()
-    data_analysis.pricipal_component_analysis()
-    # data_analysis.L1()
-
-    # model.fit(X, y)
-    # x = np.array(X[:, 1].A1)
-    # f = model.predict(X).flatten()
-
-    # fig, ax = plt.subplots(figsize=(12, 8))
-    # ax.plot(x, f, 'r', label='Prediction')
-    # ax.scatter(ads.living_area, ads.price_brutto, label='Traning Data')
-    # ax.legend(loc=2)
-    # ax.set_xlabel('Living Area')
-    # ax.set_ylabel('Price')
-    # ax.set_title('Predicted Price vs. Living Area')
-    # plt.show()
+    data_analysis.clean_dataset()
+    data_analysis.plot_numerical_values()
+    data_analysis.plot_categorical_features()
 
 
 if __name__ == "__main__":

@@ -37,9 +37,17 @@ parser.add_argument('-g', '--goal',
                     default="price_brutto")
 parser.add_argument('-f', '--file',
                     help='Predict the house price',
-                    default='{}/all_2.csv'.format(DIRECTORY))
+                    default='{}/advertisements.csv'.format(DIRECTORY))
 
 args = parser.parse_args()
+
+
+
+def spinning_coursor():
+    while True:
+        for cursor in '|/-\\':
+            yield cursor
+
 
 def main(args):
     logging.info("Start with args {}".format(args))
@@ -60,13 +68,13 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     # create a file handler
-    handler = logging.FileHandler('ml.log')
-    handler.setLevel(logging.INFO)
-    # create a logging format
-    formatter = logging.Formatter('%(asctime)s: %(levelname)s - %(message)s', "%Y-%m-%d %H:%M:%S")
-    handler.setFormatter(formatter)
+    # handler = logging.FileHandler('ml.log')
+    # handler.setLevel(logging.INFO)
+    # # create a logging format
+    # formatter = logging.Formatter('%(asctime)s: %(levelname)s - %(message)s', "%Y-%m-%d %H:%M:%S")
+    # handler.setFormatter(formatter)
 
-    # add the handlers to the logger
-    logger.addHandler(handler)
+    # # add the handlers to the logger
+    # logger.addHandler(handler)
 
     main(args)
