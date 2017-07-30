@@ -29,9 +29,33 @@ class Pipeline():
     def __init__(self, goal, settings, directory, ):
         self.goal = goal
         self.settings = settings
-        self.directory = directory        
+        self.directory = directory
         self.image_folder = os.path.abspath(os.path.join(directory, settings['image_folder']))
         self.model_folder = os.path.abspath(os.path.join(directory, settings['model_folder']))
+
+        self.preparation_pipeline = [
+            self.remove_duplicate,
+            self.simple_stats('Before Transformation'),
+            self.replace_zeros_with_nan,
+            self.transform_build_year,
+            self.transform_build_renovation,
+            self.transform_noise_level,
+            self.drop_floor,
+            self.transform_num_rooms,
+            self.transfrom_description,
+            self.transform_living_area,
+            self.simple_stats('After Transformation'),
+            self.transform_tags,
+            self.transform_features,
+            self.transform_onehot,
+            self.transform_misc_living_area,
+            self.predict_living_area,
+            self.outlier_detection,
+        ]
+
+
+    def remove_duplicate(self, ads):
+        return ads.drop_duplicates(keep='first')
 
     def simple_stats(sefl, title):
         """Show how many NaN has one Feature and how many we can use
@@ -59,7 +83,7 @@ class Pipeline():
                 total_nan += nan_values
                 total_use = total_use if total_use < useful_values else useful_values
 
-                logging.info("{:25} | {:8} ({:5.2f}%) | {:8} ({:3.0f}%)".format(key, 
+                logging.info("{:25} | {:8} ({:5.2f}%) | {:8} ({:3.0f}%)".format(key,
                         nan_values, (nan_values/total_amount_of_data)*100,
                         useful_values, (useful_values/total_amount_of_data)*100))
 
@@ -68,6 +92,17 @@ class Pipeline():
             return ads
 
         return run
+
+    def save_as_df(self, name):
+        def inner_save_as_df(ads):
+            joblib.dump(ads, name)
+            return ads
+        return inner_save_as_df
+
+    def load_df(self, name):
+        def inner_load_df(ads):
+            return joblib.load(name)
+        return inner_load_df
 
     def export(self, ads):
         logging.info("Export ads")
@@ -90,6 +125,9 @@ class Pipeline():
 
         ads['noise_level'] = ads.apply(lambdarow, axis=1)
         return ads
+
+    def remove_duplicate(self, ads):
+        return ads.drop_duplicates(keep='first')
 
     def replace_zeros_with_nan(self, ads):
         """ replace 0 values into np.nan for statistic
@@ -124,21 +162,6 @@ class Pipeline():
         ads['last_construction'] = ads.apply(last_const, axis=1)
 
         return ads.drop(['last_renovation_year'], axis=1)
-
-    def transform_floor(self, ads):
-        """if type is house there is always floor 0
-        """
-        def lambdarow(row):
-            if not np.isnan(row['floor']):
-                return row['floor']
-            if row['ogroup'] == 'haus':
-                return 0
-
-            return float('NaN')
-
-        ads['floor'] = ads.apply(lambdarow, axis=1)
-
-        return ads
 
     def transform_num_rooms(self, ads):
         """remove all elements where num_rooms is NaN
@@ -199,7 +222,7 @@ class Pipeline():
             logging.error("Could not load living area model. Did you forget to train living area?")
             return ads.dropna(subset=['living_area'])
 
-        tempdf = ads.drop(['price_brutto', 'description', 'characteristics'], axis=1)
+        tempdf = ads.drop(['price_brutto'], axis=1)
 
         ads.living_area_predicted = 0
         nan_idxs = tempdf.living_area.index[tempdf.living_area.apply(np.isnan)]
@@ -214,7 +237,7 @@ class Pipeline():
         The outlier model must be trained first
         """
         meshgrid = {
-            'build_year': np.meshgrid(np.linspace(0, max(ads['build_year']), 400), 
+            'build_year': np.meshgrid(np.linspace(0, max(ads['build_year']), 400),
                                       np.linspace(0, max(ads['price_brutto']), 1000)),
             'num_rooms': np.meshgrid(np.linspace(-1, max(ads['num_rooms']), 400),
                                      np.linspace(0, max(ads['price_brutto']), 1000)),
@@ -279,7 +302,7 @@ class Pipeline():
                                         (ads['tags_verkehr'] == 1) |
                                         (ads['tags_zentral'] == 1), 1, 0)
 
-        # Drop the concatinated features
+        # Drop the concatenated features
         drop_features = ['tags_badewanne', 'tags_badezimmer', 'tags_dusche', 'tags_lavabo', 'tags_anschluss',
                         'tags_abstellplatz', 'tags_cheminée', 'tags_eingang', 'tags_esszimmer', 'tags_gross',
                         'tags_heizung', 'tags_lift', 'tags_minergie', 'tags_schlafzimmer', 'tags_wohnzimmer',
@@ -309,7 +332,7 @@ class Pipeline():
         train_statistics(y, y_pred, title="ExtraTree")
         plot(y, y_pred, self.image_folder, show=False, title="ExtraTree")
         return ads
-    
+
     def extraTreeRegression(self, ads):
         remove = ['characteristics', 'description']
         filterd_ads = ads.drop(remove, axis=1)

@@ -42,9 +42,9 @@ parser.add_argument('-f', '--file',
 args = parser.parse_args()
 
 def main(args):
-    logging.info("Start with args {}".format(args))    
+    logging.info("Start with args {}".format(args))
     ads = pd.read_csv(args.file, index_col=0, engine='c')
-    
+
     if args.train:
         tp = TrainPipeline(args.goal, settings, DIRECTORY)
     if args.predict:
@@ -53,6 +53,8 @@ def main(args):
     for f in tp.pipeline:
         logging.info("Apply transformation: {}".format(f.__name__))
         ads = f(ads)
+
+    logging.info("Pipeline finished.")
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)

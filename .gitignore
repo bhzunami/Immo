@@ -104,3 +104,8 @@ immo/scikit/all.csv
 *pkl
 *.png
 *.csv
+
+# piero special files
+/immo/tensorflow/
+/scikit
+*.ipynb

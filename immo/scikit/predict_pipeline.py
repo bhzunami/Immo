@@ -9,30 +9,34 @@ import os
 import pdb
 import logging
 import json
+from sklearn.externals import joblib
 
 
 from pipeline import Pipeline
+import logging
+import json
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import ast
+# Scikit
+from sklearn.ensemble import ExtraTreesRegressor, IsolationForest
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.externals import joblib
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostRegressor
 
+from a_detection import AnomalyDetection
+from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
+
+RNG = np.random.RandomState(42)
+from pipeline import Pipeline
+from train_pipeline import TrainPipeline
 
 class PredictPipeline(Pipeline):
     def __init__(self, goal, settings, directory):
         super().__init__(goal, settings, directory)
         self.pipeline = [
-            self.simple_stats('Before Transformation'),
-            self.replace_zeros_with_nan,
-            self.transform_build_year,
-            self.transform_build_renovation,
-            self.transform_noise_level,
-            # self.transform_floor,  Floor will be droped
-            self.drop_floor,
-            self.transform_num_rooms,
-            self.transfrom_description,
-            self.transform_living_area,
-            self.simple_stats('After Transformation'),
-            self.transform_tags,
-            self.transform_features,
-            self.transform_onehot,
-            self.outlier_detection,
-            self.predict_living_area,
-            self.transform_misc_living_area,
-            self.extraTreeRegression]
+            self.load_df("ads_transformed.pkl"),
+        ]

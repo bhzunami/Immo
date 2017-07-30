@@ -22,6 +22,8 @@ from sklearn.externals import joblib
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostRegressor
+from sklearn.linear_model import LassoLarsCV, Ridge, RidgeCV, LassoCV, Lasso, LinearRegression, LogisticRegression
+
 # NLTK
 #import nltk
 #from nltk.corpus import stopwords # Import the stop word list
@@ -33,13 +35,15 @@ from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_
 RNG = np.random.RandomState(42)
 from pipeline import Pipeline
 
-import xgboost as xgb
-import lightgbm as lgb
+#import xgboost as xgb
+#import lightgbm as lgb
 from sklearn.metrics import confusion_matrix, mean_squared_error
 from sklearn.grid_search import GridSearchCV
 
+from combined_ensemble import CombinedEnsemble
+
 def detect_language(text):
-    """ detect the language by the text where 
+    """ detect the language by the text where
     the most stopwords for a language are found
     """
     languages_ratios = {}
@@ -54,42 +58,28 @@ def detect_language(text):
 class TrainPipeline(Pipeline):
     def __init__(self, goal, settings, directory):
         super().__init__(goal, settings, directory)
+
+        # pipeline for creating and saving ads
+        # self.pipeline = self.preparation_pipeline + [self.save_as_df("ads_transformed.pkl")]
+
+        # pipeline for loading ads and training
         self.pipeline = [
-            self.cutoff,
-            self.remove_duplicate,
-            self.simple_stats('Before Transformation'),
-            self.replace_zeros_with_nan,
-            self.transform_build_year,
-            self.transform_build_renovation,
-            self.transform_noise_level,
-            # self.transform_floor,  Floor will be droped
-            self.drop_floor,
-            self.transform_num_rooms,
-            self.transfrom_description,
-            self.transform_living_area,
-            self.simple_stats('After Transformation'),
-            self.transform_tags,
-            self.transform_features,
-            self.transform_onehot,
-            self.transform_misc_living_area,
+            self.load_df("ads_transformed.pkl"),
             #self.train_outlier_detection,
-            #self.outlier_detection,
-            #self.old_outliers_detection,
             #self.train_test_validate_split,
             #self.train_living_area,
-            self.predict_living_area,
-            self.xgboost]
-            #self.lgb]
-            #self.adaBoost]
+            #self.xgboost
+            #self.lgb
+            #self.adaBoost
             # self.kneighbours
-            #self.train_extraTreeRegrission_withKFold]
-            #self.train_extraTeeRegression]
+            # self.train_extraTreeRegression_withKFold
+            #self.train_extraTeeRegression
 
-    def cutoff(self, ads):
-        return ads
-
-    def remove_duplicate(self, ads):
-        return ads.drop_duplicates(keep='first')
+            self.combinedEnsemble_settings,
+#            self.combinedEnsemble_train,
+            self.combinedEnsemble_load,
+            self.combinedEnsemble_test,
+        ]
 
     def old_outliers_detection(self, ads):
         from sklearn import svm
@@ -102,7 +92,7 @@ class TrainPipeline(Pipeline):
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price_brutto')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6) 
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
         train_data=lgb.Dataset(X_train, label=y_train)
 
         #param = {'num_leaves':500, 'objective':'regression', 'max_depth':7, 'learning_rate':.05,'max_bin':200}
@@ -120,7 +110,7 @@ class TrainPipeline(Pipeline):
         y_pred = lgbm.predict(X_test, num_iteration=lgbm.best_iteration)
         train_statistics(y_test, y_pred, title="Lgb")
         return ads
-        
+
     def adaBoost(self, ads):
         """http://scikit-learn.org/stable/auto_examples/ensemble/plot_adaboost_regression.html#sphx-glr-auto-examples-ensemble-plot-adaboost-regression-py
 
@@ -137,7 +127,7 @@ class TrainPipeline(Pipeline):
             boost.fit(X_train, y_train)
             y_pred = boost.predict(X_test)
             train_statistics(y_test, y_pred, title="Adaboost with estimator: {}".format(i))
-        
+
     def kneighbours(self, ads):
         X, y = generate_matrix(ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
@@ -148,7 +138,7 @@ class TrainPipeline(Pipeline):
             neigh.fit(X_train, y_train)
             y_pred = neigh.predict(X_test)
             train_statistics(y_test, y_pred, title="KNeighbour with leaf size: {}".format(i))
-        
+
         return ads
 
     # Best 200 depth n_estimators=50
@@ -174,7 +164,7 @@ class TrainPipeline(Pipeline):
         logging.info("Start makeing model")
         model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
         joblib.dump(model, '{}/xgb.pkl'.format(self.model_folder))
-        
+
         model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
         plt.show()
         logging.info("Start making regressio model")
@@ -183,7 +173,7 @@ class TrainPipeline(Pipeline):
         logging.info("Start fit model")
         model_xgb.fit(X_train, y_train)
         joblib.dump(model_xgb, '{}/xgb_fit.pkl'.format(self.model_folder))
-        logging.info("Predict")        
+        logging.info("Predict")
         y_pred = model_xgb.predict(X_test)
         train_statistics(y_test, y_pred)
         #plot(y_test, y_pred, show=False, plot_name="xgboost")
@@ -330,10 +320,16 @@ class TrainPipeline(Pipeline):
             f.write(json.dumps(self.settings))
         return ads
 
-    def train_extraTreeRegrission_withKFold(self, ads):
-        kf = KFold(n_splits=10)
+    def train_extraTreeRegression_withKFold(self, ads):
+        ads['price_brutto'] = np.log(ads['price_brutto'])
+
         X, y = generate_matrix(ads.reindex(), 'price_brutto')
+
+        #X = X.drop(['price_brutto_log'], axis=1)
+        y = np.exp(y)
         X, y = X.values, y.values
+
+        kf = KFold(n_splits=10)
         sum_mape = 0
         sum_mdape = 0
         for train_index, test_index in kf.split(X):
@@ -341,7 +337,7 @@ class TrainPipeline(Pipeline):
             y_train, y_test = y[train_index], y[test_index]
             model = ExtraTreesRegressor(n_estimators=100, warm_start=False, n_jobs=-1, random_state=RNG)
             model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
+            y_pred = np.exp(model.predict(X_test))
             train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(100))
             sum_mape += mape(y_test, y_pred)
             sum_mdape += mdape(y_test, y_pred)
@@ -394,3 +390,92 @@ class TrainPipeline(Pipeline):
             f.write(json.dumps(self.settings))
         return ads
 
+    def piero_extraTreeRegression(self, ads):
+        ads['price_brutto'] = np.log(ads['price_brutto'])
+
+        X, y = generate_matrix(ads, 'price_brutto')
+
+        logging.info('split')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
+
+        estimator = 100
+        model = ExtraTreesRegressor(n_estimators=estimator, warm_start=True, n_jobs=-1, min_samples_leaf=3)
+
+        logging.info('fit')
+        model.fit(X_train, y_train)
+        logging.info('predict')
+        y_pred = model.predict(X_test)
+        train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
+
+        plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train_{}".format(estimator))
+        joblib.dump(model, '{}/extraTree.pkl'.format(self.model_folder))
+
+        return ads
+
+
+
+    def combinedEnsemble_settings(self, ads):
+        self.n_estimators = 700
+        self.min_samples_leaf = 5
+        self.ensemble_estimator = 'extratrees'
+
+        self.combinedEnsemble_identifier = 'combinedEnsemble_{}_{}_{}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
+        self.combinedEnsemble_identifier_long = 'combinedEnsemble ensemble_estimator={} n_estimators={}, min_samples_leaf={}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
+
+        self.estimators = {
+            'linear': LinearRegression(normalize=True),
+            'ridge': RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10]),
+            'knn2': KNeighborsRegressor(n_neighbors=2, weights='distance'),
+            'knn5': KNeighborsRegressor(n_neighbors=5, weights='distance'),
+        }
+
+
+        return ads
+
+    def combinedEnsemble_train(self, ads):
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
+
+        model = CombinedEnsemble(
+            ensemble_estimator=ExtraTreesRegressor(n_estimators=self.n_estimators, min_samples_leaf=self.min_samples_leaf, n_jobs=-1),
+        )
+
+        logging.info('Fit {}'.format(self.combinedEnsemble_identifier_long))
+        model.fit(X_train, y_train)
+
+        logging.info("Fit finished. Save model")
+        joblib.dump(model, '{}/{}.pkl'.format(self.model_folder, self.combinedEnsemble_identifier))
+
+        self.combinedEnsemble = model
+
+        return ads
+
+    def combinedEnsemble_load(self, ads):
+        self.combinedEnsemble = joblib.load('{}/{}.pkl'.format(self.model_folder, self.combinedEnsemble_identifier))
+
+        return ads
+
+    def combinedEnsemble_test(self, ads):
+        X, y = generate_matrix(ads, 'price_brutto')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
+
+        model = self.combinedEnsemble
+
+        logging.info("Begin testing stage 2 estimators.")
+        logging.info("-"*80)
+        logging.info("")
+
+        for name, estimator in self.estimators.items():
+            logging.info('Predict stage 2 estimator: {}'.format(name))
+            model.estimator2 = estimator
+            y_pred = model.predict(X_test, verbose=True)
+
+            logging.info('Statistics for stage 2 estimator: {}'.format(name))
+            train_statistics(y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
+            plot(y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
+            logging.info("-"*80)
+            logging.info("")
+
+        logging.info('Finished')
+
+        return ads

@@ -8,7 +8,7 @@ import pdb
 
 def generate_matrix(df, goal):
     X = df.drop([goal], axis=1)
-    y = df[goal].astype(int)
+    y = df[goal].astype(float)
     return X, y
 
 def ape(y_test, y_pred):
@@ -47,7 +47,7 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     ax.plot((np.min(y_pred), np.max(y_pred)), (0, 0), 'r-')
 
     plt.tight_layout()
-    plt.savefig("{}/cumulative_prpability_{}.png".format(image_folder, title))
+    plt.savefig("{}/{}_cumulative_probability.png".format(image_folder, title))
     if show:
         plt.show()
 
@@ -65,7 +65,7 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
 
     ax.set_xticklabels(['{:.2%}'.format(x) for x in ax.get_xticks()])
     plt.tight_layout()
-    plt.savefig("{}/verteilung_der_fehler_{}.png".format(image_folder, title))
+    plt.savefig("{}/{}_verteilung_der_fehler.png".format(image_folder, title))
     if show:
         plt.show()
 
