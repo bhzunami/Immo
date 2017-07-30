@@ -22,7 +22,7 @@ from multiprocessing import Pool
 from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
 from collections import defaultdict
 
-from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
+from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
 
 
 def dpathes_to_hash(dpathes):

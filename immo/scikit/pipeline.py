@@ -18,8 +18,8 @@ import nltk
 from nltk.corpus import stopwords # Import the stop word list
 from nltk.stem import SnowballStemmer
 
-from a_detection import AnomalyDetection
-from helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
+from .a_detection import AnomalyDetection
+from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
 
 RNG = np.random.RandomState(42)
 
