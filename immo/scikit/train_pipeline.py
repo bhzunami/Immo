@@ -149,11 +149,12 @@ class TrainPipeline(Pipeline):
 
         params = {"max_depth":100, "eta":0.1}
         model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
-        model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
-        plt.show()
+        # model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
+        # plt.show()
 
         model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
         model_xgb.fit(X_train, y_train)
+        joblib.dump(model_xgb, '{}/xgboost.pkl'.format(self.model_folder))
         y_pred = model_xgb.predict(X_test)
         statistics(y_test, y_pred)
         plot(y_test, y_pred, show=False, plot_name="xgboost")
