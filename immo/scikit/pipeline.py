@@ -32,50 +32,47 @@ class Pipeline():
         self.directory = directory
         self.image_folder = os.path.abspath(os.path.join(directory, settings['image_folder']))
         self.model_folder = os.path.abspath(os.path.join(directory, settings['model_folder']))
+        # Create folder if they do not exist
+        if not os.path.exists('{}'.format(self.image_folder)):
+            logging.info("Directory for images does not exists. Create one")
+            os.makedirs('{}'.format(self.image_folder))
 
-
-        #  self.cutoff,
-        #     self.cleanup,
-        #     self.remove_unwanted_cols,
-        #     self.simple_stats('Before Transformation'),
-        #     self.replace_zeros_with_nan,
-        #     self.transform_build_year,
-        #     self.transform_build_renovation,
-        #     self.transform_noise_level,
-        #     # self.transform_floor,  Floor will be droped
-        #     self.drop_floor,
-        #     self.transform_num_rooms,
-        #     #self.transfrom_description,
-        #     self.transform_living_area,
-        #     self.simple_stats('After Transformation'),
-        #     self.transform_tags,
-        #     self.transform_features,
-        #     self.transform_onehot,
-        #     self.transform_misc_living_area,
+        if not os.path.exists('{}'.format(self.model_folder)):
+            logging.info("Directory for models does not exists. Create one")
+            os.makedirs('{}'.format(self.model_folder))
 
         self.preparation_pipeline = [
-            self.remove_duplicate,
-            self.simple_stats('Before Transformation'),
             self.replace_zeros_with_nan,
-            self.transform_build_year,
+            self.cleanup,
+            self.simple_stats('Before Transformation'),
             self.transform_build_renovation,
             self.transform_noise_level,
-            self.drop_floor,
-            self.transform_num_rooms,
-            self.transfrom_description,
-            self.transform_living_area,
             self.simple_stats('After Transformation'),
             self.transform_tags,
             self.transform_features,
             self.transform_onehot,
             self.transform_misc_living_area,
             self.predict_living_area,
-            self.outlier_detection,
+            self.save_as_df("{}/ads_prepared.pkl".format(self.model_folder))
         ]
 
+    def cleanup(self, ads):
+        logging.info("Start preparing dataset")
+        ads = ads.drop(ads[ads['price'] < 10].index)
+        ads = ads.drop(ads[ads['build_year'] < 1200].index)
+        ads = ads.drop(ads[ads['build_year'] > 2030].index)
+        ads = ads.drop(ads[(ads['ogroup'] == 'raum') | (ads['ogroup'] == 'invalid')].index)
+        ads = ads.drop_duplicates(keep='first')
 
-    def remove_duplicate(self, ads):
-        return ads.drop_duplicates(keep='first')
+        # Remove empty prices
+        dropna = ['price', 'build_year', 'num_rooms', 'living_area']
+        ads = ads.dropna(subset=dropna)
+        
+        # Remove unwanted cols
+        remove = ['cubature', 'room_height', 'effective_area',
+                  'plot_area', 'longitude', 'latitude',
+                  'floor', 'num_floors']
+        return ads.drop(remove, axis=1)
 
     def simple_stats(sefl, title):
         """Show how many NaN has one Feature and how many we can use
@@ -124,15 +121,6 @@ class Pipeline():
             return joblib.load(name)
         return inner_load_df
 
-    def export(self, ads):
-        logging.info("Export ads")
-        ads.to_csv('ready_to_predict.csv', header=True, encoding='utf-8')
-        return ads
-
-    def import_csv(self, ads):
-        logging.info("Import ads")
-        return pd.read_csv('ready_to_predict.csv', index_col=0, engine='c')
-
 
     def transform_noise_level(self, ads):
         """ If we have no nose_level at the address
@@ -146,8 +134,6 @@ class Pipeline():
         ads['noise_level'] = ads.apply(lambdarow, axis=1)
         return ads
 
-    def remove_duplicate(self, ads):
-        return ads.drop_duplicates(keep='first')
 
     def replace_zeros_with_nan(self, ads):
         """ replace 0 values into np.nan for statistic
@@ -160,12 +146,6 @@ class Pipeline():
         ads['avg_room_area'] = ads['living_area'] / ads['num_rooms']
         return ads
 
-    def transform_build_year(self, ads):
-        """Drop all houses which are build 2030 or later
-        """
-        ads = ads.drop(ads[ads['build_year'] < 1200].index)
-        ads = ads.dropna(subset=['build_year'])
-        return ads.drop(ads.index[np.where(ads['build_year'] > 2030)[0]])
 
     def transform_build_renovation(self, ads):
         """Set was_renovated to 1 if we have a date in renovation_year
@@ -185,32 +165,6 @@ class Pipeline():
 
         return ads.drop(['last_renovation_year'], axis=1)
 
-    def transform_num_rooms(self, ads):
-        """remove all elements where num_rooms is NaN
-        """
-        return ads.dropna(subset=['num_rooms'])
-
-    def drop_floor(self, ads):
-        """Remove floor cause we have to less
-        """
-        return ads.drop(['floor'], axis=1)
-
-    def transform_living_area(self, ads):
-        """remove ad area where living area is NaN
-        """
-        return ads.dropna(subset=['living_area'])
-
-    def remove_unwanted_cols(self, ads):
-        remove = ['cubature', 'room_height', 'effective_area',
-                  'plot_area', 'longitude', 'latitude', 'num_floors']
-        return ads.drop(remove, axis=1)
-
-    def transfrom_description(self, ads):
-        """remove ad where description is NaN
-        """
-        remove = ['characteristics', 'description']
-        return ads.drop(remove, axis=1)
-        #return ads.dropna(subset=['description'])
 
     def transform_onehot(self, ads):
         """Build one hot encoding for all columns with string as value
@@ -249,7 +203,7 @@ class Pipeline():
             logging.error("Could not load living area model. Did you forget to train living area?")
             return ads.dropna(subset=['living_area'])
 
-        tempdf = ads.drop(['price_brutto'], axis=1)
+        tempdf = ads.drop(['price'], axis=1)
 
         ads.living_area_predicted = 0
         nan_idxs = tempdf.living_area.index[tempdf.living_area.apply(np.isnan)]
@@ -265,15 +219,15 @@ class Pipeline():
         """
         meshgrid = {
             'build_year': np.meshgrid(np.linspace(0, max(ads['build_year']), 400),
-                                      np.linspace(0, max(ads['price_brutto']), 1000)),
+                                      np.linspace(0, max(ads['price']), 1000)),
             'num_rooms': np.meshgrid(np.linspace(-1, max(ads['num_rooms']), 400),
-                                     np.linspace(0, max(ads['price_brutto']), 1000)),
+                                     np.linspace(0, max(ads['price']), 1000)),
             'living_area': np.meshgrid(np.linspace(0, max(ads['living_area']), 400),
-                                      np.linspace(0, max(ads['price_brutto']), 1000)),
+                                      np.linspace(0, max(ads['price']), 1000)),
             'last_construction': np.meshgrid(np.linspace(0, max(ads['last_construction']), 400),
-                                             np.linspace(0, max(ads['price_brutto']), 1000)),
+                                             np.linspace(0, max(ads['price']), 1000)),
             'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
-                                       np.linspace(0, max(ads['price_brutto']), 1000))
+                                       np.linspace(0, max(ads['price']), 1000))
         }
         anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
         return anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
@@ -342,11 +296,8 @@ class Pipeline():
 
         return ads.drop(drop_features, axis=1)
 
-    def delete_all_nan(self, ads):
-        return ads.dropna()
-
     def validate_extraTreeRegression(self, ads):
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         try:
             model = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
         except FileNotFoundError:
@@ -361,7 +312,7 @@ class Pipeline():
         return ads
 
     def extraTreeRegression(self, ads):
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         try:
             model = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
         except FileNotFoundError:

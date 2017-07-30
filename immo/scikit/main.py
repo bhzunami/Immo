@@ -34,7 +34,7 @@ parser.add_argument('-p', '--predict',
                     action="store_true")
 parser.add_argument('-g', '--goal',
                     help='What is our target',
-                    default="price_brutto")
+                    default="price")
 parser.add_argument('-f', '--file',
                     help='Predict the house price',
                     default='{}/advertisements.csv'.format(DIRECTORY))

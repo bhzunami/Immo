@@ -1,0 +1,42 @@
+{
+"CANTON_ID": ["ZH", "BE", "LU", "UR", "SZ",
+              "OW", "NW", "GL", "ZG", "FR",
+              "SO", "BS", "BL", "SH", "AR",
+              "AI", "SG", "GR", "AG", "TG",
+              "TI", "VD", "VS", "NE", "GE",
+              "JU"],
+
+"TOURISM_REGION_ID": ["Graubünden", "Ostschweiz", "Zürich Region",
+                     "Luzern / Vierwaldstättersee", "Basel Region",
+                     "Bern Region", "Berner Oberland", "Jura & Drei-Seen-Land", 
+                     "Genferseegebiet (Waadtland)", "Genf", "Wallis",
+                     "Tessin", "Fribourg Region", "Region Aargau"],
+
+"METROPOLE_REGION_ID": ["Ländliche Gemeinde", "Zürich", "Genève-Lausanne",
+                        "Basel", "Bern", "Ticino Urbano", "Übrige städtische Gemeinde"],
+
+"JOB_MARKET_REGION_ID": ["Genève", "Lausanne", "Sion", "Fribourg", "Neuchâtel", "Biel", "Bern",
+                        "Basel", "Aarau – Olten", "Zürich", "Winterthur – Schaffhausen", 
+                        "St. Gallen", "Chur", "Luzern", "Bellinzona", "Lugano"],
+
+"MOUNTAIN_REGION_ID": ["Keine Zuordnung", "Mittelland - Hochrhein",
+                      "Schwarzwald - Schwäbische Alb", "Jura", "Alpen"],
+
+"LANGUAGE_REGION_ID": ["Deutsches", "Französisches", "Italienisches", "Rätoromanisches"],
+
+"MUNICIPAL_SIZE_CLASS_ID": ["≥ 100'000", "50'000 - 99'999", "20’000 - 49’999",
+                           "10'000 - 19'999", "5'000 - 9'999", "2'000 - 4'999",
+                           "1'000 - 1'999", "< 1'000"],
+
+"GREATER_REGION_ID": ["Région lémanique", "Espace Mittelland", "Nordwestschweiz",
+                     "Zürich", "Ostschweiz", "Zentralschweiz", "Ticino"],
+
+
+"AGGLOMERATION_SIZE_CLASS_ID": ["Ländliche Gemeinde", "≥ 500'000", "200'000 – 499‘999", 
+                                "100'000 – 199‘999", "50'000 – 99‘999", "< 50'000",
+                                "Isolierte Stadt"],
+
+"IS_TOWN": ["Keine Stadt", "Stadt"],
+
+"DEGURBA_ID": ["Dichtbesiedelte", "Mitteldicht besiedeltet", "Geringbesiedeltet"]
+}

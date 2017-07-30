@@ -1,20 +1,25 @@
 from sklearn.ensemble import IsolationForest
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 from sklearn.externals import joblib
 import pdb
-RNG = np.random.RandomState(42)
 import logging
+
+RNG = np.random.RandomState(42)
 
 class AnomalyDetection(object):
 
-    def __init__(self, data, image_folder, model_folder, goal='price_brutto'):
+    def __init__(self, data, image_folder, model_folder, goal='price'):
         self.data = data
         self.goal = goal
         self.image_folder = image_folder
         self.model_folder = model_folder
 
     def plot_isolation_forest(self, data, cls_, x, y, outlierIdx, elements):
+        if not os.path.exists('{}/outlier_detection'.format(self.image_folder)):
+            logging.info("Directory for outliers does not exists. Create one")
+            os.makedirs('{}/outlier_detection'.format(self.image_folder))
         for i, feature in enumerate(elements):
             Z = cls_[feature].decision_function(np.c_[x[feature].ravel(), y[feature].ravel()])
             Z = Z.reshape(x[feature].shape)
@@ -38,13 +43,13 @@ class AnomalyDetection(object):
             plt.xlim((min(x[feature][0]), max(x[feature][0])))
             plt.ylim(0, max(self.data[self.goal]))
             plt.legend([b1, b2], ["Outlier", "Accepted values"], loc="upper left", frameon=True)
-            plt.savefig("{}/{}_IsolationForest.png".format(self.image_folder, feature), transparent=True)
+            plt.savefig("{}/outlier_detection/{}_IsolationForest.png".format(self.image_folder, feature), transparent=True)
             plt.close()
 
     def isolation_forest(self,
                          settings,
                          meshgrid,
-                         goal='price_brutto_m2',
+                         goal='price',
                          load=False):
         """ get a dataframe and features to check for anomaly detection
         returns a new dataframe with removed anomalies

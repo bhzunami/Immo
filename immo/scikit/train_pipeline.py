@@ -70,44 +70,30 @@ class TrainPipeline(Pipeline):
         super().__init__(goal, settings, directory)
 
         # pipeline for creating and saving ads
-        # self.pipeline = self.preparation_pipeline + [self.save_as_df("ads_transformed.pkl")]
+        #self.pipeline = self.preparation_pipeline + []
 
-        # pipeline for loading ads and training
-        self.pipeline = [
-            self.load_df("ads_transformed.pkl"),
-            #self.train_outlier_detection,
-            #self.train_test_validate_split,
-            #self.train_living_area,
+        train_pipleine = [
+            self.load_df("{}/ads_prepared.pkl".format(self.model_folder)),
+            self.train_outlier_detection,
+            self.outlier_detection,
+            #self.train_living_area
             #self.xgboost
             #self.lgb
             #self.adaBoost
-            self.predict_living_area,
             self.extraTreeRegression2,
             #self.xgboost]
             #self.lgb]
             #self.adaBoost]
-            # self.kneighbours
-            # self.train_extraTreeRegression_withKFold
+            #self.kneighbours
+            #self.train_extraTreeRegression_withKFold
             #self.train_extraTeeRegression
             #self.combinedEnsemble_settings,
             #self.combinedEnsemble_train,
             #self.combinedEnsemble_load,
-            #self.combinedEnsemble_test,
+            #self.combinedEnsemble_test
         ]
-    def cutoff(self, ads):
-        return ads
 
-    def cleanup(self, ads):
-        ads = ads.drop(ads[ads['num_floors'] > 20].index)
-        ads = ads.drop(ads[ads['price'] < 10].index)
-        #ads = ads.drop(ads[ads['living_area'] > 5000].index)
-        #ads = ads.drop(ads[ads['num_rooms'] > 20].index)
-        ads = ads.drop(ads[ads['build_year'] < 1200].index)
-        ads = ads.drop(ads[(ads['ogroup'] == 'raum') | (ads['ogroup'] == 'invalid')].index)
-
-        # Delete empty prices
-        ads = ads.dropna(subset=['price'])
-        return ads.drop_duplicates(keep='first')
+        self.pipeline = train_pipleine if os.path.isfile("{}/ads_prepared.pkl".format(self.model_folder)) else self.preparation_pipeline + train_pipleine
 
     def old_outliers_detection(self, ads):
         from sklearn import svm
@@ -124,7 +110,7 @@ class TrainPipeline(Pipeline):
 
 
     def test(self, ads):
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6) 
 
         lasso = make_pipeline(RobustScaler(), Lasso(alpha =0.0005, random_state=42))
@@ -158,7 +144,7 @@ class TrainPipeline(Pipeline):
         
     def lgb(self, ads):
 
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
         train_data=lgb.Dataset(X_train, label=y_train)
 
@@ -184,7 +170,7 @@ class TrainPipeline(Pipeline):
         https://www.analyticsvidhya.com/blog/2016/02/complete-guide-parameter-tuning-gradient-boosting-gbm-python/
 
         """
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
         # learning rate 0.05 - 0.2
         for i in [5, 10, 20, 50, 70]:
@@ -196,7 +182,7 @@ class TrainPipeline(Pipeline):
             train_statistics(y_test, y_pred, title="Adaboost with estimator: {}".format(i))
 
     def kneighbours(self, ads):
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
         for i in [50, 100, 200, 400, 500]:
@@ -211,7 +197,7 @@ class TrainPipeline(Pipeline):
     # Best 200 depth n_estimators=50
     def xgboost(self, ads):
         # http://www.xavierdupre.fr/app/pymyinstall/helpsphinx/notebooks/example_xgboost.html
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
         xgb_model = xgb.XGBRegressor()
@@ -268,7 +254,7 @@ class TrainPipeline(Pipeline):
 
     def train_living_area(self, ads):
         filterd_ads = ads.dropna(subset=['living_area'])
-        filterd_ads = filterd_ads.drop(['characteristics', 'price_brutto', 'description'], axis=1)
+        filterd_ads = filterd_ads.drop(['price'], axis=1)
         logging.debug("Find best estimator for ExtraTreesRegressor")
         X, y = generate_matrix(filterd_ads, 'living_area')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
@@ -301,13 +287,19 @@ class TrainPipeline(Pipeline):
 
 
     def train_outlier_detection(self, ads):
+        
         """Check which contamination is the best for the features
         Run isolation forest with different contamination and check
         difference in the standard derivation.
         If the diff is < 1 we found our c
         """
         for feature in self.settings['anomaly_detection']['features']:
-            logging.debug("Check feature: {}".format(feature))
+            # Do not run outlier detection if model exists
+            if os.path.isfile('{}/isolation_forest_{}.pkl'.format(self.model_folder, feature)):
+                logging.info("Outlier detection for feature {} exists.".format(feature))
+                continue
+
+            logging.info("Check feature: {}".format(feature))
             # Only use the this specific feature with our target
             tmp_ad = ads[[feature, self.goal]]
             # Initialize std and std_percent
@@ -352,6 +344,10 @@ class TrainPipeline(Pipeline):
             self.settings['anomaly_detection'][feature] = best_c if best_c > 0 else 0 + self.settings['anomaly_detection']['step']
 
             # Plot stuff
+            # Create directory if not exists
+            if not os.path.exists('{}/outlier_detection'.format(self.image_folder)):
+                logging.info("Directory for outliers does not exists. Create one")
+                os.makedirs('{}/outlier_detection'.format(self.image_folder))
             logging.info("Best C for feature {}: {} chosen_std: {}".format(feature, best_c, chosen_std_percent))
             # Plot the standard derivation for this feature
             fig, ax1 = plt.subplots()
@@ -368,7 +364,7 @@ class TrainPipeline(Pipeline):
             ax1.set_xlim([0, 10])
             ax1.set_ylim([35, 100])
             plt.axis('tight')
-            plt.savefig('{}/{}_std.png'.format(self.image_folder, feature))
+            plt.savefig('{}/outlier_detection/{}_std.png'.format(self.image_folder, feature))
             plt.close()
 
             # Plot the difference between the standard derivation
@@ -379,7 +375,7 @@ class TrainPipeline(Pipeline):
 
             ax1.set_ylabel('% decline of σ to previous σ')
             ax1.set_xlabel('% removed of {} outliers'.format(feature.replace("_", " ")))
-            plt.savefig('{}/{}_diff_of_std.png'.format(self.image_folder, feature))
+            plt.savefig('{}/outlier_detection/{}_diff_of_std.png'.format(self.image_folder, feature))
             plt.close()
 
         # Save best c for all features
@@ -388,11 +384,11 @@ class TrainPipeline(Pipeline):
         return ads
 
     def train_extraTreeRegression_withKFold(self, ads):
-        ads['price_brutto'] = np.log(ads['price_brutto'])
+        ads['price'] = np.log(ads['price'])
 
-        X, y = generate_matrix(ads.reindex(), 'price_brutto')
+        X, y = generate_matrix(ads.reindex(), 'price')
 
-        #X = X.drop(['price_brutto_log'], axis=1)
+        #X = X.drop(['price_log'], axis=1)
         y = np.exp(y)
         X, y = X.values, y.values
 
@@ -429,13 +425,13 @@ class TrainPipeline(Pipeline):
     def train_extraTeeRegression(self, ads):
         # remove = ['characteristics', 'description']
         # filterd_ads = ads.drop(remove, axis=1)
-        X_train, y_train = generate_matrix(ads, 'price_brutto')
+        X_train, y_train = generate_matrix(ads, 'price')
 
         test_ads = pd.read_csv('train_ads.csv', index_col=0, engine='c')
-        X_test, y_test = generate_matrix(test_ads, 'price_brutto')
+        X_test, y_test = generate_matrix(test_ads, 'price')
 
         valid_ads = pd.read_csv('validate_ads.csv', index_col=0, engine='c')
-        X_valid, y_valid = generate_matrix(valid_ads, 'price_brutto')
+        X_valid, y_valid = generate_matrix(valid_ads, 'price')
         #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         best_md = None
         best_estimator = None
@@ -472,9 +468,9 @@ class TrainPipeline(Pipeline):
         return ads
 
     def piero_extraTreeRegression(self, ads):
-        ads['price_brutto'] = np.log(ads['price_brutto'])
+        ads['price'] = np.log(ads['price'])
 
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
 
         logging.info('split')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
@@ -514,7 +510,7 @@ class TrainPipeline(Pipeline):
         return ads
 
     def combinedEnsemble_train(self, ads):
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
 
         model = CombinedEnsemble(
@@ -537,7 +533,7 @@ class TrainPipeline(Pipeline):
         return ads
 
     def combinedEnsemble_test(self, ads):
-        X, y = generate_matrix(ads, 'price_brutto')
+        X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
 
         model = self.combinedEnsemble
