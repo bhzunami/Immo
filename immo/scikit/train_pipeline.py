@@ -48,8 +48,12 @@ from sklearn.preprocessing import RobustScaler
 from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.metrics import mean_squared_error
-# import xgboost as xgb
-# import lightgbm as lgb
+import xgboost as xgb
+import lightgbm as lgb
+from xgboost.sklearn import XGBRegressor
+from sklearn import cross_validation, metrics   #Additional scklearn functions
+from sklearn.grid_search import GridSearchCV  
+
 
 def detect_language(text):
     """ detect the language by the text where
@@ -139,23 +143,32 @@ class TrainPipeline(Pipeline):
 
     # Best 200 depth n_estimators=50
     def xgboost(self, ads):
+        print("Start xgboost")
         X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
-
+        print("Create matrix")
         dtrain = xgb.DMatrix(X_train, label=y_train)
         dtest = xgb.DMatrix(X_test)
-
-        params = {"max_depth":100, "eta":0.1}
-        model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
+        print("Create xgb model")
+        parameters = {"max_depth": [10, 100, 500], "learning_rate": [0.01, 0.1, 0.3], "n_estimators": [10, 50, 100, 250]}
+        #params = {"max_depth":100, "eta":0.1}
+        #model = xgb.cv(params, dtrain,  num_boost_round=500, early_stopping_rounds=100)
         # model.loc[:,["test-rmse-mean", "train-rmse-mean"]].plot()
         # plt.show()
+        xgb_model = xgb.XGBRegressor(silent=False)
+        print("Create GridSearch")
+        clf = GridSearchCV(xgb_model, parameters, verbose=1)
+        print("Start Fit")
+        clf.fit(X_train, y_train)
+        print("Best score: {}".format(clf.best_score_))
+        print("Best params: {}".format(clf.best_params_))
 
-        model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
-        model_xgb.fit(X_train, y_train)
-        joblib.dump(model_xgb, '{}/xgboost.pkl'.format(self.model_folder))
-        y_pred = model_xgb.predict(X_test)
-        statistics(y_test, y_pred)
-        plot(y_test, y_pred, show=False, plot_name="xgboost")
+        #model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
+        #model_xgb.fit(X_train, y_train)
+        #joblib.dump(model_xgb, '{}/xgboost.pkl'.format(self.model_folder))
+        #y_pred = model_xgb.predict(X_test)
+        #statistics(y_test, y_pred)
+        #plot(y_test, y_pred, show=False, plot_name="xgboost")
 
         # model = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0,
         #                          learning_rate=0.15, max_depth=200,
@@ -563,3 +576,4 @@ class MeanEstimator(BaseEstimator):
 
     def predict(self, X, verbose=False):
         return [self.val]
+
