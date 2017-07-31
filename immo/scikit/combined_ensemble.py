@@ -46,7 +46,10 @@ def pool_dpath_trees(trees, X, n_parts=1000, n_pools=4):
 
 
 class CombinedEnsemble(BaseEstimator):
-    def __init__(self, ensemble_estimator, estimator2 = None):
+    def __init__(self, ensemble_estimator, estimator2=None, verbose=False):
+        self.verbose = verbose
+
+        if self.verbose: logging.info("CombinedEnsemble: __init__ start")
         self.dpath_trees = []
         self.dpath_trees_grouped = []
         self.X = None # pandas dataframe
@@ -54,18 +57,24 @@ class CombinedEnsemble(BaseEstimator):
 
         # ensemble_estimator must be a Forest Estimator
         self.ensemble_estimator = ensemble_estimator
-        # estimator2 may be any kind of estimator
+        # estimator2 may be any kind of estimator. It is possible to change estimator2, even after calling .fit()
         self.estimator2 = estimator2
         # example:
-        # ensemble_estimator=lambda: ExtraTreesRegressor(n_estimators=100, min_samples_leaf=3)
-        # estimator2=lambda: LinearRegression(normalize=True)
+        # ensemble_estimator=ExtraTreesRegressor(n_estimators=100, min_samples_leaf=3)
+        # estimator2=LinearRegression(normalize=True)
+
+        if self.verbose: logging.info("CombinedEnsemble: __init__ end")
 
     def fit(self, X, y, **kwargs):
-        self.ensemble_estimator.fit(X, y, **kwargs)
-
+        if self.verbose: logging.info("CombinedEnsemble: fit start")
+        # save X, y for stage two fit prediction
         self.X = X
         self.y = y
 
+        if self.verbose: logging.info("CombinedEnsemble: Fit ensemble_estimator")
+        self.ensemble_estimator.fit(X, y, **kwargs)
+
+        if self.verbose: logging.info("CombinedEnsemble: Search all decision_paths")
         self.dpath_trees = pool_dpath_trees(self.ensemble_estimator.estimators_, X)
 
         # group indexes by hash
@@ -74,14 +83,16 @@ class CombinedEnsemble(BaseEstimator):
             for idx, hash_val in enumerate(tree):
                 self.dpath_trees_grouped[tree_idx][hash_val].append(idx)
 
+        if self.verbose: logging.info("CombinedEnsemble: fit end")
+
         return self
 
-    def predict(self, X, verbose=False):
+    def predict(self, X):
+        if self.verbose: logging.info("CombinedEnsemble: predict start")
 
-        if verbose: logging.info("get decision pathes")
         predict_dpathes = pool_dpath_trees(self.ensemble_estimator.estimators_, X)
 
-        if verbose: logging.info("match decision pathes")
+        if self.verbose: logging.info("match decision pathes")
         matching_rows = [[] for _ in range(len(X))]
         for test_tree, dpath_tree in zip(predict_dpathes, self.dpath_trees_grouped):
             for test_i, test in enumerate(test_tree):
@@ -90,12 +101,12 @@ class CombinedEnsemble(BaseEstimator):
 
         all_y_pred = []
         for i, row in enumerate(matching_rows):
-            if verbose and i%1000==0: logging.info("fit and predict {}/{}".format(i, len(matching_rows)))
+            if self.verbose and i%1000==0: logging.info("fit and predict {}/{}".format(i, len(matching_rows)))
 
             all_y_pred.append(clone(self.estimator2) \
                                 .fit(self.X.iloc[row], self.y.iloc[row]) \
                                 .predict([X.iloc[i]])[0])
 
-        if verbose: logging.info("fit and predict finished")
+        if self.verbose: logging.info("CombinedEnsemble: predict end")
 
         return all_y_pred

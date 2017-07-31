@@ -441,13 +441,14 @@ class TrainPipeline(Pipeline):
         self.combinedEnsemble_identifier_long = 'combinedEnsemble ensemble_estimator={} n_estimators={}, min_samples_leaf={}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
 
         self.estimators = {
-            'linear': LinearRegression(normalize=True),
-            'ridge': RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10]),
+            # 'linear': LinearRegression(normalize=True),
+            # 'ridge': RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10]),
             'knn2': KNeighborsRegressor(n_neighbors=2, weights='distance'),
-            'knn5': KNeighborsRegressor(n_neighbors=5, weights='distance'),
+            'knn3': KNeighborsRegressor(n_neighbors=3, weights='distance'),
+            # 'knn5': KNeighborsRegressor(n_neighbors=5, weights='distance'),
+            # 'mean': MeanEstimator(),
+            # 'rounded': RoundedMeanEstimator(),
         }
-
-
         return ads
 
     def combinedEnsemble_train(self, ads):
@@ -455,6 +456,7 @@ class TrainPipeline(Pipeline):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
 
         model = CombinedEnsemble(
+            verbose=True,
             ensemble_estimator=ExtraTreesRegressor(n_estimators=self.n_estimators, min_samples_leaf=self.min_samples_leaf, n_jobs=-1),
         )
 
@@ -474,8 +476,11 @@ class TrainPipeline(Pipeline):
         return ads
 
     def combinedEnsemble_test(self, ads):
-        X, y = generate_matrix(ads, 'price')
+        X, y = generate_matrix(ads, 'price_brutto')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RNG)
+
+        y_test = y_test[:1000]
+        X_test = X_test[:1000]
 
         model = self.combinedEnsemble
 
@@ -486,7 +491,33 @@ class TrainPipeline(Pipeline):
         for name, estimator in self.estimators.items():
             logging.info('Predict stage 2 estimator: {}'.format(name))
             model.estimator2 = estimator
-            y_pred = model.predict(X_test, verbose=True)
+            y_pred = model.predict(X_test)
+
+            logging.info('Statistics for stage 2 estimator: {}'.format(name))
+            train_statistics(y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
+            plot(y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
+            logging.info("-"*80)
+            logging.info("")
+
+        logging.info('Finished')
+
+        return ads = model.predict(X_test)
+
+            logging.info('Statistics for stage 2 estimator: {}'.format(name))
+            train_statistics(y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
+            plot(y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
+            logging.info("-"*80)
+            logging.info("")
+
+        logging.info('Finished')
+
+        return ads_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
+            logging.info("-"*80)
+            logging.info("")
+
+        logging.info('Finished')
+
+        return ads = model.predict(X_test)
 
             logging.info('Statistics for stage 2 estimator: {}'.format(name))
             train_statistics(y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
@@ -497,3 +528,62 @@ class TrainPipeline(Pipeline):
         logging.info('Finished')
 
         return ads
+
+    def combinedEnsemble_CV(self, ads):
+        X, y = generate_matrix(ads[:1000].reset_index(), 'price')
+
+        all_y_test = []
+        all_y_pred = []
+
+        for train_index, test_index in KFold(n_splits=10, shuffle=True).split(X):
+            logging.info('combinedEnsemble_CV: new split')
+
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            model = CombinedEnsemble(
+                verbose=True,
+                ensemble_estimator=ExtraTreesRegressor(n_estimators=self.n_estimators, min_samples_leaf=self.min_samples_leaf, n_jobs=-1),
+                estimator2=None,
+            )
+
+            logging.info('combinedEnsemble_CV: fit')
+
+            model.fit(X_train, y_train)
+
+            logging.info('combinedEnsemble_CV: predict')
+
+            y_pred = model.predict(X_test)
+
+            logging.info('combinedEnsemble_CV: statistics')
+            train_statistics(y_test, y_pred, title="CV")
+
+            all_y_test += y_test
+            all_y_pred += y_train
+
+        logging.info('combinedEnsemble_CV: combined statistics')
+        train_statistics(all_y_test, all_y_pred, title="CV combined")
+
+
+class RoundedMeanEstimator(BaseEstimator):
+    def __init__(self):
+        pass
+
+    def fit(self, X, y, **kwargs):
+        self.val = round(np.mean(y) / 1000)*1000
+        return self
+
+    def predict(self, X, verbose=False):
+        return [self.val]
+
+
+class MeanEstimator(BaseEstimator):
+    def __init__(self):
+        pass
+
+    def fit(self, X, y, **kwargs):
+        self.val = np.mean(y)
+        return self
+
+    def predict(self, X, verbose=False):
+        return [self.val]

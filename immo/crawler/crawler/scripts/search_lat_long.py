@@ -12,6 +12,16 @@ from models import Municipality
 sys.path.insert(0, '../')
 from settings import OPENSTREETMAP_BASE_URL, GOOGLE_MAP_API_BASE_URL
 
+
+""" **************************************
+
+    Search Lat Long for municipalities
+        in OSM and Google Maps
+
+************************************** """
+
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
