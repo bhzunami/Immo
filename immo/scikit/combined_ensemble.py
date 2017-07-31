@@ -104,8 +104,8 @@ class CombinedEnsemble(BaseEstimator):
             if self.verbose and i%1000==0: logging.info("fit and predict {}/{}".format(i, len(matching_rows)))
 
             all_y_pred.append(clone(self.estimator2) \
-                                .fit(self.X.iloc[row], self.y.iloc[row]) \
-                                .predict([X.iloc[i]])[0])
+                                .fit(self.X[row], self.y[row]) \
+                                .predict([X[i]])[0])
 
         if self.verbose: logging.info("CombinedEnsemble: predict end")
 

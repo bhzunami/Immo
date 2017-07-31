@@ -84,5 +84,5 @@ def train_statistics(y_test, y_pred, title="dummy"):
     num_elements = len(y_pred)
     apes = ape(y_test, y_pred)
     for i in np.arange(5, 100, 5):
-        logging.info("I {}: {}".format(i, len(np.where(apes < i/100)[0])/num_elements))
+        logging.info("I {:2n}: {:.3%}".format(i, len(np.where(apes < i/100)[0])/num_elements))
 

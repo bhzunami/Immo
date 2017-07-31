@@ -41,21 +41,27 @@ class Pipeline():
             logging.info("Directory for models does not exists. Create one")
             os.makedirs('{}'.format(self.model_folder))
 
-        self.preparation_pipeline = [
-            self.replace_zeros_with_nan,
-            self.cleanup,
-            self.simple_stats('Before Transformation'),
-            self.transform_build_renovation,
-            self.transform_noise_level,
-            self.simple_stats('After Transformation'),
-            self.show_crawler_stats,
-            self.transform_tags,
-            self.transform_features,
-            self.transform_onehot,
-            self.transform_misc_living_area,
-            self.predict_living_area,
-            self.save_as_df("{}/ads_prepared.pkl".format(self.model_folder))
-        ]
+    def preparation_pipeline(self):
+        filename = "{}/ads_prepared.pkl".format(self.model_folder)
+
+        if os.path.isfile(filename):
+            return [self.load_df(filename)]
+        else:
+            return [
+                self.replace_zeros_with_nan,
+                self.cleanup,
+                self.simple_stats('Before Transformation'),
+                self.transform_build_renovation,
+                self.transform_noise_level,
+                self.simple_stats('After Transformation'),
+                self.show_crawler_stats,
+                self.transform_tags,
+                self.transform_features,
+                self.transform_onehot,
+                self.transform_misc_living_area,
+                self.predict_living_area,
+                self.save_as_df("{}/ads_prepared.pkl".format(self.model_folder))
+            ]
 
     def cleanup(self, ads):
         logging.info("Start preparing dataset")
@@ -68,7 +74,7 @@ class Pipeline():
         # Remove empty prices
         dropna = ['price', 'build_year', 'num_rooms', 'living_area']
         ads = ads.dropna(subset=dropna)
-        
+
         # Remove unwanted cols
         remove = ['cubature', 'room_height', 'effective_area',
                   'plot_area', 'longitude', 'latitude',

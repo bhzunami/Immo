@@ -23,6 +23,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.linear_model import LassoLarsCV, Ridge, RidgeCV, LassoCV, Lasso, LinearRegression, LogisticRegression
+from collections import defaultdict
 
 # NLTK
 #import nltk
@@ -67,15 +68,11 @@ class TrainPipeline(Pipeline):
     def __init__(self, goal, settings, directory):
         super().__init__(goal, settings, directory)
 
-        # pipeline for creating and saving ads
-        #self.pipeline = self.preparation_pipeline + []
-
-        train_pipleine = [
-            self.load_df("{}/ads_prepared.pkl".format(self.model_folder)),
-            self.train_outlier_detection,
-            self.outlier_detection,
-            #self.train_living_area
-            self.xgboost,
+        train_pipeline = [
+            # self.train_outlier_detection,
+            # self.outlier_detection,
+            # #self.train_living_area
+            # self.xgboost,
             #self.lgb]
             #self.adaBoost]
             #self.kneighbours
@@ -85,11 +82,12 @@ class TrainPipeline(Pipeline):
             #self.combinedEnsemble_train,
             #self.combinedEnsemble_load,
             #self.combinedEnsemble_test
+            self.combinedEnsemble_settings,
+            self.combinedEnsemble_CV,
         ]
 
-        self.pipeline = train_pipleine if os.path.isfile("{}/ads_prepared.pkl".format(self.model_folder)) else self.preparation_pipeline + train_pipleine
+        self.pipeline = self.preparation_pipeline() + train_pipeline
 
-        
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price')
@@ -159,8 +157,8 @@ class TrainPipeline(Pipeline):
         statistics(y_test, y_pred)
         plot(y_test, y_pred, show=False, plot_name="xgboost")
 
-        # model = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0, 
-        #                          learning_rate=0.15, max_depth=200, 
+        # model = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0,
+        #                          learning_rate=0.15, max_depth=200,
         #                          min_child_weight=1.5, n_estimators=7200,
         #                          reg_alpha=0.9, reg_lambda=0.6,
         #                          subsample=0.2,seed=42, silent=1,
@@ -171,7 +169,7 @@ class TrainPipeline(Pipeline):
         # y_pred = model.predict(X_test)
         # train_statistics(y_test, y_pred, title="XGBOOST")
         # plot(y_test, y_pred, self.image_folder, show=True, title="XGBOOST")
-        
+
         return ads
 
     def train_test_validate_split(self, ads):
@@ -501,41 +499,19 @@ class TrainPipeline(Pipeline):
 
         logging.info('Finished')
 
-        return ads = model.predict(X_test)
-
-            logging.info('Statistics for stage 2 estimator: {}'.format(name))
-            train_statistics(y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
-            plot(y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
-            logging.info("-"*80)
-            logging.info("")
-
-        logging.info('Finished')
-
-        return ads_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
-            logging.info("-"*80)
-            logging.info("")
-
-        logging.info('Finished')
-
-        return ads = model.predict(X_test)
-
-            logging.info('Statistics for stage 2 estimator: {}'.format(name))
-            train_statistics(y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
-            plot(y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
-            logging.info("-"*80)
-            logging.info("")
-
-        logging.info('Finished')
-
         return ads
 
     def combinedEnsemble_CV(self, ads):
-        X, y = generate_matrix(ads[:1000].reset_index(), 'price')
+        if 'crawler' in list(ads):
+            ads = ads.drop(['crawler'], axis=1)
 
-        all_y_test = []
-        all_y_pred = []
+        X, y = generate_matrix(ads.reset_index(), 'price')
+        X, y = X.values, y.values
 
-        for train_index, test_index in KFold(n_splits=10, shuffle=True).split(X):
+        all_y_test = defaultdict(list)
+        all_y_pred = defaultdict(list)
+
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
             logging.info('combinedEnsemble_CV: new split')
 
             X_train, X_test = X[train_index], X[test_index]
@@ -544,25 +520,25 @@ class TrainPipeline(Pipeline):
             model = CombinedEnsemble(
                 verbose=True,
                 ensemble_estimator=ExtraTreesRegressor(n_estimators=self.n_estimators, min_samples_leaf=self.min_samples_leaf, n_jobs=-1),
-                estimator2=None,
             )
 
             logging.info('combinedEnsemble_CV: fit')
-
             model.fit(X_train, y_train)
 
-            logging.info('combinedEnsemble_CV: predict')
+            for name, estimator in self.estimators.items():
+                logging.info('combinedEnsemble_CV: predict {}'.format(name))
+                model.estimator2 = estimator
+                y_pred = model.predict(X_test)
 
-            y_pred = model.predict(X_test)
+                logging.info('combinedEnsemble_CV: statistics {}'.format(name))
+                train_statistics(y_test, y_pred, title="CV")
 
-            logging.info('combinedEnsemble_CV: statistics')
-            train_statistics(y_test, y_pred, title="CV")
+                all_y_test[name] += y_test.tolist()
+                all_y_pred[name] += y_pred
 
-            all_y_test += y_test
-            all_y_pred += y_train
-
-        logging.info('combinedEnsemble_CV: combined statistics')
-        train_statistics(all_y_test, all_y_pred, title="CV combined")
+        for name, _ in self.estimators.items():
+            logging.info('combinedEnsemble_CV: combined statistics {}'.format(name))
+            train_statistics(np.array(all_y_test[name]), np.array(all_y_pred[name]), title="CV combined")
 
 
 class RoundedMeanEstimator(BaseEstimator):
