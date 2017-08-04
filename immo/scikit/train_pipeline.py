@@ -93,22 +93,6 @@ class TrainPipeline(Pipeline):
 
         self.pipeline = self.preparation_pipeline() + train_pipeline
 
-
-    def stacked_models(self, ads):
-        X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
-
-        xgboost = joblib.load('{}/xgboost.pkl'.format(self.model_folder))
-        extra_tree = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
-        pdb.set_trace()
-        y_pred_x = xgboost.predict(X_test)
-        y_pred_t = extra_tree.predict(X_test)
-
-        predictions = np.column_stack([y_pred_x, y_pred_t])
-        y_pred = np.mean(predictions, axis=1)
-        train_statistics(y_test, y_pred, title="Stacked")
-        plot(y_test, y_pred, self.image_folder, show=True, title="Stacked")
-
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price')
@@ -158,11 +142,50 @@ class TrainPipeline(Pipeline):
 
         return ads
 
+    def stacked_models(self, ads):
+        X, y = generate_matrix(ads, 'price')
+
+        X, y = X.values, y.values
+
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+            logging.info('Stacked Models new split')
+
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            logging.info("Create xgb model")
+            xgb_model = xgb.XGBRegressor(silent=False, max_depth=100,
+                                         learning_rate=0.1, n_estimators=350, n_jobs=-1)
+
+            xgb_model.fit(X_train, y_train)
+            logging.info("Finish fit, results:")
+            y_pred_xgb = neigh.predict(X_test)
+            statistics(y_test, y_pred_xgb)
+
+            logging.info("Start tree")
+            tree_model = ExtraTreesRegressor(n_estimators=700, n_jobs=-1)
+            tree_model.fit(X_train, y_train)
+            logging.info("Finish fit, results:")
+            y_pred_tree = neigh.predict(X_test)
+            statistics(y_test, y_pred_tree)
+
+            logging.info("70% tree, 30% xgb")
+            y_pred = np.array(y_pred_tree*0.7 + 0.3*y_pred_xgb)
+            statistics(y_test, y_pred)
+
+            logging.info("50% tree, 50% xgb")
+            y_pred = np.array(y_pred_tree + y_pred_xgb) / 2
+            statistics(y_test, y_pred)
+
+            logging.info("80% tree, 20% xgb")
+            y_pred = np.array(y_pred_tree*0.8 + 0.2*y_pred_xgb)
+            statistics(y_test, y_pred)
+
     # Best 200 depth n_estimators=50
     def xgboost(self, ads):
         print("Start xgboost")
         X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         print("Create matrix")
         dtrain = xgb.DMatrix(X_train, label=y_train)
         dtest = xgb.DMatrix(X_test)
@@ -463,7 +486,7 @@ class TrainPipeline(Pipeline):
 
     def combinedEnsemble_settings(self, ads):
         self.n_estimators = 700
-        self.min_samples_leaf = 5
+        self.min_samples_leaf = 3
         self.ensemble_estimator = 'extratrees'
 
         self.combinedEnsemble_identifier = 'combinedEnsemble_{}_{}_{}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
