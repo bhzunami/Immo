@@ -164,12 +164,14 @@ class DataAnalysis():
         missing_data = (self.ads.isnull().sum() / len(self.ads)) * 100
         # Remove itmes we have 100% and sort
         missing_data = missing_data.drop(missing_data[missing_data == 0].index).sort_values(ascending=False)
-        sns.barplot(x=missing_data.index, y=missing_data)
+        b = sns.barplot(x=missing_data.index, y=missing_data)
         plt.xlabel('Features')
-        plt.ylabel('Percent of missing values')
-        plt.title('Percent missing data by feature')
+        plt.ylabel('% von fehlenden Werten')
+        plt.title('Fehlende Features in %')
         plt.xticks(rotation='90')
         plt.tight_layout()
+        for text in b.get_xticklabels():
+            text.set_text(text.get_text().replace("_", " ").title())
         plt.savefig("images/analysis/missing_values.png", dpi=250)
         plt.clf()
         plt.close()
@@ -180,6 +182,7 @@ class DataAnalysis():
         print("-"*70)
         # Remove elements with no price
         ads = self.ads.dropna(subset=['price'])
+        print("Removed {} ads because we do not have a price.".format(len(self.ads) - len(ads)))
         # Cleanup some outliers
         ads = ads.drop(ads[ads['num_floors'] > 20].index)
         ads = ads.drop(ads[ads['price'] > 20000000].index)
@@ -190,6 +193,10 @@ class DataAnalysis():
         ads = ads.drop(ads[ads['cubature'] > 20000].index)
         ads = ads.drop(ads[ads['floor'] > 30].index)
         print("Removed {} outliers. Dataset size: {}".format(len(self.ads) - len(ads), len(ads)))
+
+        print("Describe: \n{}".format(ads.describe()))
+        print("Median: \n{}".format(ads.median()))
+
         self.ads = ads
 
     def plot_numerical_values(self):
@@ -198,6 +205,15 @@ class DataAnalysis():
         sns.distplot(self.ads['price'], kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
         ax.set_xlabel("Kaufpreis CHF")
         plt.savefig("images/analysis/Verteilung_des_kauf_preises.png", dpi=250)
+        print("Distplot - OK")
+        plt.clf()
+        plt.close()
+
+        ax = plt.axes()
+        ax.set_title("Vertielung des Kaufpreises mit log")
+        sns.distplot(np.log1p(self.ads['price']), kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
+        ax.set_xlabel("Kaufpreis CHF (log)")
+        plt.savefig("images/analysis/Verteilung_des_kauf_preises_log.png", dpi=250)
         print("Distplot - OK")
         plt.clf()
         plt.close()
@@ -237,7 +253,7 @@ class DataAnalysis():
 
         # Now all features compared to price
         plt.figure(1)
-        f, ax = plt.subplots(3, 2, figsize=(10, 9))
+        f, ax = plt.subplots(4, 2, figsize=(10, 9))
         price = self.ads.price.values
         ax[0, 0].scatter(self.ads.num_rooms.values, price)
         ax[0, 0].set_title('Anzahl Zimmer')
@@ -252,6 +268,10 @@ class DataAnalysis():
         ax[2, 0].set_title('Cubature')
         ax[2, 1].scatter(self.ads.floor.values, price)
         ax[2, 1].set_title('Stockwerk')
+        ax[3, 0].scatter(self.ads.noise_level.values, price)
+        ax[3, 0].set_title('Lärmbelastung')
+        ax[3, 1].scatter(self.ads.last_renovation_year.values, price)
+        ax[3, 1].set_title('Letzte Renovaton')
         plt.tight_layout()
         plt.savefig("images/analysis/Vergleich_zum_preis.png", dpi=250)
         print("Vergleich - OK")

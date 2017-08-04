@@ -74,11 +74,11 @@ class TrainPipeline(Pipeline):
 
         train_pipeline = [
             # self.train_outlier_detection,
-            # self.outlier_detection,
-            # #self.train_living_area
-            # self.xgboost,
-            #self.lgb]
-            #self.adaBoost]
+            self.outlier_detection,
+            self.stacked_models,
+            #self.train_extraTeeRegression,
+            #self.lgb,
+            #self.adaBoost,
             #self.kneighbours
             #self.train_extraTreeRegression_withKFold
             #self.train_extraTeeRegression
@@ -86,11 +86,28 @@ class TrainPipeline(Pipeline):
             #self.combinedEnsemble_train,
             #self.combinedEnsemble_load,
             #self.combinedEnsemble_test
-            self.combinedEnsemble_settings,
-            self.combinedEnsemble_CV,
+            # Use cv for ensemle
+            #self.combinedEnsemble_settings,
+            #self.combinedEnsemble_CV,
         ]
 
         self.pipeline = self.preparation_pipeline() + train_pipeline
+
+
+    def stacked_models(self, ads):
+        X, y = generate_matrix(ads, 'price')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+
+        xgboost = joblib.load('{}/xgboost.pkl'.format(self.model_folder))
+        extra_tree = joblib.load('{}/extraTree.pkl'.format(self.model_folder))
+        pdb.set_trace()
+        y_pred_x = xgboost.predict(X_test)
+        y_pred_t = extra_tree.predict(X_test)
+
+        predictions = np.column_stack([y_pred_x, y_pred_t])
+        y_pred = np.mean(predictions, axis=1)
+        train_statistics(y_test, y_pred, title="Stacked")
+        plot(y_test, y_pred, self.image_folder, show=True, title="Stacked")
 
     def lgb(self, ads):
 
@@ -161,7 +178,7 @@ class TrainPipeline(Pipeline):
         print("Start Fit")
         clf.fit(X_train, y_train)
         print("Best score: {}".format(clf.best_score_))
-        print("Best params: {}".format(clf.best_params_))
+        
 
         #model_xgb = xgb.XGBRegressor(n_estimators=350, max_depth=100, learning_rate=0.1) #the params were tuned using xgb.cv
         #model_xgb.fit(X_train, y_train)
@@ -377,14 +394,15 @@ class TrainPipeline(Pipeline):
     def train_extraTeeRegression(self, ads):
         # remove = ['characteristics', 'description']
         # filterd_ads = ads.drop(remove, axis=1)
-        X_train, y_train = generate_matrix(ads, 'price')
+        X, y = generate_matrix(ads, 'price')
 
-        test_ads = pd.read_csv('train_ads.csv', index_col=0, engine='c')
-        X_test, y_test = generate_matrix(test_ads, 'price')
+        # test_ads = pd.read_csv('train_ads.csv', index_col=0, engine='c')
+        # X_test, y_test = generate_matrix(test_ads, 'price')
 
-        valid_ads = pd.read_csv('validate_ads.csv', index_col=0, engine='c')
-        X_valid, y_valid = generate_matrix(valid_ads, 'price')
-        #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        # valid_ads = pd.read_csv('validate_ads.csv', index_col=0, engine='c')
+        # X_valid, y_valid = generate_matrix(valid_ads, 'price')
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         best_md = None
         best_estimator = None
         model = ExtraTreesRegressor(n_estimators=100, warm_start=True, n_jobs=-1, random_state=RNG)
@@ -400,9 +418,9 @@ class TrainPipeline(Pipeline):
             md = mape(y_test, y_pred)
             logging.info("Stats for estimator: {}".format(estimator))
             train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
-            logging.info("VALIDATION")
-            y_pred = model.predict(X_valid)
-            train_statistics(y_valid, y_pred, title="ExtraTree_train_{}".format(estimator))
+            # logging.info("VALIDATION")
+            # y_pred = model.predict(X_valid)
+            # train_statistics(y_valid, y_pred, title="ExtraTree_train_{}".format(estimator))
 
             plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train_{}".format(estimator))
             # Wenn altes md grösser ist als neues md haben wir ein kleiners md somit bessers Ergebnis
