@@ -50,7 +50,6 @@ from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.metrics import mean_squared_error
 import xgboost as xgb
 import lightgbm as lgb
-from xgboost.sklearn import XGBRegressor
 from sklearn import cross_validation, metrics   #Additional scklearn functions
 from sklearn.grid_search import GridSearchCV  
 
@@ -159,27 +158,28 @@ class TrainPipeline(Pipeline):
 
             xgb_model.fit(X_train, y_train)
             logging.info("Finish fit, results:")
-            y_pred_xgb = neigh.predict(X_test)
-            statistics(y_test, y_pred_xgb)
-
+            y_pred_xgb = xgb_model.predict(X_test)
+            train_statistics(y_test, y_pred_xgb, title="Stacked xgb")
+            
             logging.info("Start tree")
             tree_model = ExtraTreesRegressor(n_estimators=700, n_jobs=-1)
             tree_model.fit(X_train, y_train)
             logging.info("Finish fit, results:")
-            y_pred_tree = neigh.predict(X_test)
-            statistics(y_test, y_pred_tree)
-
+            y_pred_tree = tree_model.predict(X_test)
+            train_statistics(y_test, y_pred_tree, title="Stacked Tree")
+            
             logging.info("70% tree, 30% xgb")
             y_pred = np.array(y_pred_tree*0.7 + 0.3*y_pred_xgb)
-            statistics(y_test, y_pred)
+            train_statistics(y_test, y_pred, title="Stacked 70 30")
 
             logging.info("50% tree, 50% xgb")
             y_pred = np.array(y_pred_tree + y_pred_xgb) / 2
-            statistics(y_test, y_pred)
+            train_statistics(y_test, y_pred, title="Stacked 50 50")
 
             logging.info("80% tree, 20% xgb")
             y_pred = np.array(y_pred_tree*0.8 + 0.2*y_pred_xgb)
-            statistics(y_test, y_pred)
+            train_statistics(y_test, y_pred, title="Stacked 80 20")
+
 
     # Best 200 depth n_estimators=50
     def xgboost(self, ads):
@@ -207,7 +207,7 @@ class TrainPipeline(Pipeline):
         #model_xgb.fit(X_train, y_train)
         #joblib.dump(model_xgb, '{}/xgboost.pkl'.format(self.model_folder))
         #y_pred = model_xgb.predict(X_test)
-        #statistics(y_test, y_pred)
+        #train_statistics(y_test, y_pred, title="")
         #plot(y_test, y_pred, show=False, plot_name="xgboost")
 
         # model = xgb.XGBRegressor(colsample_bytree=0.2, gamma=0.0,
