@@ -32,8 +32,6 @@ from collections import defaultdict
 
 from .a_detection import AnomalyDetection
 from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
-
-RNG = np.random.RandomState(42)
 from .pipeline import Pipeline
 
 from sklearn.metrics import confusion_matrix, mean_squared_error
@@ -53,6 +51,7 @@ import lightgbm as lgb
 from sklearn import cross_validation, metrics   #Additional scklearn functions
 from sklearn.grid_search import GridSearchCV  
 
+RNG = np.random.RandomState(42)
 
 def detect_language(text):
     """ detect the language by the text where
@@ -107,7 +106,8 @@ class TrainPipeline(Pipeline):
 
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
-
+            logging.info("Size of training data: {}".format(len(X_train)))
+            logging.info("Size of testing data: {}".format(len(X_test)))
             linreg = LinearRegression(normalize=True, n_jobs=-1)
             linreg.fit(X_train, y_train)
             y_pred = linreg.predict(X_test)
@@ -194,7 +194,7 @@ class TrainPipeline(Pipeline):
         X, y = generate_matrix(ads, 'price')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         # learning rate 0.05 - 0.2
-        for i in [5, 10, 20, 50, 70]:
+        for i in [18, 19, 21, 22, 23]:
             logging.info("Adaboost with estimator: {}".format(i))
             boost = AdaBoostRegressor(DecisionTreeRegressor(),
                                       n_estimators=i, random_state=RNG)
@@ -233,13 +233,13 @@ class TrainPipeline(Pipeline):
             logging.info('random forest new split')
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
-            for estimator in [100, 400, 700, 100]:
+            for estimator in [100, 400, 700, 1000]:
                 logging.info("Try estimator: {}".format(estimator))
                 model = RandomForestRegressor(n_estimators=estimator, max_features="auto",
                                               n_jobs=-1, min_samples_leaf=1)
                 model.fit(X_train, y_train)
-                y_predicted = model.predict(X_test)
-                train_statistics(y_test, y_predicted)
+                y_pred = model.predict(X_test)
+                train_statistics(y_test, y_pred)
                 plot(y_test, y_pred, self.image_folder, show=False, title="random_forest_{}".format(estimator))
                 
         return ads
