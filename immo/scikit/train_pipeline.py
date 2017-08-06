@@ -74,7 +74,10 @@ class TrainPipeline(Pipeline):
         train_pipeline = [
             # self.train_outlier_detection,
             self.outlier_detection,
-            self.stacked_models,
+            self.linear_regression,
+            self.ridge_regression,
+            self.lasso_regression,
+            #self.stacked_models,
             #self.train_extraTeeRegression,
             #self.lgb,
             #self.adaBoost,
@@ -91,6 +94,67 @@ class TrainPipeline(Pipeline):
         ]
 
         self.pipeline = self.preparation_pipeline() + train_pipeline
+
+
+    def linear_regression(self, ads):
+        X, y = generate_matrix(ads, 'price')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        linreg = LinearRegression(normalize=True, n_jobs=-1)
+        linreg.fit(X_train, y_train)
+        y_pred = linreg.predict(X_test)
+        train_statistics(y_test, y_pred)
+        plot(y_test, y_pred, self.image_folder, show=False, title="simpel_linear_regresion")
+
+
+    def ridge_regression(self, ads):
+        X, y = generate_matrix(ads, 'price')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        ridge = RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
+        ridge.fit(X_train, y_train)
+        alpha = ridge.alpha_
+
+        logger.info("Try again for more precision with alphas centered around " + str(alpha))
+        ridge = RidgeCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
+                                alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
+                                alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
+                        cv=5)
+        ridge.fit(X_train, y_train)
+
+        alpha = ridge.alpha_
+        logger.info("Best alpha: {}".format(alpha))
+        ridgereg = Ridge(alpha=alpha, normalize=True)
+        ridgereg.fit(X_train, y_train)
+        y_pred = ridgereg.predict(X_test)
+        train_statistics(y_test, y_pred)
+        plot(y_test, y_pred, self.image_folder, show=False, title="ridge_regression")
+        return ads
+
+
+    def lasso_regression(self, ads):
+        X, y = generate_matrix(ads, 'price')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        lasso = LassoCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
+        lasso.fit(X_train, y_train)
+        alpha = lasso.alpha_
+
+        logger.info("Try again for more precision with alphas centered around " + str(alpha))
+        lasso = LassoCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
+                                alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
+                                alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
+                        cv=5)
+        lasso.fit(X_train, y_train)
+
+        alpha = lasso.alpha_
+        logger.info("Best alpha: {}".format(alpha))
+
+        lassoreg = Lasso(alpha=alpha, normalize=True, max_iter=1e5)
+        lassoreg.fit(X_train, y_train)
+        y_pred = lassoreg.predict(X_test)
+        train_statistics(y_test, y_pred)
+        plot(y_test, y_pred, self.image_folder, show=False, title="lasso_regression")
+        return ads
 
     def lgb(self, ads):
 
@@ -157,6 +221,14 @@ class TrainPipeline(Pipeline):
                                          learning_rate=0.1, n_estimators=350, n_jobs=-1)
 
             xgb_model.fit(X_train, y_train)
+
+            xgb_model._Booster.save_model('{}/xgbooster.pkl'.format(self.model_folder))
+
+            xgb_model = xgb.XGBRegressor(silent=False, max_depth=100,
+                                         learning_rate=0.1, n_estimators=350, n_jobs=-1)
+            booster = xgb.Booster()
+            booster.load_model('{}/xgbooster.pkl'.format(self.model_folder))
+            xgb_model._Booster = booster
             logging.info("Finish fit, results:")
             y_pred_xgb = xgb_model.predict(X_test)
             train_statistics(y_test, y_pred_xgb, title="Stacked xgb")

@@ -182,7 +182,8 @@ class DataAnalysis():
         print("-"*70)
         # Remove elements with no price
         ads = self.ads.dropna(subset=['price'])
-        print("Removed {} ads because we do not have a price.".format(len(self.ads) - len(ads)))
+        removed_ads_with_missing_price = len(self.ads) - len(ads)
+        print("Removed {} ads because we do not have a price.".format(removed_ads_with_missing_price))
         # Cleanup some outliers
         ads = ads.drop(ads[ads['num_floors'] > 20].index)
         ads = ads.drop(ads[ads['price'] > 20000000].index)
@@ -190,13 +191,28 @@ class DataAnalysis():
         ads = ads.drop(ads[ads['living_area'] > 5000].index)
         ads = ads.drop(ads[ads['num_rooms'] > 20].index)
         ads = ads.drop(ads[ads['build_year'] < 1200].index)
+        ads = ads.drop(ads[ads['build_year'] > 2050].index)
+        ads = ads.drop(ads[ads['last_renovation_year'] < 1200].index)
+        ads = ads.drop(ads[ads['last_renovation_year'] > 2050].index)
         ads = ads.drop(ads[ads['cubature'] > 20000].index)
         ads = ads.drop(ads[ads['floor'] > 30].index)
-        print("Removed {} outliers. Dataset size: {}".format(len(self.ads) - len(ads), len(ads)))
+        # Remove to lower values
+        # ads = ads.drop(ads[ads['living_area'] < 20].index)
+        # ads = ads.drop(ads[ads['cubature'] < 20].index)
+        # ads = ads.drop(ads[ads['num_rooms'] < 1].index)
+        print("Removed {} outliers. Dataset size: {}".format(len(self.ads) - len(ads) - removed_ads_with_missing_price, len(ads)))
 
-        print("Describe: \n{}".format(ads.describe()))
-        print("Median: \n{}".format(ads.median()))
-
+        #print("Describe: \n{}".format(ads.describe()))
+        
+        print("Nummerical features:")
+        print(ads.num_rooms.describe())
+        print(ads.living_area.describe())
+        print(ads.build_year.describe())
+        print(ads.num_floors.describe())
+        print(ads.cubature.describe())
+        print(ads.floor.describe())
+        print(ads.noise_level.describe())
+        print(ads.last_renovation_year.describe())        
         self.ads = ads
 
     def plot_numerical_values(self):
@@ -208,7 +224,7 @@ class DataAnalysis():
         print("Distplot - OK")
         plt.clf()
         plt.close()
-
+        
         ax = plt.axes()
         ax.set_title("Vertielung des Kaufpreises mit log")
         sns.distplot(np.log1p(self.ads['price']), kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
@@ -217,6 +233,18 @@ class DataAnalysis():
         print("Distplot - OK")
         plt.clf()
         plt.close()
+
+        for f, name in [('num_rooms', 'Anzahl Zimmer'),
+                        ('living_area', 'Fläche [m^2]'),
+                        ('noise_level', 'Lärmbelastung')]:
+            ax = plt.axes()
+            ax.set_title("Vertielung der {}".format(name))
+            sns.distplot(self.ads[f].dropna(), kde=False, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
+            ax.set_xlabel("{}".format(name))
+            plt.savefig("images/analysis/Verteilung_{}.png".format(f), dpi=250)
+            print("Distplot - OK")
+            plt.clf()
+            plt.close()
 
         # Heatmap of features:
         corr = self.ads.select_dtypes(include = ['float64', 'int64']).corr()
