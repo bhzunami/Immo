@@ -77,11 +77,12 @@ class TrainPipeline(Pipeline):
             self.linear_regression,
             self.ridge_regression,
             self.lasso_regression,
+            self.kneighbours,
+            self.random_forest,
+            self.adaBoost,
             #self.stacked_models,
             #self.train_extraTeeRegression,
             #self.lgb,
-            #self.adaBoost,
-            #self.kneighbours
             #self.train_extraTreeRegression_withKFold
             #self.train_extraTeeRegression
             #self.combinedEnsemble_settings,
@@ -98,12 +99,21 @@ class TrainPipeline(Pipeline):
 
     def linear_regression(self, ads):
         X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        linreg = LinearRegression(normalize=True, n_jobs=-1)
-        linreg.fit(X_train, y_train)
-        y_pred = linreg.predict(X_test)
-        train_statistics(y_test, y_pred)
-        plot(y_test, y_pred, self.image_folder, show=False, title="simpel_linear_regresion")
+
+        X, y = X.values, y.values
+
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+            logging.info('Linear regression new split')
+
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            linreg = LinearRegression(normalize=True, n_jobs=-1)
+            linreg.fit(X_train, y_train)
+            y_pred = linreg.predict(X_test)
+            train_statistics(y_test, y_pred)
+            plot(y_test, y_pred, self.image_folder, show=False, title="simpel_linear_regresion")
+        return ads
 
 
     def ridge_regression(self, ads):
@@ -114,7 +124,7 @@ class TrainPipeline(Pipeline):
         ridge.fit(X_train, y_train)
         alpha = ridge.alpha_
 
-        logger.info("Try again for more precision with alphas centered around " + str(alpha))
+        logging.info("Try again for more precision with alphas centered around " + str(alpha))
         ridge = RidgeCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
                                 alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
                                 alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
@@ -122,7 +132,7 @@ class TrainPipeline(Pipeline):
         ridge.fit(X_train, y_train)
 
         alpha = ridge.alpha_
-        logger.info("Best alpha: {}".format(alpha))
+        logging.info("Best alpha: {}".format(alpha))
         ridgereg = Ridge(alpha=alpha, normalize=True)
         ridgereg.fit(X_train, y_train)
         y_pred = ridgereg.predict(X_test)
@@ -139,7 +149,7 @@ class TrainPipeline(Pipeline):
         lasso.fit(X_train, y_train)
         alpha = lasso.alpha_
 
-        logger.info("Try again for more precision with alphas centered around " + str(alpha))
+        logging.info("Try again for more precision with alphas centered around " + str(alpha))
         lasso = LassoCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
                                 alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
                                 alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
@@ -147,7 +157,7 @@ class TrainPipeline(Pipeline):
         lasso.fit(X_train, y_train)
 
         alpha = lasso.alpha_
-        logger.info("Best alpha: {}".format(alpha))
+        logging.info("Best alpha: {}".format(alpha))
 
         lassoreg = Lasso(alpha=alpha, normalize=True, max_iter=1e5)
         lassoreg.fit(X_train, y_train)
@@ -159,7 +169,7 @@ class TrainPipeline(Pipeline):
     def lgb(self, ads):
 
         X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         model = lgb.LGBMRegressor(objective='regression',num_leaves=800,
                                   learning_rate=0.05, n_estimators=720,
                                   max_bin = 55, bagging_fraction = 0.8,
@@ -182,7 +192,7 @@ class TrainPipeline(Pipeline):
 
         """
         X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         # learning rate 0.05 - 0.2
         for i in [5, 10, 20, 50, 70]:
             logging.info("Adaboost with estimator: {}".format(i))
@@ -194,15 +204,44 @@ class TrainPipeline(Pipeline):
 
     def kneighbours(self, ads):
         X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
-        for i in [50, 100, 200, 400, 500]:
-            logging.info("KNeighborsRegressor with leaf size: {}".format(i))
-            neigh = KNeighborsRegressor(n_neighbors=2, weights='distance', leaf_size=i, n_jobs=6)
-            neigh.fit(X_train, y_train)
-            y_pred = neigh.predict(X_test)
-            train_statistics(y_test, y_pred, title="KNeighbour with leaf size: {}".format(i))
+        X, y = X.values, y.values
 
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+            logging.info('K neighbour new split')
+
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            for i in [50, 100, 200, 400, 500]:
+                logging.info("KNeighborsRegressor with leaf size: {}".format(i))
+                neigh = KNeighborsRegressor(n_neighbors=2, weights='distance', leaf_size=i, n_jobs=6)
+                neigh.fit(X_train, y_train)
+                y_pred = neigh.predict(X_test)
+                train_statistics(y_test, y_pred, title="KNeighbour with leaf size: {}".format(i))
+                plot(y_test, y_pred, self.image_folder, show=True, title="k_neigh_{}".format(i))
+                
+
+        return ads
+
+
+    def random_forest(self, ads):
+        X, y = generate_matrix(ads, 'price')
+        X, y = X.values, y.values
+
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+            logging.info('random forest new split')
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            for estimator in [100, 400, 700, 100]:
+                logging.info("Try estimator: {}".format(estimator))
+                model = RandomForestRegressor(n_estimators=estimator, max_features="auto",
+                                              n_jobs=-1, min_samples_leaf=1)
+                model.fit(X_train, y_train)
+                y_predicted = model.predict(X_test)
+                train_statistics(y_test, y_predicted)
+                plot(y_test, y_pred, self.image_folder, show=False, title="random_forest_{}".format(estimator))
+                
         return ads
 
     def stacked_models(self, ads):
@@ -321,7 +360,7 @@ class TrainPipeline(Pipeline):
         filterd_ads = filterd_ads.drop(['price'], axis=1)
         logging.debug("Find best estimator for ExtraTreesRegressor")
         X, y = generate_matrix(filterd_ads, 'living_area')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         best_md = None
         best_estimator = None
         # Use Warm start to use calculated trees
