@@ -505,7 +505,7 @@ class Pipeline():
         alpha = ridge.alpha_
         logging.info("Best alpha: {}".format(alpha))
         idx = 0
-        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+        for train_index, test_index in KFold(n_splits=5, shuffle=True).split(X):
             logging.info('New split')
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
@@ -542,7 +542,7 @@ class Pipeline():
         alpha = lasso.alpha_
         logging.info("Best alpha: {}".format(alpha))
         idx = 0
-        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+        for train_index, test_index in KFold(n_splits=5, shuffle=True).split(X):
             logging.info('New split')
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
@@ -561,7 +561,6 @@ class Pipeline():
     def train_kneighbours(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         parameters = {"n_neighbors": [2, 3, 5], "leaf_size":[50, 100, 200]}
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1)
         gd = GridSearchCV(neigh, parameters, verbose=1, scoring=scorer, cv=5)
@@ -590,21 +589,23 @@ class Pipeline():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def train_adaBoost(self, ads):
         X, y = generate_matrix(ads, 'price')
-            
-        parameters = {"n_estimators": [17, 18, 19, 20]}
-        adaboost = AdaBoostRegressor(DecisionTreeRegressor(), random_state=RNG)
-        gd = GridSearchCV(adaboost, parameters, verbose=1, scoring=scorer, cv=5)
-        gd.fit(X, y)
-        logging.info("Best score: {}".format(gd.best_score_))
-        logging.info("Best params: {}".format(gd.best_params_))
-        params = gd.best_params_
+        X, y = X.values, y.values          
+        # parameters = {"n_estimators": [17, 18, 19, 20], "learning_rate": [0.01, 0.1, 0.3]}
+        # adaboost = AdaBoostRegressor(DecisionTreeRegressor(), random_state=RNG)
+        # gd = GridSearchCV(adaboost, parameters, verbose=1, scoring=scorer, cv=5)
+        # gd.fit(X, y)
+        # logging.info("Best score: {}".format(gd.best_score_))
+        # logging.info("Best params: {}".format(gd.best_params_))
+        # params = gd.best_params_
+        params = {}
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         boost = AdaBoostRegressor(DecisionTreeRegressor(),
                                   n_estimators=params.get('n_estimators', 18),
+                                  learning_rate=params.get('learning_rate', 1),
                                   random_state=RNG)
         boost.fit(X_train, y_train)
-        joblib.dump(neigh, '{}/adaboost.pkl'.format(self.model_folder))
+        joblib.dump(boost, '{}/adaboost.pkl'.format(self.model_folder))
         y_pred = boost.predict(X_test)
         train_statistics(y_test, y_pred, title="adaboost")
         plot(y_test, y_pred, self.image_folder, show=False, title="adaboost")
@@ -616,37 +617,24 @@ class Pipeline():
     def train_random_forest(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         parameters = {"n_estimators": [100, 500, 700, 1000], "min_samples_leaf":[1, 5]}
         random = RandomForestRegressor(n_jobs=-1)
-        gd = GridSearchCV(random, parameters, verbose=1, scoring=scorer)
+        gd = GridSearchCV(random, parameters, verbose=1, scoring=scorer, cv=5)
         logging.info("Start Fit")
-        gd.fit(X_train, y_train)
+        gd.fit(X, y)
         logging.info("Best score: {}".format(gd.best_score_))
         logging.info("Best score: {}".format(gd.best_params_))
-        
+        params = gd.best_params_
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
+                                      max_features="auto", n_jobs=-1,
+                                      min_samples_leaf=params.get('min_samples_leaf', 1))
+        model.fit(X_train, y_train)
+        joblib.dump(model, '{}/random_forest.pkl'.format(self.model_folder))
+        y_pred = model.predict(X_test)
+        train_statistics(y_test, y_pred, title="random_forest")
+        plot(y_test, y_pred, self.image_folder, show=False, title="random_forest") 
         return ads
-
-    def fit_random_forest(self, params):
-        def fit(ads):
-            X, y = generate_matrix(ads, 'price')
-            X, y = X.values, y.values
-            idx = 0
-            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
-                logging.info('New split')
-                X_train, X_test = X[train_index], X[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
-                                            max_features="auto",
-                                            n_jobs=-1, min_samples_leaf=1)
-                model.fit(X_train, y_train)
-                joblib.dump(model, '{}/random_forest_{}.pkl'.format(self.model_folder, idx))
-                y_pred = model.predict(X_test)
-                train_statistics(y_test, y_pred, title="random_forest_{}".format(idx))
-                plot(y_test, y_pred, self.image_folder, show=False, title="random_forest_{}".format(idx))
-                idx += 1
-            return ads
-        return fit
 
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -655,121 +643,56 @@ class Pipeline():
     def train_xgboost(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
+        # parameters = {"max_depth": [10, 100, 500],
+        #               "learning_rate": [0.01, 0.1, 0.3],
+        #               "n_estimators": [10, 50, 100, 250, 500]}
+        # xgb_model = xgb.XGBRegressor(silent=False)
+        # logging.info("Create GridSearch")
+        # clf = GridSearchCV(xgb_model, parameters, verbose=1, scoring=scorer, cv=5)
+        # logging.info("Start Fit")
+        # clf.fit(X_train, y_train)
+        # logging.info("Best score: {}".format(gd.best_score_))
+        # logging.info("Best score: {}".format(gd.best_params_))
+        # params = gd.best_params_
+        params = {}
+
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        parameters = {"max_depth": [10, 100, 500],
-                      "learning_rate": [0.01, 0.1, 0.3],
-                      "n_estimators": [10, 50, 100, 250, 500]}
-        xgb_model = xgb.XGBRegressor(silent=False)
-        logging.info("Create GridSearch")
-        clf = GridSearchCV(xgb_model, parameters, verbose=1, scoring=scorer)
-        logging.info("Start Fit")
-        clf.fit(X_train, y_train)
-        logging.info("Best score: {}".format(gd.best_score_))
-        logging.info("Best score: {}".format(gd.best_params_))
-        
+        xgb_model = xgb.XGBRegressor(silent=False,
+                                     max_depth=params.get('max_depth', 100),
+                                     learning_rate=params.get('learning_rate', 0.1),
+                                     n_estimators=params.get('n_estimators', 350),
+                                     n_jobs=-1)
+
+        xgb_model.fit(X_train, y_train)
+        xgb_model._Booster.save_model('{}/xgbooster.pkl'.format(self.model_folder))
+        y_pred = xgb_model.predict(X_test)
+        train_statistics(y_test, y_pred, title="xgb")
+        plot(y_test, y_pred, self.image_folder, show=False, title="xgboost")
         return ads
-
-    def fit_xgboost(self, params):
-        def fit(ads):
-            X, y = generate_matrix(ads, 'price')
-            X, y = X.values, y.values
-            idx = 0
-            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
-                logging.info('New split')
-                X_train, X_test = X[train_index], X[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                xgb_model = xgb.XGBRegressor(silent=False,
-                                            max_depth=params.get('max_depth', 100),
-                                            learning_rate=params.get('learning_rate', 0.1),
-                                            n_estimators=params.get('n_estimators', 350),
-                                            n_jobs=-1)
-
-                xgb_model.fit(X_train, y_train)
-                xgb_model._Booster.save_model('{}/xgbooster_{}.pkl'.format(self.model_folder, idx))
-                y_pred_xgb = xgb_model.predict(X_test)
-                train_statistics(y_test, y_pred_xgb, title="xgb_{}".format(idx))
-                plot(y_test, y_pred, self.image_folder, show=False, title="xgboost_{}".format(idx))
-                
-                idx += 1
-            return ads
-        return fit
-
-    def predict_xgboost(self, ads):
-            xgb_model = xgb.XGBRegressor(silent=False, max_depth=100,
-                                        learning_rate=0.1, n_estimators=350, n_jobs=-1)
-            booster = xgb.Booster()
-            booster.load_model('{}/xgbooster.pkl'.format(self.model_folder))
-            xgb_model._Booster = booster
-
-            X, y = generate_matrix(ads, 'price')
-            X, y = X.values, y.values
-            idx = 0
-            name = 'xgboost'
-            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
-                logging.info('New split')
-                X_train, X_test = X[train_index], X[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                logging.info("Size of training data: {}".format(len(X_train)))
-                logging.info("Size of testing data: {}".format(len(X_test)))
-                y_pred = xgb_model.predict(X_test)
-                train_statistics(y_test, y_pred, title="{}_{}".format(name, idx))
-                plot(y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(name, idx))
-                idx += 1
-            return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Extra Tree
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def train_extra_tree(self, ads):
         X, y = generate_matrix(ads, 'price')
+        X, y = X.values, y.values
+        # parameters = {"n_estimators": [100, 500, 700, 1000]}
+        # extra = ExtraTreesRegressor(warm_start=True, n_jobs=-1, random_state=RNG)
+        # gd = GridSearchCV(extra, parameters, verbose=1, scoring=scorer, cv=5)
+        # logging.info("Start Fit")
+        # gd.fit(X, y)
+        # logging.info("Best score: {}".format(gd.best_score_))
+        # logging.info("Best score: {}".format(gd.best_params_))
+        # params = gd.best_params_
+        params = {}
+
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        best_md = None
-        best_estimator = None
-        model = ExtraTreesRegressor(n_estimators=100, warm_start=True, n_jobs=-1, random_state=RNG)
-        logging.debug("Find best estimator for ExtraTreesRegressor")
-        for estimator in range(100,
-                               self.settings['extraTreeRegression']['limit'],
-                               self.settings['extraTreeRegression']['step']):
-            logging.debug("Estimator: {}".format(estimator))
-            model.n_estimators = estimator
-
-            model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
-            md = mape(y_test, y_pred)
-            logging.info("Stats for estimator: {}".format(estimator))
-            train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
+        extra = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
+                                    warm_start=True, n_jobs=-1, random_state=RNG)
         
-            plot(y_test, y_pred, self.image_folder, show=False, title="ExtraTree_train_{}".format(estimator))
-            # Wenn altes md grösser ist als neues md haben wir ein kleiners md somit bessers Ergebnis
-            if best_md is None or best_md > md:
-                best_estimator = estimator
-                best_md = md
-                logging.info("Better result with estimator: {}".format(estimator))
-                # Store model
-                joblib.dump(model, '{}/extraTree.pkl'.format(self.model_folder))
-
-        self.settings['extraTreeRegression']['estimator'] = best_estimator
-        # Save best c for all features
-        with open('{}/settings.json'.format(self.directory), 'w') as f:
-            f.write(json.dumps(self.settings))
+        extra.fit(X_train, y_train)
+        joblib.dump(extra, '{}/extraTree.pkl'.format(self.model_folder))
+        y_pred = extra.predict(X_test)
+        train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
+        plot(y_test, y_pred, self.image_folder, show=False, title="extra")
         return ads
-
-    def fit_extra_tree(self, params):
-        def fit(ads):
-            X, y = generate_matrix(ads, 'price')
-            X, y = X.values, y.values
-            idx = 0
-            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
-                logging.info('New split')
-                X_train, X_test = X[train_index], X[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                model = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
-                                            n_jobs=-1, random_state=RNG)
-                model.fit(X_train, y_train)
-                joblib.dump(model, '{}/extra_tree_regressior_{}.pkl'.format(self.model_folder, idx))
-                y_pred = model.predict(X_test)
-                train_statistics(y_test, y_pred, title="ExtraTree_{}".format(idx))
-                plot(y_test, y_pred, self.image_folder, show=True, title="ExtraTree_train_{}".format(idx))
-                idx += 1
-            return ads
-        return fit
