@@ -40,7 +40,7 @@ from .combined_ensemble import CombinedEnsemble
 
 RNG = np.random.RandomState(42)
 
-def score_function(y_test, y_pred):
+def score_function(y_test, y_pred, **kwargs):
     return mape(y_test, y_pred)
 
 scorer = make_scorer(score_function, greater_is_better=False)
@@ -561,75 +561,54 @@ class Pipeline():
     def train_kneighbours(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        parameters = {"n_neighbors": [2, 3, 5, 10], "leaf_size":[50, 100, 200]}
+        #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        parameters = {"n_neighbors": [2, 3, 5], "leaf_size":[50, 100, 200]}
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1)
-        gd = GridSearchCV(neigh, parameters, verbose=1, scoring=scorer)
+        gd = GridSearchCV(neigh, parameters, verbose=1, scoring=scorer, cv=5)
         logging.info("Start Fit")
-        gd.fit(X_train, y_train)
+        gd.fit(X, y)
         logging.info("Best score: {}".format(gd.best_score_))
         logging.info("Best params: {}".format(gd.best_params_))
-        return ads
+        params = gd.best_params_
 
-    def fit_kneighbours(self, params={}):
-        def fit(ads):
-            X, y = generate_matrix(ads, 'price')
-            X, y = X.values, y.values
-            idx = 0
-            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
-                logging.info('New split')
-                X_train, X_test = X[train_index], X[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                
-                neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
-                                            leaf_size=params.get('leaf_size', 100),
-                                            n_neighbors=params.get('n_neighbors', 2))
-                neigh.fit(X_train, y_train)
-                joblib.dump(neigh, '{}/kneighbour_{}.pkl'.format(self.model_folder, idx))
-                
-                y_pred = neigh.predict(X_test)
-                train_statistics(y_test, y_pred, title="KNeighbour_{}".format(idx))
-                plot(y_test, y_pred, self.image_folder, show=False, title="KNeighbour_{}".format(idx))
-                idx += 1
-            return ads
-        return fit
+        idx = 0
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
+                                    leaf_size=params.get('leaf_size', 100),
+                                    n_neighbors=params.get('n_neighbors', 2))
+        neigh.fit(X_train, y_train)
+        joblib.dump(neigh, '{}/kneighbour.pkl'.format(self.model_folder))
+        
+        y_pred = neigh.predict(X_test)
+        train_statistics(y_test, y_pred, title="KNeighbour")
+        plot(y_test, y_pred, self.image_folder, show=False, title="KNeighbour")
+
+        return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # adaBOOST
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def train_adaBoost(self, ads):
         X, y = generate_matrix(ads, 'price')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        # learning rate 0.05 - 0.2
-        for i in [18, 19, 21, 22, 23]:
-            logging.info("Adaboost with estimator: {}".format(i))
-            boost = AdaBoostRegressor(DecisionTreeRegressor(),
-                                      n_estimators=i, random_state=RNG)
-            boost.fit(X_train, y_train)
-            y_pred = boost.predict(X_test)
-            train_statistics(y_test, y_pred, title="Adaboost with estimator: {}".format(i))
-            plot(y_test, y_pred, self.image_folder, show=False, title="adaboost_{}".format(i))
+            
+        parameters = {"n_estimators": [17, 18, 19, 20]}
+        adaboost = AdaBoostRegressor(DecisionTreeRegressor(), random_state=RNG)
+        gd = GridSearchCV(adaboost, parameters, verbose=1, scoring=scorer, cv=5)
+        gd.fit(X, y)
+        logging.info("Best score: {}".format(gd.best_score_))
+        logging.info("Best params: {}".format(gd.best_params_))
+        params = gd.best_params_
 
-    def fit_adaBoost(self, params):
-        def fit(ads):
-            X, y = generate_matrix(ads, 'price')
-            X, y = X.values, y.values
-            idx = 0
-            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
-                logging.info('New split')
-                X_train, X_test = X[train_index], X[test_index]
-                y_train, y_test = y[train_index], y[test_index]
-                boost = AdaBoostRegressor(DecisionTreeRegressor(),
-                                        n_estimators=params.get('n_estimators', 18),
-                                        random_state=RNG)
-                boost.fit(X_train, y_train)
-                joblib.dump(neigh, '{}/adaboost_{}.pkl'.format(self.model_folder, idx))
-                y_pred = boost.predict(X_test)
-                train_statistics(y_test, y_pred, title="adaboost_{}".format(idx))
-                plot(y_test, y_pred, self.image_folder, show=False, title="adaboost_{}".format(idx))
-                idx += 1
-            return ads
-        return fit
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        boost = AdaBoostRegressor(DecisionTreeRegressor(),
+                                  n_estimators=params.get('n_estimators', 18),
+                                  random_state=RNG)
+        boost.fit(X_train, y_train)
+        joblib.dump(neigh, '{}/adaboost.pkl'.format(self.model_folder))
+        y_pred = boost.predict(X_test)
+        train_statistics(y_test, y_pred, title="adaboost")
+        plot(y_test, y_pred, self.image_folder, show=False, title="adaboost")
+        return ads
     
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # Random Forest
