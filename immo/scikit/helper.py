@@ -42,7 +42,7 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     ax.set_xlabel("Inserat Nr.")
     ax.set_ylabel("Preis")
     plt.tight_layout()
-    plt.savefig("{}/verteilung_preis_{}.png".format(image_folder, title), dpi=250)
+    plt.savefig("{}/{}_verteilung_preis.png".format(image_folder, title), dpi=250)
     plt.clf()
     plt.close()
 
@@ -53,19 +53,19 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     ax.set_xlabel("Geschätzte Werte")
     ax.set_ylabel("Residuals")
     plt.tight_layout()
-    plt.savefig("{}/tukey_anscombe_{}.png".format(image_folder, title), dpi=250)
+    plt.savefig("{}/{}_tukey_anscombe.png".format(image_folder, title), dpi=250)
     plt.clf()
     plt.close()
 
     # Title Absolute Abweichung in %
     ax = plt.axes()
-    ax.hist((np.log1p(y_test) - np.log1p(y_pred)), 100)
+    ax.hist(np.nan_to_num(np.log1p(y_test) - np.log1p(y_pred)), 100)
     ax.set_xticklabels(['{:.2}'.format(x) for x in ax.get_xticks()])
     ax.set_title("Absolute Abweichung")
     ax.set_xlabel("Residuen loge(y) − loge(yˆ)")
     ax.set_ylabel("Anzahl Inserate")
     plt.tight_layout()
-    plt.savefig("{}/{}verteilung_residuals_log.png".format(image_folder, title), dpi=250)
+    plt.savefig("{}/{}_verteilung_residuals_log.png".format(image_folder, title), dpi=250)
     plt.clf()
     plt.close()
 
