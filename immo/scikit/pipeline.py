@@ -23,6 +23,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import RobustScaler
 from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
+from sklearn.linear_model import LassoLarsCV, Ridge, RidgeCV, LassoCV, Lasso, LinearRegression, LogisticRegression
 from sklearn.metrics.scorer import make_scorer
 import xgboost as xgb
 import lightgbm as lgb
@@ -478,7 +479,7 @@ class Pipeline():
             linreg.fit(X_train, y_train)
             y_pred = linreg.predict(X_test)
             train_statistics(y_test, y_pred)
-            plot(y_test, y_pred, self.image_folder, show=False, title="simpel_linear_regresion_{}".format(i))
+            plot(y_test, y_pred, self.image_folder, show=False, title="simpel_linear_regresion")
         return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
