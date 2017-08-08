@@ -20,12 +20,12 @@ logging.getLogger().addHandler(logging.StreamHandler())
 
 def main(commands):
 
-    tp = Pipeline('price', settings, DIRECTORY)
+    p = Pipeline('price', settings, DIRECTORY)
     ads = None
 
     for line in commands:
         logging.info("Apply transformation: {}".format(line[0]))
-        func = getattr(tp, line[0])
+        func = getattr(p, line[0])
         if len(line) > 1:
             line.pop(0)
             func = func(*line)

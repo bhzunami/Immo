@@ -10,7 +10,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ast
 # Scikit
-# Scikit
 from sklearn.ensemble import ExtraTreesRegressor, IsolationForest
 from sklearn.externals import joblib
 from sklearn.metrics import confusion_matrix, mean_squared_error
@@ -26,7 +25,7 @@ from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.linear_model import LassoLarsCV, Ridge, RidgeCV, LassoCV, Lasso, LinearRegression, LogisticRegression
 from sklearn.metrics.scorer import make_scorer
 import xgboost as xgb
-import lightgbm as lgb
+#import lightgbm as lgb
 from sklearn import cross_validation, metrics   #Additional scklearn functions
 # NLTK
 #import nltk
@@ -442,7 +441,7 @@ class Pipeline():
 
 
 
-    def predict(self, model):
+    def predict(self, name):
         def inner_predict(ads):
             X, y = generate_matrix(ads, 'price')
             X, y = X.values, y.values
@@ -502,12 +501,19 @@ class Pipeline():
 
         alpha = ridge.alpha_
         logging.info("Best alpha: {}".format(alpha))
-        ridgereg = Ridge(alpha=alpha, normalize=True)
-        ridgereg.fit(X_train, y_train)
-        joblib.dump(ridgereg, '{}/ridge.pkl'.format(self.model_folder))
-        y_pred = ridgereg.predict(X_test)
-        train_statistics(y_test, y_pred)
-        plot(y_test, y_pred, self.image_folder, show=False, title="ridge_regression")
+        idx = 0
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+            logging.info('New split')
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            ridgereg = Ridge(alpha=alpha, normalize=True)
+            ridgereg.fit(X_train, y_train)
+            joblib.dump(ridgereg, '{}/ridge_{}.pkl'.format(self.model_folder, idx))
+            y_pred = ridgereg.predict(X_test)
+            train_statistics(y_test, y_pred, title="Ridge_{}".format(idx))
+            plot(y_test, y_pred, self.image_folder, show=False, title="ridge_regression_{}".format(idx))
+            idx +=1
         return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -530,13 +536,18 @@ class Pipeline():
 
         alpha = lasso.alpha_
         logging.info("Best alpha: {}".format(alpha))
-
-        lassoreg = Lasso(alpha=alpha, normalize=True, max_iter=1e5)
-        lassoreg.fit(X_train, y_train)
-        joblib.dump(lassoreg, '{}/lasso.pkl'.format(self.model_folder))
-        y_pred = lassoreg.predict(X_test)
-        train_statistics(y_test, y_pred)
-        plot(y_test, y_pred, self.image_folder, show=False, title="lasso_regression")
+        idx = 0
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+            logging.info('New split')
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            lassoreg = Lasso(alpha=alpha, normalize=True, max_iter=1e5)
+            lassoreg.fit(X_train, y_train)
+            joblib.dump(lassoreg, '{}/lasso_{}.pkl'.format(self.model_folder, idx))
+            y_pred = lassoreg.predict(X_test)
+            train_statistics(y_test, y_pred, title="lasso_{}".format(idx))
+            plot(y_test, y_pred, self.image_folder, show=False, title="lasso_regression_{}".format(idx))
+            idx += 1
         return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -554,24 +565,28 @@ class Pipeline():
         gd.fit(X_train, y_train)
         logging.info("Best score: {}".format(gd.best_score_))
         logging.info("Best params: {}".format(gd.best_params_))
-        logging.info("result: {}".format(gd.cv_results_))
         return ads
 
-    def fit_kneighbours(self, params):
+    def fit_kneighbours(self, params={}):
         def fit(ads):
             X, y = generate_matrix(ads, 'price')
             X, y = X.values, y.values
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-            
-            neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
-                                        leaf_size=params.get('leaf_size', 100),
-                                        n_neighbors=params.get('n_neighbors', 2))
-            neigh.fit(X_train, y_train)
-            joblib.dump(neigh, '{}/kneighbour.pkl'.format(self.model_folder))
-            
-            y_pred = neigh.predict(X_test)
-            train_statistics(y_test, y_pred, title="KNeighbour with leaf size: {}".format(i))
-            plot(y_test, y_pred, self.image_folder, show=False, title="k_neigh_{}".format(i))
+            idx = 0
+            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+                logging.info('New split')
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                
+                neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
+                                            leaf_size=params.get('leaf_size', 100),
+                                            n_neighbors=params.get('n_neighbors', 2))
+                neigh.fit(X_train, y_train)
+                joblib.dump(neigh, '{}/kneighbour_{}.pkl'.format(self.model_folder, idx))
+                
+                y_pred = neigh.predict(X_test)
+                train_statistics(y_test, y_pred, title="KNeighbour_{}".format(idx))
+                plot(y_test, y_pred, self.image_folder, show=False, title="KNeighbour_{}".format(idx))
+                idx += 1
             return ads
         return fit
 
@@ -594,15 +609,21 @@ class Pipeline():
     def fit_adaBoost(self, params):
         def fit(ads):
             X, y = generate_matrix(ads, 'price')
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-            boost = AdaBoostRegressor(DecisionTreeRegressor(),
-                                      n_estimators=params.get('n_estimators', 18),
-                                      random_state=RNG)
-            boost.fit(X_train, y_train)
-            joblib.dump(neigh, '{}/adaboost.pkl'.format(self.model_folder))
-            y_pred = boost.predict(X_test)
-            train_statistics(y_test, y_pred, title="Adaboost")
-            plot(y_test, y_pred, self.image_folder, show=False, title="adaboost")
+            X, y = X.values, y.values
+            idx = 0
+            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+                logging.info('New split')
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                boost = AdaBoostRegressor(DecisionTreeRegressor(),
+                                        n_estimators=params.get('n_estimators', 18),
+                                        random_state=RNG)
+                boost.fit(X_train, y_train)
+                joblib.dump(neigh, '{}/adaboost_{}.pkl'.format(self.model_folder, idx))
+                y_pred = boost.predict(X_test)
+                train_statistics(y_test, y_pred, title="adaboost_{}".format(idx))
+                plot(y_test, y_pred, self.image_folder, show=False, title="adaboost_{}".format(idx))
+                idx += 1
             return ads
         return fit
     
@@ -620,7 +641,6 @@ class Pipeline():
         gd.fit(X_train, y_train)
         logging.info("Best score: {}".format(gd.best_score_))
         logging.info("Best score: {}".format(gd.best_params_))
-        logging.info("result: {}".format(gd.cv_results_))
         
         return ads
 
@@ -628,15 +648,20 @@ class Pipeline():
         def fit(ads):
             X, y = generate_matrix(ads, 'price')
             X, y = X.values, y.values
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-            model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
-                                          max_features="auto",
-                                          n_jobs=-1, min_samples_leaf=1)
-            model.fit(X_train, y_train)
-            joblib.dump(model, '{}/random_forest.pkl'.format(self.model_folder))
-            y_pred = model.predict(X_test)
-            train_statistics(y_test, y_pred)
-            plot(y_test, y_pred, self.image_folder, show=False, title="random_forest")
+            idx = 0
+            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+                logging.info('New split')
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
+                                            max_features="auto",
+                                            n_jobs=-1, min_samples_leaf=1)
+                model.fit(X_train, y_train)
+                joblib.dump(model, '{}/random_forest_{}.pkl'.format(self.model_folder, idx))
+                y_pred = model.predict(X_test)
+                train_statistics(y_test, y_pred, title="random_forest_{}".format(idx))
+                plot(y_test, y_pred, self.image_folder, show=False, title="random_forest_{}".format(idx))
+                idx += 1
             return ads
         return fit
 
@@ -658,7 +683,6 @@ class Pipeline():
         clf.fit(X_train, y_train)
         logging.info("Best score: {}".format(gd.best_score_))
         logging.info("Best score: {}".format(gd.best_params_))
-        logging.info("result: {}".format(gd.cv_results_))
         
         return ads
 
@@ -666,17 +690,24 @@ class Pipeline():
         def fit(ads):
             X, y = generate_matrix(ads, 'price')
             X, y = X.values, y.values
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-            xgb_model = xgb.XGBRegressor(silent=False,
-                                         max_depth=params.get('max_depth', 100),
-                                         learning_rate=params.get('learning_rate', 0.1),
-                                         n_estimators=params.get('n_estimators', 350),
-                                         n_jobs=-1)
+            idx = 0
+            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+                logging.info('New split')
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                xgb_model = xgb.XGBRegressor(silent=False,
+                                            max_depth=params.get('max_depth', 100),
+                                            learning_rate=params.get('learning_rate', 0.1),
+                                            n_estimators=params.get('n_estimators', 350),
+                                            n_jobs=-1)
 
-            xgb_model.fit(X_train, y_train)
-            xgb_model._Booster.save_model('{}/xgbooster.pkl'.format(self.model_folder))
-            y_pred_xgb = xgb_model.predict(X_test)
-            train_statistics(y_test, y_pred_xgb, title="Stacked xgb")
+                xgb_model.fit(X_train, y_train)
+                xgb_model._Booster.save_model('{}/xgbooster_{}.pkl'.format(self.model_folder, idx))
+                y_pred_xgb = xgb_model.predict(X_test)
+                train_statistics(y_test, y_pred_xgb, title="xgb_{}".format(idx))
+                plot(y_test, y_pred, self.image_folder, show=False, title="xgboost_{}".format(idx))
+                
+                idx += 1
             return ads
         return fit
 
@@ -742,12 +773,20 @@ class Pipeline():
 
     def fit_extra_tree(self, params):
         def fit(ads):
-            model = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
-                                        n_jobs=-1, random_state=RNG)
-            model.fit(X_train, y_train)
-            joblib.dump(model, '{}/extra_tree_regressior.pkl'.format(self.model_folder))
-            y_pred = model.predict(X_test)
-            train_statistics(y_test, y_pred, title="ExtraTree_train")
-            plot(y_test, y_pred, self.image_folder, show=True, title="ExtraTree_train")
+            X, y = generate_matrix(ads, 'price')
+            X, y = X.values, y.values
+            idx = 0
+            for train_index, test_index in KFold(n_splits=3, shuffle=True).split(X):
+                logging.info('New split')
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                model = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
+                                            n_jobs=-1, random_state=RNG)
+                model.fit(X_train, y_train)
+                joblib.dump(model, '{}/extra_tree_regressior_{}.pkl'.format(self.model_folder, idx))
+                y_pred = model.predict(X_test)
+                train_statistics(y_test, y_pred, title="ExtraTree_{}".format(idx))
+                plot(y_test, y_pred, self.image_folder, show=True, title="ExtraTree_train_{}".format(idx))
+                idx += 1
             return ads
         return fit
