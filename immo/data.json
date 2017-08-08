@@ -1,0 +1,14 @@
+{
+    "living_area": 105,
+    "num_rooms": 4,
+    "otype_id": 29,
+    "street": "Domaine de la Résidence",
+    "zip_municipality": "1884 Villars-sur-Ollon",
+    "build_year": 1977,
+    "last_renovation_year": null,
+    "description": "Appartement de 3 pièces + mezzanine en bon état d'entretien 3 room apartment + mezzanine in good condition",
+    "price": 840000,
+    "detect_outlier": true,
+    "model_pkl": "scikit/models/adaboost.pkl",
+    "ads_pkl": "scikit/models/ads_prepared.pkl"
+}

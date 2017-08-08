@@ -48,7 +48,7 @@ class AnomalyDetection(object):
 
     def isolation_forest(self,
                          settings,
-                         meshgrid,
+                         meshgrid=None,
                          goal='price',
                          load=False):
         """ get a dataframe and features to check for anomaly detection
@@ -72,11 +72,13 @@ class AnomalyDetection(object):
             data[feature] = ad
             outlierIdx[feature] = cls_[feature].predict(ad)
             logging.info("found {} outliers for feature {}".format(ad[np.where(outlierIdx[feature] == -1)].shape[0], feature))
-            x[feature], y[feature] = meshgrid[feature]
+            if meshgrid is not None:
+                x[feature], y[feature] = meshgrid[feature]
 
-        self.plot_isolation_forest(data, cls_, x, y, outlierIdx, features)
+        if meshgrid is not None:
+            self.plot_isolation_forest(data, cls_, x, y, outlierIdx, features)
 
-        # Remove all outliers in one pice
+        # Remove all outliers in one piece
         o = []
         for feature in features:
             o = np.unique(np.concatenate((o, np.where(outlierIdx[feature] == -1)[0]), axis=0))

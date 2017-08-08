@@ -54,7 +54,7 @@ class Pipeline():
                 self.transform_build_renovation,
                 self.transform_noise_level,
                 self.simple_stats('After Transformation'),
-                self.show_crawler_stats,
+                # self.show_crawler_stats,
                 self.transform_tags,
                 self.transform_features,
                 self.transform_onehot,
@@ -62,6 +62,15 @@ class Pipeline():
                 self.predict_living_area,
                 self.save_as_df("{}/ads_prepared.pkl".format(self.model_folder))
             ]
+
+    def load_csv(self, filename):
+        def load_csv_inner(ads):
+            try:
+                return pd.read_csv(filename, index_col=0, engine='c')
+            except FileNotFoundError:
+                logging.info("File {} does not exist. Please run data_analyse.py first".format(filename))
+                return None
+        return load_csv_inner
 
     def cleanup(self, ads):
         logging.info("Start preparing dataset")
@@ -132,6 +141,7 @@ class Pipeline():
     def show_crawler_stats(self, ads):
         logging.info(ads.groupby('crawler')['price'].count())
         return ads
+
     def transform_noise_level(self, ads):
         """ If we have no nose_level at the address
         we use the municipality noise_level
@@ -243,10 +253,15 @@ class Pipeline():
             'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
                                        np.linspace(0, max(ads['price']), 1000))
         }
-        anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
-        ads = anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
-                                                  meshgrid, self.goal)
+
+        ads = self.outlier_detection_light(ads, meshgrid)
+
         return self.save_as_df("{}/ads_clean.pkl".format(self.model_folder))(ads)
+
+    def outlier_detection_light(self, ads, meshgrid=None):
+        anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
+        return anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
+                                                  meshgrid, self.goal)
 
     def transform_features(self, ads):
         """Transfrom features to more global one

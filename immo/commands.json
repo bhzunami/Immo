@@ -1,0 +1,16 @@
+[
+  ["load_csv", "scikit/advertisements.csv"],
+  ["replace_zeros_with_nan"],
+  ["cleanup"],
+  ["simple_stats", "Before Transformation"],
+  ["transform_build_renovation"],
+  ["transform_noise_level"],
+  ["simple_stats", "After Transformation"],
+  ["show_crawler_stats"],
+  ["transform_tags"],
+  ["transform_features"],
+  ["transform_onehot"],
+  ["transform_misc_living_area"],
+  ["predict_living_area"],
+  ["save_as_df", "scikit/models/ads_prepared.pkl"]
+]
