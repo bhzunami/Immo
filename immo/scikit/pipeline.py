@@ -486,6 +486,7 @@ class Pipeline():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def train_ridge(self, ads):
         X, y = generate_matrix(ads, 'price')
+        X, y = X.values, y.values
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
         ridge = RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
@@ -521,6 +522,8 @@ class Pipeline():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def train_lasso(self, ads):
         X, y = generate_matrix(ads, 'price')
+        X, y = X.values, y.values
+        
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
         lasso = LassoCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
