@@ -51,14 +51,18 @@ class Pipeline():
                 self.replace_zeros_with_nan,
                 self.cleanup,
                 self.simple_stats('Before Transformation'),
-                self.transform_build_renovation,
-                self.transform_noise_level,
+                #self.transform_build_renovation,
+                #self.transform_noise_level,
                 self.simple_stats('After Transformation'),
+<<<<<<< HEAD
                 # self.show_crawler_stats,
+=======
+                #self.show_crawler_stats,
+>>>>>>> prepare and predict better
                 self.transform_tags,
-                self.transform_features,
+                #self.transform_features,
                 self.transform_onehot,
-                self.transform_misc_living_area,
+                #self.transform_misc_living_area,
                 self.predict_living_area,
                 self.save_as_df("{}/ads_prepared.pkl".format(self.model_folder))
             ]
@@ -87,7 +91,10 @@ class Pipeline():
         # Remove unwanted cols
         remove = ['cubature', 'room_height', 'effective_area',
                   'plot_area', 'longitude', 'latitude',
-                  'floor', 'num_floors']
+                  'floor', 'num_floors',
+                  'last_renovation_year', 
+                  'noise_level','crawler',
+                  'steuerfuss_kanton', 'steuerfuss_gde']
         return ads.drop(remove, axis=1)
 
     def simple_stats(sefl, title):
@@ -143,6 +150,7 @@ class Pipeline():
         return ads
 
     def transform_noise_level(self, ads):
+        pdb.set_trace()
         """ If we have no nose_level at the address
         we use the municipality noise_level
         """
@@ -151,7 +159,9 @@ class Pipeline():
                 return row.m_noise_level
             return row.noise_level
 
-        ads['noise_level'] = ads.apply(lambdarow, axis=1)
+        if 'noise_level' in ads.keys():
+            ads['noise_level'] = ads.apply(lambdarow, axis=1)
+            return ads
         return ads
 
 

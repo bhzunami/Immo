@@ -32,7 +32,7 @@ class PredictPipeline(Pipeline):
         super().__init__(goal, settings, directory)
 
         predict_pipeline = [
-            #self.outlier_detection,
+            self.outlier_detection,
             #self.adaBoost,
             #self.xgboost,
             #self.extraTreeRegression,
