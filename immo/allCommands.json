@@ -23,10 +23,10 @@
   ["train_kneighbours"],
   ["fit_kneighbours", {"leaf_size": 2, "n_neighbors": 100}],
   ["train_adaBoost"],
-  ["fit_adaBoost"],
+  ["fit_adaBoost", {}],
   ["train_random_forest"],
   ["train_xgboost"],
-  ["fit_xgboost"],
+  ["fit_xgboost", {}],
   ["train_extra_tree"],
-  ["fit_extra_tree"]
+  ["fit_extra_tree", {}]
 ]

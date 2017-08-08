@@ -19,6 +19,8 @@ from sklearn.ensemble import RandomForestRegressor,  GradientBoostingRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.pipeline import make_pipeline
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostRegressor
 from sklearn.preprocessing import RobustScaler
 from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
@@ -560,8 +562,7 @@ class Pipeline():
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        # parameters = {"n_neighbors": [2, 3, 5, 10], "leaf_size":[50, 100, 200]}
-        parameters = {"n_neighbors": [2], "leaf_size":[50]}
+        parameters = {"n_neighbors": [2, 3, 5, 10], "leaf_size":[50, 100, 200]}
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1)
         gd = GridSearchCV(neigh, parameters, verbose=1, scoring=scorer)
         logging.info("Start Fit")
