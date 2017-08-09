@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pdb
+import logging
+import os
 
 def generate_matrix(df, goal):
     X = df.drop([goal], axis=1)
@@ -32,9 +34,16 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     y_test = np.asarray(y_test)
     y_pred = np.asarray(y_pred)
     markersize = 1
-    fig = plt.figure(figsize=(10, 10))
-    subplots = gen_subplots(fig, 3, 1)
 
+    i = 0
+    while True:
+        i += 1
+        file = "{}/{}_verteilung_preis_{}.png".format(image_folder, title, i)
+        if os.path.exists(file):
+            continue
+        break
+
+    logging.info("PLOT NR: {}".format(i))
     ax = plt.axes()
     ax.plot(y_test, 'bo', markersize=markersize, label="Actual")
     ax.plot(y_pred, 'ro', markersize=markersize, label="Predicted")
@@ -42,7 +51,7 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     ax.set_xlabel("Inserat Nr.")
     ax.set_ylabel("Preis")
     plt.tight_layout()
-    plt.savefig("{}/{}_verteilung_preis.png".format(image_folder, title), dpi=250)
+    plt.savefig("{}/{}_verteilung_preis_{}.png".format(image_folder, title, i), dpi=250)
     plt.clf()
     plt.close()
 
@@ -53,7 +62,7 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     ax.set_xlabel("Geschätzte Werte")
     ax.set_ylabel("Residuals")
     plt.tight_layout()
-    plt.savefig("{}/{}_tukey_anscombe.png".format(image_folder, title), dpi=250)
+    plt.savefig("{}/{}_tukey_anscombe_{}.png".format(image_folder, title, i), dpi=250)
     plt.clf()
     plt.close()
 
@@ -65,7 +74,7 @@ def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     ax.set_xlabel("Residuen loge(y) − loge(yˆ)")
     ax.set_ylabel("Anzahl Inserate")
     plt.tight_layout()
-    plt.savefig("{}/{}_verteilung_residuals_log.png".format(image_folder, title), dpi=250)
+    plt.savefig("{}/{}_verteilung_residuals_log_{}.png".format(image_folder, title, i), dpi=250)
     plt.clf()
     plt.close()
 
