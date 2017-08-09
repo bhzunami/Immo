@@ -28,6 +28,15 @@ def gen_subplots(fig, x, y):
         plt.grid()
         yield ax
 
+
+def feature_importance(model, X):
+    importances = model.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    logging.info("Feature Ranking:")
+    for f in range(X.shape[1]):
+        logging.info("{}. feature {} ({})".format(f+1, X.keys()[indices[f]], importances[indices[f]]))
+
+
 def plot(y_test, y_pred, image_folder, show=False, title="dummy"):
     # sort both arrays by y_test
     y_test, y_pred = zip(*sorted(zip(y_test, y_pred)))

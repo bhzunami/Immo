@@ -35,7 +35,7 @@ from sklearn import cross_validation, metrics   #Additional scklearn functions
 #from nltk.stem import SnowballStemmer
 
 from .a_detection import AnomalyDetection
-from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics
+from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics, feature_importance
 from .combined_ensemble import CombinedEnsemble
 
 RNG = np.random.RandomState(42)
@@ -79,8 +79,18 @@ class Pipeline():
 
     def load_df(self, name):
         def inner_load_df(ads):
-            return joblib.load(name)
+            advertisements = joblib.load(name)
+            X, y = generate_matrix(advertisements, 'price')
+            self.X, self.y = X.values, y.values
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3)
+            return advertisements
         return inner_load_df
+
+    def echo(self, message):
+        def inner_echo(ads):
+            logging.info("{}".format(message))
+            return ads
+        return inner_echo
 
     def remove(self, name):
         def inner_remove(ads):
@@ -159,7 +169,6 @@ class Pipeline():
         return ads
 
     def transform_noise_level(self, ads):
-        pdb.set_trace()
         """ If we have no nose_level at the address
         we use the municipality noise_level
         """
@@ -340,8 +349,9 @@ class Pipeline():
                                        np.linspace(0, max(ads['price']), 1000))
         }
 
-        ads = self.outlier_detection_light(ads, meshgrid)
-
+        anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
+        ads = anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
+                                                 meshgrid, self.goal)
         return self.save_as_df("{}/ads_clean.pkl".format(self.model_folder))(ads)
 
 
@@ -571,16 +581,15 @@ class Pipeline():
         params = gd.best_params_
 
         idx = 0
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
                                     leaf_size=params.get('leaf_size', 100),
                                     n_neighbors=params.get('n_neighbors', 2))
-        neigh.fit(X_train, y_train)
+        neigh.fit(self.X_train, self.y_train)
         joblib.dump(neigh, '{}/kneighbour.pkl'.format(self.model_folder))
         
-        y_pred = neigh.predict(X_test)
-        train_statistics(y_test, y_pred, title="KNeighbour")
-        plot(y_test, y_pred, self.image_folder, show=False, title="KNeighbour")
+        y_pred = neigh.predict(self.X_test)
+        train_statistics(self.y_test, y_pred, title="KNeighbour")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="KNeighbour")
 
         return ads
 
@@ -598,17 +607,23 @@ class Pipeline():
         # logging.info("Best params: {}".format(gd.best_params_))
         # params = gd.best_params_
         params = {}
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         boost = AdaBoostRegressor(DecisionTreeRegressor(),
                                   n_estimators=params.get('n_estimators', 18),
                                   learning_rate=params.get('learning_rate', 1),
                                   random_state=RNG)
-        boost.fit(X_train, y_train)
+        boost.fit(self.X_train, self.y_train)
         joblib.dump(boost, '{}/adaboost.pkl'.format(self.model_folder))
-        y_pred = boost.predict(X_test)
-        train_statistics(y_test, y_pred, title="adaboost")
-        plot(y_test, y_pred, self.image_folder, show=False, title="adaboost")
+        y_pred = boost.predict(self.X_test)
+        train_statistics(self.y_test, y_pred, title="adaboost")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="adaboost")
+
+        # X values is numpy matrix with no keys()
+        X, y = generate_matrix(ads, 'price')
+        try:
+            feature_importance(boost, X)
+        except Exception:
+            logging.error("Could not get Feature importance")
+            pass
         return ads
     
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -625,15 +640,23 @@ class Pipeline():
         logging.info("Best score: {}".format(gd.best_score_))
         logging.info("Best score: {}".format(gd.best_params_))
         params = gd.best_params_
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
                                       max_features="auto", n_jobs=-1,
                                       min_samples_leaf=params.get('min_samples_leaf', 1))
-        model.fit(X_train, y_train)
+        model.fit(self.X_train, self.y_train)
         joblib.dump(model, '{}/random_forest.pkl'.format(self.model_folder))
-        y_pred = model.predict(X_test)
-        train_statistics(y_test, y_pred, title="random_forest")
-        plot(y_test, y_pred, self.image_folder, show=False, title="random_forest") 
+        y_pred = model.predict(self.X_test)
+        train_statistics(self.y_test, y_pred, title="random_forest")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="random_forest")
+        
+        # X values is numpy matrix with no keys()
+        X, y = generate_matrix(ads, 'price')
+        try:
+            feature_importance(boost, X)
+        except Exception:
+            logging.error("Could not get Feature importance")
+            pass
+        return ads
         return ads
 
 
@@ -656,18 +679,25 @@ class Pipeline():
         # params = gd.best_params_
         params = {}
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         xgb_model = xgb.XGBRegressor(silent=False,
                                      max_depth=params.get('max_depth', 100),
                                      learning_rate=params.get('learning_rate', 0.1),
                                      n_estimators=params.get('n_estimators', 350),
                                      n_jobs=-1)
 
-        xgb_model.fit(X_train, y_train)
+        xgb_model.fit(self.X_train, self.y_train)
         xgb_model._Booster.save_model('{}/xgbooster.pkl'.format(self.model_folder))
-        y_pred = xgb_model.predict(X_test)
-        train_statistics(y_test, y_pred, title="xgb")
-        plot(y_test, y_pred, self.image_folder, show=False, title="xgboost")
+        y_pred = xgb_model.predict(self.X_test)
+        train_statistics(self.y_test, y_pred, title="xgb")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="xgboost")
+        # X values is numpy matrix with no keys()
+        X, y = generate_matrix(ads, 'price')
+        try:
+            feature_importance(boost, X)
+        except Exception:
+            logging.error("Could not get Feature importance")
+            pass
+        return ads
         return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -686,13 +716,92 @@ class Pipeline():
         # params = gd.best_params_
         params = {}
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         extra = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
                                     warm_start=True, n_jobs=-1, random_state=RNG)
         
-        extra.fit(X_train, y_train)
+        extra.fit(self.X_train, self.y_train)
         joblib.dump(extra, '{}/extraTree.pkl'.format(self.model_folder))
-        y_pred = extra.predict(X_test)
-        train_statistics(y_test, y_pred, title="ExtraTree_train")
-        plot(y_test, y_pred, self.image_folder, show=False, title="extra")
+        y_pred = extra.predict(self.X_test)
+        train_statistics(self.y_test, y_pred, title="ExtraTree_train")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="extra")
+        # X values is numpy matrix with no keys()
+        X, y = generate_matrix(ads, 'price')
+        try:
+            feature_importance(boost, X)
+        except Exception:
+            logging.error("Could not get Feature importance")
+            pass
+        return ads
+        return ads
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Stacked model
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    def stacked_models(self, ads):
+        logging.info("Start extra Tree")
+        params_tree = {}
+        extra = ExtraTreesRegressor(n_estimators=params_tree.get('n_estimators', 700),
+                                    warm_start=True, n_jobs=-1, random_state=RNG)
+        extra.fit(self.X_train, self.y_train)
+        
+        logging.info("Start xgb")
+        params_xgb = {}
+        xgb_model = xgb.XGBRegressor(silent=False,
+                                     max_depth=params_xgb.get('max_depth', 100),
+                                     learning_rate=params_xgb.get('learning_rate', 0.1),
+                                     n_estimators=params_xgb.get('n_estimators', 350),
+                                     n_jobs=-1)
+        xgb_model.fit(self.X_train, self.y_train)
+
+        logging.info("Start adaboost")        
+        params_ada = {}
+        boost = AdaBoostRegressor(DecisionTreeRegressor(),
+                                  n_estimators=params_ada.get('n_estimators', 18),
+                                  learning_rate=params_ada.get('learning_rate', 1),
+                                  random_state=RNG)
+        boost.fit(self.X_train, self.y_train)
+
+        t_predict = extra.predict(self.X_test)
+        xg_predict = xgb_model.predict(self.X_test)
+        a_predict = boost.predict(self.X_test)
+
+        y_pred = np.array(0.2*a_predict + 0.6*xg_predict + 0.2*t_predict)
+        train_statistics(y_test, y_pred, title="BEST")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+        
+        y_pred = np.array(0.3*a_predict + 0.3*xg_predict + 0.4*t_predict)
+        train_statistics(y_test, y_pred, title="0.3, 0.3, 0.4")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.8*a_predict + 0.1*xg_predict + 0.1*t_predict)
+        train_statistics(y_test, y_pred, title="0.8, 0.1, 0.1")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.2*a_predict + 0.6*xg_predict + 0.2*t_predict)
+        train_statistics(y_test, y_pred, title="0.2, 0.6, 0.2")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.4*a_predict + 0.4*xg_predict + 0.2*t_predict)
+        train_statistics(y_test, y_pred, title="0.4, 0.4, 0.2")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.1*a_predict + 0.8*xg_predict + 0.1*t_predict)
+        train_statistics(y_test, y_pred, title="0.1, 0.8, 0.1")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.6*a_predict + 0.1*xg_predict + 0.3*t_predict)
+        train_statistics(y_test, y_pred, title="0.6, 0.1, 0.3")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.2*a_predict + 0.7*xg_predict + 0.1*t_predict)
+        train_statistics(y_test, y_pred, title="0.2, 0.7, 0.1")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.2*a_predict + 0.0*xg_predict + 0.8*t_predict)
+        train_statistics(y_test, y_pred, title="0.2, 0.0, 0.8")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+
+        y_pred = np.array(0.3*a_predict + 0.4*xg_predict + 0.3*t_predict)
+        train_statistics(y_test, y_pred, title="0.3, 0.4, 0.3")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="extra")
         return ads

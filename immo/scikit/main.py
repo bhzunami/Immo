@@ -24,12 +24,17 @@ def main(commands):
     ads = None
 
     for line in commands:
-        logging.info("Apply transformation: {}".format(line[0]))
+        if line[0] != "echo":
+            logging.info("Apply transformation: {}".format(line[0]))
         func = getattr(p, line[0])
         if len(line) > 1:
             line.pop(0)
             func = func(*line)
-        ads = func(ads)
+        try:
+            ads = func(ads)
+        except Exception:
+            logging.error("Could not run method {}".format(line[0]))
+            continue
 
     logging.info("Pipeline finished.")
 
