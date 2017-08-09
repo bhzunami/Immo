@@ -693,6 +693,6 @@ class Pipeline():
         extra.fit(X_train, y_train)
         joblib.dump(extra, '{}/extraTree.pkl'.format(self.model_folder))
         y_pred = extra.predict(X_test)
-        train_statistics(y_test, y_pred, title="ExtraTree_train_{}".format(estimator))
+        train_statistics(y_test, y_pred, title="ExtraTree_train")
         plot(y_test, y_pred, self.image_folder, show=False, title="extra")
         return ads
