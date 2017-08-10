@@ -652,7 +652,7 @@ class Pipeline():
         # X values is numpy matrix with no keys()
         X, y = generate_matrix(ads, 'price')
         try:
-            feature_importance(boost, X)
+            feature_importance(model, X)
         except Exception:
             logging.error("Could not get Feature importance")
             pass
@@ -690,14 +690,6 @@ class Pipeline():
         y_pred = xgb_model.predict(self.X_test)
         train_statistics(self.y_test, y_pred, title="xgb")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="xgboost")
-        # X values is numpy matrix with no keys()
-        X, y = generate_matrix(ads, 'price')
-        try:
-            feature_importance(boost, X)
-        except Exception:
-            logging.error("Could not get Feature importance")
-            pass
-        return ads
         return ads
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -727,7 +719,7 @@ class Pipeline():
         # X values is numpy matrix with no keys()
         X, y = generate_matrix(ads, 'price')
         try:
-            feature_importance(boost, X)
+            feature_importance(extra, X)
         except Exception:
             logging.error("Could not get Feature importance")
             pass
