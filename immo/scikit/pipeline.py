@@ -82,7 +82,7 @@ class Pipeline():
             advertisements = joblib.load(name)
             X, y = generate_matrix(advertisements, 'price')
             self.X, self.y = X.values, y.values
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3)
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3, random_state=RNG)
             return advertisements
         return inner_load_df
 
@@ -499,7 +499,7 @@ class Pipeline():
     def train_ridge(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, , random_state=RNG)
 
         ridge = RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
         ridge.fit(X_train, y_train)
@@ -536,7 +536,7 @@ class Pipeline():
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RNG)
 
         lasso = LassoCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
         lasso.fit(X_train, y_train)
