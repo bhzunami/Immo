@@ -83,7 +83,7 @@ class Pipeline():
             X, y = generate_matrix(advertisements, 'price')
             self.X, self.y = X.values, y.values
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=RNG)
-            logging.info("Size of X_train: {}, size of X_test: {}".format(len(self.X_train), len(sefl.y_train)))
+            logging.info("Size of X_train: {}, size of X_test: {}".format(len(self.X_train), len(self.y_train)))
             return advertisements
         return inner_load_df
 
@@ -129,7 +129,7 @@ class Pipeline():
             return ads.drop(remove, axis=1)
         return inner_cleanup
 
-    def simple_stats(sefl, title):
+    def simple_stats(self, title):
         """Show how many NaN has one Feature and how many we can use
         """
         def run(ads):
