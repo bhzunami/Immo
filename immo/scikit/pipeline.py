@@ -82,7 +82,8 @@ class Pipeline():
             advertisements = joblib.load(name)
             X, y = generate_matrix(advertisements, 'price')
             self.X, self.y = X.values, y.values
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3, random_state=RNG)
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=RNG)
+            logging.info("Size of X_train: {}, size of X_test: {}".format(len(self.X_train), len(sefl.y_train)))
             return advertisements
         return inner_load_df
 
@@ -273,21 +274,23 @@ class Pipeline():
         ads['interior'] = np.where((ads['tags_anschluss'] == 1) |
                                    (ads['tags_abstellplatz'] == 1) |
                                    (ads['tags_cheminée'] == 1) |
-                                    (ads['tags_eingang'] == 1) |
-                                    (ads['tags_esszimmer'] == 1) |
-                                    (ads['tags_gross'] == 1) |
-                                    (ads['tags_heizung'] == 1) |
-                                    (ads['tags_lift'] == 1) |
-                                    (ads['tags_minergie'] == 1) |
-                                    (ads['tags_schlafzimmer'] == 1) |
-                                    (ads['tags_wohnzimmer'] == 1) |
-                                    (ads['tags_rollstuhlgängig'] == 1) |
-                                    (ads['tags_tv'] == 1) |
-                                    (ads['tags_küche'] == 1) |
-                                    (ads['tags_waschküche'] == 1) |
-                                    (ads['tags_waschmaschine'] == 1) |
-                                    (ads['tags_wc'] == 1) |
-                                    (ads['tags_zimmer'] == 1), 1, 0)
+                                   (ads['tags_eingang'] == 1) |
+                                   (ads['tags_esszimmer'] == 1) |
+                                   (ads['tags_gross'] == 1) |
+                                   (ads['tags_heizung'] == 1) |
+                                   (ads['tags_lift'] == 1) |
+                                   (ads['tags_minergie'] == 1) |
+                                   (ads['tags_schlafzimmer'] == 1) |
+                                   (ads['tags_wohnzimmer'] == 1) |
+                                   (ads['tags_rollstuhlgängig'] == 1) |
+                                   (ads['tags_tv'] == 1) |
+                                   (ads['tags_küche'] == 1) |
+                                   (ads['tags_waschküche'] == 1) |
+                                   (ads['tags_waschmaschine'] == 1) |
+                                   (ads['tags_wc'] == 1) |
+                                   (ads['tags_keller'] == 1) |
+                                   (ads['tags_raum'] == 1) |                                   
+                                   (ads['tags_zimmer'] == 1), 1, 0)
 
         ads['exterior'] = np.where((ads['tags_aussicht'] == 1) |
                                 (ads['tags_balkon'] == 1) |
@@ -320,7 +323,7 @@ class Pipeline():
                         'tags_lage', 'tags_liegenschaft', 'tags_parkplatz', 'tags_sitzplatz', 'tags_terrasse',
                         'tags_autobahnanschluss', 'tags_einkaufen', 'tags_kinderfreundlich',
                         'tags_kindergarten', 'tags_oberstufe', 'tags_primarschule', 'tags_quartier',
-                        'tags_ruhig', 'tags_sommer', 'tags_verkehr', 'tags_zentral']
+                        'tags_ruhig', 'tags_sommer', 'tags_verkehr', 'tags_zentral', 'tags_keller', 'tags_raum']
 
         return ads.drop(drop_features, axis=1)
 
@@ -332,9 +335,9 @@ class Pipeline():
         """Detect outliers we do not want in our training phase
         The outlier model must be trained first
         """
-        if os.path.isfile("{}/ads_clean.pkl".format(self.model_folder)):
-            logging.info("Clean file found skipping outlier detection load data from file.")
-            return self.load_df("{}/ads_clean.pkl".format(self.model_folder))(ads)
+        # if os.path.isfile("{}/ads_cleaned.pkl".format(self.model_folder)):
+        #     logging.info("Clean file found skipping outlier detection load data from file.")
+        #     return self.load_df("{}/ads_cleaned.pkl".format(self.model_folder))(ads)
 
         meshgrid = {
             'build_year': np.meshgrid(np.linspace(0, max(ads['build_year']), 400),
@@ -345,14 +348,15 @@ class Pipeline():
                                       np.linspace(0, max(ads['price']), 1000)),
             'last_construction': np.meshgrid(np.linspace(0, max(ads['last_construction']), 400),
                                              np.linspace(0, max(ads['price']), 1000)),
-            #'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
-            #                           np.linspace(0, max(ads['price']), 1000))
+            # 'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
+            #                            np.linspace(0, max(ads['price']), 1000))
         }
 
         anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
         ads = anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
                                                  meshgrid, self.goal)
-        return self.save_as_df("{}/ads_clean.pkl".format(self.model_folder))(ads)
+
+        return ads 
 
 
     def train_outlier_detection(self, ads):
@@ -580,7 +584,14 @@ class Pipeline():
         # logging.info("Best params: {}".format(gd.best_params_))
         # params = gd.best_params_
         params = {}
-
+        
+        self.settings['k-neighbour'] = {}
+        self.settings['k-neighbour']['n_neighbors'] = params.get('n_neighbors', 2)
+        self.settings['k-neighbour']['leaf_size'] = params.get('leaf_size', 2)
+        # Save best c for all features
+        with open('{}/settings.json'.format(self.directory), 'w') as f:
+            f.write(json.dumps(self.settings))
+    
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
                                     leaf_size=params.get('leaf_size', 100),
                                     n_neighbors=params.get('n_neighbors', 2))
@@ -607,6 +618,13 @@ class Pipeline():
         # logging.info("Best params: {}".format(gd.best_params_))
         # params = gd.best_params_
         params = {}
+        self.settings['adaboost'] = {}
+        self.settings['adaboost']['n_estimators'] = params.get('n_estimators', 18)
+        self.settings['adaboost']['learning_rate'] = params.get('learning_rate', 1)
+        # Save best c for all features
+        with open('{}/settings.json'.format(self.directory), 'w') as f:
+            f.write(json.dumps(self.settings))
+
         boost = AdaBoostRegressor(DecisionTreeRegressor(),
                                   n_estimators=params.get('n_estimators', 18),
                                   learning_rate=params.get('learning_rate', 1),
@@ -632,14 +650,22 @@ class Pipeline():
     def train_random_forest(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        parameters = {"n_estimators": [100, 500, 700, 1000], "min_samples_leaf":[1, 5]}
-        random = RandomForestRegressor(n_jobs=-1)
-        gd = GridSearchCV(random, parameters, verbose=1, scoring=scorer, cv=5)
-        logging.info("Start Fit")
-        gd.fit(X, y)
-        logging.info("Best score: {}".format(gd.best_score_))
-        logging.info("Best score: {}".format(gd.best_params_))
-        params = gd.best_params_
+        # parameters = {"n_estimators": [100, 500, 700, 1000], "min_samples_leaf":[1, 5]}
+        # random = RandomForestRegressor(n_jobs=-1)
+        # gd = GridSearchCV(random, parameters, verbose=1, scoring=scorer, cv=5)
+        # logging.info("Start Fit")
+        # gd.fit(X, y)
+        # logging.info("Best score: {}".format(gd.best_score_))
+        # logging.info("Best score: {}".format(gd.best_params_))
+        # params = gd.best_params_
+        params = {}
+        self.settings['random_forest'] = {}
+        self.settings['random_forest']['n_estimators'] = params.get('n_estimators', 700)
+        self.settings['random_forest']['min_samples_leaf'] = params.get('min_samples_leaf', 1)
+        # Save best c for all features
+        with open('{}/settings.json'.format(self.directory), 'w') as f:
+            f.write(json.dumps(self.settings))
+
         model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
                                       max_features="auto", n_jobs=-1,
                                       min_samples_leaf=params.get('min_samples_leaf', 1))
@@ -678,6 +704,13 @@ class Pipeline():
         # logging.info("Best score: {}".format(gd.best_params_))
         # params = gd.best_params_
         params = {}
+        self.settings['xgboost'] = {}
+        self.settings['xgboost']['max_depth'] = params.get('max_depth', 100)
+        self.settings['xgboost']['learning_rate'] = params.get('learning_rate', 0.1)
+        self.settings['xgboost']['n_estimators'] = params.get('n_estimators', 350)
+        # Save best c for all features
+        with open('{}/settings.json'.format(self.directory), 'w') as f:
+            f.write(json.dumps(self.settings))
 
         xgb_model = xgb.XGBRegressor(silent=False,
                                      max_depth=params.get('max_depth', 100),
@@ -707,6 +740,11 @@ class Pipeline():
         # logging.info("Best score: {}".format(gd.best_params_))
         # params = gd.best_params_
         params = {}
+        self.settings['extraTree'] = {}
+        self.settings['extraTree']['n_estimators'] = params.get('n_estimators', 700)
+        # Save best c for all features
+        with open('{}/settings.json'.format(self.directory), 'w') as f:
+            f.write(json.dumps(self.settings))
 
         extra = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
                                     warm_start=True, n_jobs=-1, random_state=RNG)
@@ -757,45 +795,45 @@ class Pipeline():
         xg_predict = xgb_model.predict(self.X_test)
         a_predict = boost.predict(self.X_test)
 
-        y_pred = np.array(0.2*a_predict + 0.6*xg_predict + 0.2*t_predict)
-        train_statistics(self.y_test, y_pred, title="BEST")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
-        
-        y_pred = np.array(0.3*a_predict + 0.3*xg_predict + 0.4*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.3, 0.3, 0.4")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
-
         y_pred = np.array(0.8*a_predict + 0.1*xg_predict + 0.1*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.8, 0.1, 0.1")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+        train_statistics(self.y_test, y_pred, title="08_01_01")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="08_01_01")
+        
+        y_pred = np.array(0.7*a_predict + 0.2*xg_predict + 0.1*t_predict)
+        train_statistics(self.y_test, y_pred, title="7_2_1")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="7_2_1")
 
-        y_pred = np.array(0.2*a_predict + 0.6*xg_predict + 0.2*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.2, 0.6, 0.2")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+        y_pred = np.array(0.6*a_predict + 0.3*xg_predict + 0.1*t_predict)
+        train_statistics(self.y_test, y_pred, title="6_3_1")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="6_3_1")
+
+        y_pred = np.array(0.6*a_predict + 0.2*xg_predict + 0.2*t_predict)
+        train_statistics(self.y_test, y_pred, title="6_2_2")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="6_2_2")
+
+        y_pred = np.array(0.5*a_predict + 0.3*xg_predict + 0.2*t_predict)
+        train_statistics(self.y_test, y_pred, title="5_3_2")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="5_3_2")
+
+        y_pred = np.array(0.5*a_predict + 0.4*xg_predict + 0.1*t_predict)
+        train_statistics(self.y_test, y_pred, title="5_4_1")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="5_4_1")
 
         y_pred = np.array(0.4*a_predict + 0.4*xg_predict + 0.2*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.4, 0.4, 0.2")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+        train_statistics(self.y_test, y_pred, title="4_4_2")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="4_4_2")
 
-        y_pred = np.array(0.1*a_predict + 0.8*xg_predict + 0.1*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.1, 0.8, 0.1")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+        y_pred = np.array(0.4*a_predict + 0.3*xg_predict + 0.3*t_predict)
+        train_statistics(self.y_test, y_pred, title="4_3_3")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="4_3_3")
 
-        y_pred = np.array(0.6*a_predict + 0.1*xg_predict + 0.3*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.6, 0.1, 0.3")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
+        y_pred = np.array(0.7*a_predict + 0.3*xg_predict + 0.0*t_predict)
+        train_statistics(self.y_test, y_pred, title="7_3_0")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="7_3_0")
 
-        y_pred = np.array(0.2*a_predict + 0.7*xg_predict + 0.1*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.2, 0.7, 0.1")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
-
-        y_pred = np.array(0.2*a_predict + 0.0*xg_predict + 0.8*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.2, 0.0, 0.8")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
-
-        y_pred = np.array(0.3*a_predict + 0.4*xg_predict + 0.3*t_predict)
-        train_statistics(self.y_test, y_pred, title="0.3, 0.4, 0.3")
-        plot(self.y_test, y_pred, self.image_folder, show=False, title="extra")
+        y_pred = np.array(0.8*a_predict + 0.2*xg_predict + 0.0*t_predict)
+        train_statistics(self.y_test, y_pred, title="8_2_0")
+        plot(self.y_test, y_pred, self.image_folder, show=False, title="8_2_0")
         return ads
 
 
@@ -804,7 +842,7 @@ class Pipeline():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def combinedEnsemble_settings(self, ads):
         self.n_estimators = 700
-        self.min_samples_leaf = 3
+        self.min_samples_leaf = 5
         self.ensemble_estimator = 'extratrees'
 
         self.combinedEnsemble_identifier = 'combinedEnsemble_{}_{}_{}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
