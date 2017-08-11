@@ -345,8 +345,8 @@ class Pipeline():
                                       np.linspace(0, max(ads['price']), 1000)),
             'last_construction': np.meshgrid(np.linspace(0, max(ads['last_construction']), 400),
                                              np.linspace(0, max(ads['price']), 1000)),
-            'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
-                                       np.linspace(0, max(ads['price']), 1000))
+            #'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
+            #                           np.linspace(0, max(ads['price']), 1000))
         }
 
         anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
@@ -499,7 +499,7 @@ class Pipeline():
     def train_ridge(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, , random_state=RNG)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RNG)
 
         ridge = RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
         ridge.fit(X_train, y_train)
@@ -569,18 +569,18 @@ class Pipeline():
     # K nearest Neighbour
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def train_kneighbours(self, ads):
-        X, y = generate_matrix(ads, 'price')
-        X, y = X.values, y.values
-        parameters = {"n_neighbors": [2, 3, 5], "leaf_size":[50, 100, 200]}
-        neigh = KNeighborsRegressor(weights='distance', n_jobs=-1)
-        gd = GridSearchCV(neigh, parameters, verbose=1, scoring=scorer, cv=5)
-        logging.info("Start Fit")
-        gd.fit(X, y)
-        logging.info("Best score: {}".format(gd.best_score_))
-        logging.info("Best params: {}".format(gd.best_params_))
-        params = gd.best_params_
+        # X, y = generate_matrix(ads, 'price')
+        # X, y = X.values, y.values
+        # parameters = {"n_neighbors": [2, 3, 5], "leaf_size":[50, 100, 200]}
+        # neigh = KNeighborsRegressor(weights='distance', n_jobs=-1)
+        # gd = GridSearchCV(neigh, parameters, verbose=1, scoring=scorer, cv=5)
+        # logging.info("Start Fit")
+        # gd.fit(X, y)
+        # logging.info("Best score: {}".format(gd.best_score_))
+        # logging.info("Best params: {}".format(gd.best_params_))
+        # params = gd.best_params_
+        params = {}
 
-        idx = 0
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
                                     leaf_size=params.get('leaf_size', 100),
                                     n_neighbors=params.get('n_neighbors', 2))
@@ -758,42 +758,140 @@ class Pipeline():
         a_predict = boost.predict(self.X_test)
 
         y_pred = np.array(0.2*a_predict + 0.6*xg_predict + 0.2*t_predict)
-        train_statistics(y_test, y_pred, title="BEST")
+        train_statistics(self.y_test, y_pred, title="BEST")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
         
         y_pred = np.array(0.3*a_predict + 0.3*xg_predict + 0.4*t_predict)
-        train_statistics(y_test, y_pred, title="0.3, 0.3, 0.4")
+        train_statistics(self.y_test, y_pred, title="0.3, 0.3, 0.4")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.8*a_predict + 0.1*xg_predict + 0.1*t_predict)
-        train_statistics(y_test, y_pred, title="0.8, 0.1, 0.1")
+        train_statistics(self.y_test, y_pred, title="0.8, 0.1, 0.1")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.2*a_predict + 0.6*xg_predict + 0.2*t_predict)
-        train_statistics(y_test, y_pred, title="0.2, 0.6, 0.2")
+        train_statistics(self.y_test, y_pred, title="0.2, 0.6, 0.2")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.4*a_predict + 0.4*xg_predict + 0.2*t_predict)
-        train_statistics(y_test, y_pred, title="0.4, 0.4, 0.2")
+        train_statistics(self.y_test, y_pred, title="0.4, 0.4, 0.2")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.1*a_predict + 0.8*xg_predict + 0.1*t_predict)
-        train_statistics(y_test, y_pred, title="0.1, 0.8, 0.1")
+        train_statistics(self.y_test, y_pred, title="0.1, 0.8, 0.1")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.6*a_predict + 0.1*xg_predict + 0.3*t_predict)
-        train_statistics(y_test, y_pred, title="0.6, 0.1, 0.3")
+        train_statistics(self.y_test, y_pred, title="0.6, 0.1, 0.3")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.2*a_predict + 0.7*xg_predict + 0.1*t_predict)
-        train_statistics(y_test, y_pred, title="0.2, 0.7, 0.1")
+        train_statistics(self.y_test, y_pred, title="0.2, 0.7, 0.1")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.2*a_predict + 0.0*xg_predict + 0.8*t_predict)
-        train_statistics(y_test, y_pred, title="0.2, 0.0, 0.8")
+        train_statistics(self.y_test, y_pred, title="0.2, 0.0, 0.8")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="Best")
 
         y_pred = np.array(0.3*a_predict + 0.4*xg_predict + 0.3*t_predict)
-        train_statistics(y_test, y_pred, title="0.3, 0.4, 0.3")
+        train_statistics(self.y_test, y_pred, title="0.3, 0.4, 0.3")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="extra")
+        return ads
+
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Combined
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    def combinedEnsemble_settings(self, ads):
+        self.n_estimators = 700
+        self.min_samples_leaf = 3
+        self.ensemble_estimator = 'extratrees'
+
+        self.combinedEnsemble_identifier = 'combinedEnsemble_{}_{}_{}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
+        self.combinedEnsemble_identifier_long = 'combinedEnsemble ensemble_estimator={} n_estimators={}, min_samples_leaf={}'.format(self.ensemble_estimator, self.n_estimators, self.min_samples_leaf)
+
+        self.estimators = {
+            # 'linear': LinearRegression(normalize=True),
+            # 'ridge': RidgeCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10]),
+            'knn2': KNeighborsRegressor(n_neighbors=2, weights='distance', leaf_size=100),
+            'knn3': KNeighborsRegressor(n_neighbors=3, weights='distance', leaf_size=100),
+            # 'knn5': KNeighborsRegressor(n_neighbors=5, weights='distance'),
+            # 'mean': MeanEstimator(),
+            # 'rounded': RoundedMeanEstimator(),
+        }
+        return ads
+
+    def combinedEnsemble_train(self, ads):
+        model = CombinedEnsemble(
+            verbose=True,
+            ensemble_estimator=ExtraTreesRegressor(n_estimators=self.n_estimators, min_samples_leaf=self.min_samples_leaf, n_jobs=-1),
+        )
+        logging.info('Fit {}'.format(self.combinedEnsemble_identifier_long))
+        model.fit(self.X_train, self.y_train)
+        logging.info("Fit finished. Save model")
+        joblib.dump(model, '{}/{}.pkl'.format(self.model_folder, self.combinedEnsemble_identifier))
+        self.combinedEnsemble = model
+        return ads
+
+    def combinedEnsemble_load(self, ads):
+        self.combinedEnsemble = joblib.load('{}/{}.pkl'.format(self.model_folder, self.combinedEnsemble_identifier))
+        return ads
+
+    def combinedEnsemble_test(self, ads):
+        model = self.combinedEnsemble
+
+        logging.info("Begin testing stage 2 estimators.")
+        logging.info("-"*80)
+        logging.info("")
+
+        for name, estimator in self.estimators.items():
+            logging.info('Predict stage 2 estimator: {}'.format(name))
+            model.estimator2 = estimator
+            y_pred = model.predict(self.X_test)
+
+            logging.info('Statistics for stage 2 estimator: {}'.format(name))
+            train_statistics(self.y_test, y_pred, title="{} estimator2={}".format(self.combinedEnsemble_identifier_long, name))
+            plot(self.y_test, y_pred, self.image_folder, show=False, title="{}_{}".format(self.combinedEnsemble_identifier, name))
+            logging.info("-"*80)
+            logging.info("")
+
+        logging.info('Finished')
+
+        return ads
+
+    def combinedEnsemble_CV(self, ads):
+        if 'crawler' in list(ads):
+            ads = ads.drop(['crawler'], axis=1)
+
+        all_y_test = defaultdict(list)
+        all_y_pred = defaultdict(list)
+
+        for train_index, test_index in KFold(n_splits=3, shuffle=True).split(self.X):
+            logging.info('combinedEnsemble_CV: new split')
+
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            model = CombinedEnsemble(
+                verbose=True,
+                ensemble_estimator=ExtraTreesRegressor(n_estimators=self.n_estimators, min_samples_leaf=self.min_samples_leaf, n_jobs=-1),
+            )
+
+            logging.info('combinedEnsemble_CV: fit')
+            model.fit(X_train, y_train)
+
+            for name, estimator in self.estimators.items():
+                logging.info('combinedEnsemble_CV: predict {}'.format(name))
+                model.estimator2 = estimator
+                y_pred = model.predict(X_test)
+
+                logging.info('combinedEnsemble_CV: statistics {}'.format(name))
+                train_statistics(y_test, y_pred, title="CV")
+
+                all_y_test[name] += y_test.tolist()
+                all_y_pred[name] += y_pred
+
+        for name, _ in self.estimators.items():
+            logging.info('combinedEnsemble_CV: combined statistics {}'.format(name))
+            train_statistics(np.array(all_y_test[name]), np.array(all_y_pred[name]), title="CV combined")
         return ads

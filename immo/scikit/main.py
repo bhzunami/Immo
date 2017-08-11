@@ -32,8 +32,8 @@ def main(commands):
             func = func(*line)
         try:
             ads = func(ads)
-        except Exception:
-            logging.error("Could not run method {}".format(line[0]))
+        except Exception as e:
+            logging.error("Could not run method {} cause: {}".format(line[0], e))
             continue
 
     logging.info("Pipeline finished.")
