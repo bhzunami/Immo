@@ -33,7 +33,7 @@ def feature_importance(model, X):
     importances = model.feature_importances_
     indices = np.argsort(importances)[::-1]
     logging.info("Feature Ranking:")
-    for f in range(X.shape[1]):
+    for f in range(500):
         logging.info("{}. feature {} ({})".format(f+1, X.keys()[indices[f]], importances[indices[f]]))
 
 
