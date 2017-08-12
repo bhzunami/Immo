@@ -15,7 +15,7 @@ Ist ein Crawler zu aggressiv, kann es vorkommen, dass er vom Betreiber gesperrt 
 %
 \subsection{Machine Learning}
 Machine Learning ist eine Art Künstliche Intelligenz (AI), das Softwareapplikationen erlaubt Vorhersagen zu machen, anhand von trainierten Algorithmen.
-Die Definition von Machine Learning aus dem Jahr 1959 von Arthur Samuel, einer der Pioniere im Bereich Machine Learning, lautet \cite{what_is_ml}: 
+Die Definition von Machine Learning aus dem Jahr 1959 von Arthur Samuel, einer der Pioniere im Bereich Machine Learning, lautet \cite{what_is_ml}:
   \begin{quote}
     Machine Learning: Field of study that gives computers the ability to learn without being explicitly programmed.
   \end{quote}
@@ -65,7 +65,7 @@ Wie in Tabelle \ref{tab:error_models} gezeigt, haben sich mit der Zeit diverse F
 Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei bei quadratischen Fehler grössere Fehler durch das Quadrieren stärker gewichtet werden. Beim MAE hat ein Fehler bei einem hohen Beobachtungswert einen grösseren Einfluss auf den gesamten Fehler. Das kann durch den Median (MdAE) oder einer prozentualen Angabe wie der MAPE oder MdAPE vermieden werden. Eine prozentuale Angabe hat zusätzlich den Vorteil, dass sie intuitiver Interpretiert werden kann. Der Nachteil bei MAPE und MdAPE ist, dass sie bei einem y Wert von 0 nicht verwendet werden können \cite{error_models_2}.\\[2ex]
 %
 Eine weitere Möglichkeit die Performance eines Modells neben dem Fehlermodell zu bestimmen, ist der $R^2$ Wert. $R^2$ ist ein Gütemass, das beschreibt, wie gut die Features in der Lage sind, die Varianz der Zielvariable erklären zu können. Die Formel \eqref{eq:r2} zeigt, dass der Wert immer zwischen 0 bis 1 liegt. Dabei ist y der Beobachtungswert, $\hat{y}$ der geschätzte Wert und $\overline{y}$ der Durchschnitt aller y. Sind alle Beobachtungswerte gleich ist $R^2$ nicht definiert. Je näher sicher der Wert bei 1 befindet, desto besser ist das Modell.\\
-Es gilt jedoch zu beachten, dass der $R^2$ Wert die Varianzen aufzeigt. Somit kann nicht davon ausgegangen werden, dass ein hoher $R^2$ Wert auch eine hohe Genauigkeit beim Schätzen erzielt \cite{r2, r2_2}. 
+Es gilt jedoch zu beachten, dass der $R^2$ Wert die Varianzen aufzeigt. Somit kann nicht davon ausgegangen werden, dass ein hoher $R^2$ Wert auch eine hohe Genauigkeit beim Schätzen erzielt \cite{r2, r2_2}.
 \begin{equation}
 \label{eq:r2}
 R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y_i})^2}{\sum_{i=1}^{n}(y_i - \overline{y})^2},\text{ falls nicht }y_1  = ... = y_n = \overline{y}
@@ -109,7 +109,7 @@ Es wird auch von dem \textit{Bias-Varianz-Dilemma} gesprochen \cite{bias_varianc
 \label{fig:under_overfit}
 \end{figure}
 %
-Das Bias-Varianz-Dilemma ergibt sich durch die Komplexität eines Modells. Die Komplexität wird durch das Hinzufügen von Polynomen oder Features gesteigert. 
+Das Bias-Varianz-Dilemma ergibt sich durch die Komplexität eines Modells. Die Komplexität wird durch das Hinzufügen von Polynomen oder Features gesteigert.
 Es ist daher sinnvoll die Modelle möglichst einfach zu gestalten oder einen Regularisierungsparameter zu verwenden.\\[2ex]
 %
 \textbf{Ridge Regression}\\
@@ -124,7 +124,7 @@ J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2 + \lambda \sum_{
 Wichtig beim Ridge Algorithmus ist, dass die einzelnen Koeffizienten verkleinert werden, aber nie 0 erreichen. Das geeignetste Lambda hängt immer vom Datensatz ab und muss durch Analysieren verschiedener Werte gefunden werden.\\[2ex]
 %
 \textbf{Lasso Regression}\\
-Ein weiterer Regularisierungs Algorithmus ist der Lasso Regression Algorithmus \eqref{eq:lasso}. Dieser fügt, wie der Ridge Regression auch, einen zusätzlichen $\lambda$ Parameter ein. Er nimmt dabei nicht das Theta im Quadrat, sondern den absoluten Wert von Theta und summiert diesen auf. Durch das kann der Algorithmus unwichtige Features auf 0 setzen und somit eliminieren. Wenn Features weggelassen werden, wird die Komplexität des Modells reduziert \cite{lasso}. 
+Ein weiterer Regularisierungs Algorithmus ist der Lasso Regression Algorithmus \eqref{eq:lasso}. Dieser fügt, wie der Ridge Regression auch, einen zusätzlichen $\lambda$ Parameter ein. Er nimmt dabei nicht das Theta im Quadrat, sondern den absoluten Wert von Theta und summiert diesen auf. Durch das kann der Algorithmus unwichtige Features auf 0 setzen und somit eliminieren. Wenn Features weggelassen werden, wird die Komplexität des Modells reduziert \cite{lasso}.
 %
 \begin{equation}
 \label{eq:lasso}
@@ -174,9 +174,15 @@ Die Gewichtung wird dann mit dem gefundenen Beobachtungswert multipliziert, wie 
 %
 \subsubsection{Tree Based Learning Algorithmen}
 Ein anderer Ansatz von Machine Learning besteht aus den Tree Based Learning Algorithmen. Am verbreitetsten sind Classification and Regression Trees (CART), die von Breiman 1984 beschrieben wurden. Darunter gibt es noch diverse andere Algorithmen\footnote{ID3, C4.5, CHADI, MARS, Conditional Inference Trees}. Bei diesen Algorithmen handelt es sich grundsätzlich um supervised Algorithmen. Es existieren aber auch unsupervised Ansätze, die nicht Teil von dieser Arbeit sind.\\[2ex]
-%
+
 \textbf{Decision Trees}\\
-Ein Decision Tree\footnote{als Fussnote Entscheidungsbaum} ist eine Baumstruktur, die es erlaubt, Daten mithilfe von Entscheidungsregeln zu kategorisieren. Bei den Daten kann es sich sowohl um diskrete als auch um kontinuierliche Werte handeln.\\
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{images/decision_tree.png}
+  \caption[Decision Tree]{Decision Tree}%
+  \label{fig:decision_tree}
+\end{figure}
+Ein Decision Tree (Entscheidungsbaum) ist eine Baumstruktur, die es erlaubt, Daten mithilfe von Entscheidungsregeln zu kategorisieren. Bei den Daten kann es sich sowohl um diskrete als auch um kontinuierliche Werte handeln.\\
 Auf jedem Knoten des Entscheidungsbaumes wird ein Feature aus dem Datensatz ausgewählt und eine Teilung in seinem Wertebereich durchgeführt. Der Feature Raum wird somit in unterschiedliche, nicht überlappende Regionen aufgeteilt.\\[2ex]
 Es gilt zu beachten, dass dasselbe Feature wiederholt als Entscheidungsregel verwendet werden kann.\\
 Für eine Schätzung wird dann der Durchschnitt aller Werte in der Regionen $R_j$ berechnet, in die der zu schätzende Wert fällt.\\
@@ -189,7 +195,7 @@ Wie die  J unterschiedliche Regionen aufgeteilt werden, hängt von der Kostenfun
 \newline
 Dabei ist $\hat{y}_{R_j}$ jder durchschnittliche Beobachtungswert in der j-ten Region.
 Für eine Klassifikation gibt es andere Kostenfunktionen wie der Gini Coefficent oder der Gini Impurity.\\
-Da es aber mit steigender Anzahl von Datensätzen praktisch unmöglich wird, jede mögliche optimale Region durchzurechnen, wird ein “greedy” Ansatz verwendet. Greedy deshalb, weil die nächstbeste Teilung nur mit den aktuell vorhandenen Regionen berechnet wird. Es wird nicht rekursiv vorausberechnet um mit weiteren Teilungen ein theoretisch besseren Baum zu erstellen. So wird nur ein lokales und kein globales Optimum gefunden. Die Aufteilung einer Region in zwei unterschiedliche Regionen nennt sich “recursive binary splitting” und wird in Formel \eqref{eq:splitting} gezeigt. Dabei gilt die Bedingung für die zuteilende Region R wenn s die Entscheidungsregel ist. 
+Da es aber mit steigender Anzahl von Datensätzen praktisch unmöglich wird, jede mögliche optimale Region durchzurechnen, wird ein “greedy” Ansatz verwendet. Greedy deshalb, weil die nächstbeste Teilung nur mit den aktuell vorhandenen Regionen berechnet wird. Es wird nicht rekursiv vorausberechnet um mit weiteren Teilungen ein theoretisch besseren Baum zu erstellen. So wird nur ein lokales und kein globales Optimum gefunden. Die Aufteilung einer Region in zwei unterschiedliche Regionen nennt sich “recursive binary splitting” und wird in Formel \eqref{eq:splitting} gezeigt. Dabei gilt die Bedingung für die zuteilende Region R wenn s die Entscheidungsregel ist.
 %
 \begin{equation}
 \label{eq:splitting}
@@ -228,21 +234,21 @@ Extra Trees (Extremely Randomized Trees) ist eine abgeänderte Variante des Rand
 XGBoost steht für Extreme Gradient Boosting und gehört ebenfalls zur Familie der Ensemble-Algorithmen \cite{xgboost}.\\
 Im Unterschied zu Random Forest oder Extra Trees bauen die trainierten Decision Trees aufeinander auf und lernen von den Fehlern der vorher trainierten Decision Trees. Dies wird solange wiederholt, bis der Fehler so klein ist, dass keine Verbesserung erreicht werden kann. Dieses Vorgehen wird Boosting genannt und ist ein additives Lernen.\\
 Im Allgemeinen sieht die Formel für Gradient Boosting folgendermassen aus \eqref{eq:xgboost}:
-\begin{equation}
+\begin{flalign}
 \label{eq:xgboost}
 \begin{split}
-\hat{y}_{i}^{(0)} = 0\\
-\hat{y}_{i}^{(1)} = f_1(x_i) = \hat{y}_{i}^{(0)} + f_1(x_i)\\
-\hat{y}_{i}^{(2)} = f_1(x_i) + f_2(x_i)= \hat{y}_{i}^{(1)} + f_2(x_i)\\
-\text{...}\\
-\hat{y}_{i}^{(t)} = \sum_{k=1}^{t} f_k(x_i) = hat{y}_{i}^{(t-1)} + f_t(x_i)
+\hat{y}_{i}^{(0)} &= 0\\
+\hat{y}_{i}^{(1)} &= f_1(x_i) = \hat{y}_{i}^{(0)} + f_1(x_i)\\
+\hat{y}_{i}^{(2)} &= f_1(x_i) + f_2(x_i)= \hat{y}_{i}^{(1)} + f_2(x_i)\\
+\text{\ldots}\\
+\hat{y}_{i}^{(t)} &= \sum_{k=1}^{t} f_k(x_i) = hat{y}_{i}^{(t-1)} + f_t(x_i)
 \end{split}
-\end{equation}
+\end{flalign}
 \newline
 %
 $\hat{y}_{i}^{(t)}$ ist dabei der zu schätzende Wert für Datensatz i vom Decision Tree t. $f_t$ ist die Funktion vom Decision Tree t.\\[2ex]
 %
-Die Zielfunktion, in Formel \eqref{eq:xgboost_target} dargestellt, für XGBoost funktioniert im Endeffekt ähnlich wie bei einer Lasso Regression, indem der Residual Sum of Squares (RSS) berechnet wird (hier l()). 
+Die Zielfunktion, in Formel \eqref{eq:xgboost_target} dargestellt, für XGBoost funktioniert im Endeffekt ähnlich wie bei einer Lasso Regression, indem der Residual Sum of Squares (RSS) berechnet wird (hier l()).
 Um ein Overfitting zu verhindern, wird die Regularisierungsfunktion $\Omega(f)$ hinzugenommen. Dieser Wert berechnet die Komplexität des Modells und hält die Parameter für den Decision Tree klein \cite{xgboost_1, xgboost_2}.
 \begin{equation}
 \label{eq:xgboost_target}

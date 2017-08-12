@@ -1,0 +1,20 @@
+digraph G {
+  m1[label="Ist Haus?"];
+  m2l[label="avg_room_area < 20"];
+  m2r[label="Kanton Zürich?"];
+  m3l[label="Baujahr < 1900"];
+  m3r[label="..."]
+  p3l[label="Preis:\n1'000'000 CHF"]
+  p3r[label="..."]
+  p4l[label="Preis:\n800'000 CHF"]
+  p4r[label="Preis:\n1'800'000 CHF"]
+
+  m1 -> m2l [label=True]
+  m1 -> m2r [label=False]
+  m2l -> p3l[label=True]
+  m2l -> p3r[label=False]
+  m2r -> m3l [label=True]
+  m2r -> m3r [label=False]
+  m3l -> p4l[label=True]
+  m3l -> p4r[label=False]
+}
