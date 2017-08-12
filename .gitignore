@@ -102,7 +102,7 @@ immo/crawler/env
 immo/crawler/urls
 immo/scikit/all.csv
 *pkl
-*.png
+immo/scikit/images/*
 *.csv
 
 # piero special files
