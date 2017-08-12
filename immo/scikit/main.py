@@ -10,6 +10,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import sys
+import traceback
 
 from .pipeline import Pipeline
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +35,7 @@ def main(commands):
             ads = func(ads)
         except Exception as e:
             logging.error("Could not run method {} cause: {}".format(line[0], e))
+            logging.error(traceback.format_exc())
             continue
 
     logging.info("Pipeline finished.")

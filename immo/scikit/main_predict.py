@@ -227,14 +227,11 @@ def get_municipality_id(zip_municipality):
     # Search in database
     municipalities = session.query(Municipality).filter(Municipality.zip == utils.extract_number(zip_code)).all()
 
-    if len(municipalities) == 0:
-        return None
-
     for m in municipalities:
         if m.name.startswith(name) or name in m.alternate_names:
             return m.id
 
-    return None
+    raise Exception("Municipality '{}' not found in database!".format(zip_municipality))
 
 def user_input_to_df(parameters, settings):
 
@@ -256,7 +253,6 @@ def user_input_to_df(parameters, settings):
         'tags': get_tags_from_text(parameters['description']),
         'noise_level': noise_level,
         'price': parameters['price'],
-        'crawler': 'homegate', # todo remove this
     }]).join(load_additional(get_municipality_id(parameters['zip_municipality']), parameters['otype_id']))
 
     return df
@@ -274,17 +270,14 @@ def main(params):
     model = joblib.load(params["model_pkl"])
     ads = joblib.load(params["ads_pkl"])
 
-    if len(list(ads)) - 1 != len(model.feature_importances_):
-        logging.error("Number of features from given ads dataframe({}) does not match model({})".format(
-            len(list(ads)), len(model.feature_importances_)))
+    # if len(list(ads)) - 1 != len(model.feature_importances_):
+    #     logging.error("Number of features from given ads dataframe({}) does not match model({})".format(
+    #         len(list(ads)), len(model.feature_importances_)))
 
     tp = Pipeline("price", settings, DIRECTORY)
     data = user_input_to_df(params, settings)
 
     pipeline = [
-        # tp.get_long_lat,
-        # tp.get_lv03,
-        # tp.get_noise_level,
         tp.transform_build_renovation,
         tp.transform_noise_level,
         tp.transform_tags,
@@ -297,22 +290,19 @@ def main(params):
         data = p(data)
 
     if len(data) == 0:
-        logging.error("Input data fell through pipeline.")
-        return
+        raise Exception("Input data fell through pipeline.")
 
     if params["detect_outlier"]:
-        data = tp.outlier_detection_light(data)
+        data = tp.outlier_detection(data)
 
         if len(data) == 0:
-            logging.error("Input data is an outlier")
-            return
+            raise Exception("Input data is an outlier")
 
     col_new = set(list(data))
     col_exist = set(list(ads))
 
     if len(col_new - col_exist) > 0:
-        logging.error("Error: there are input columns which are not in the trained model: {}".format(col_new - col_exist))
-        return
+        raise Exception("Error: there are input columns which are not in the trained model: {}".format(col_new - col_exist))
 
     data = data.join(pd.DataFrame(columns=list(col_exist - col_new)))
     data[list(col_exist - col_new)] = 0
@@ -320,29 +310,12 @@ def main(params):
     data = data[list(ads)]  # ensure correct order for columns
     data = data.drop(['price'], axis=1)
 
-    data = data.values
-
-    adaboost = joblib.load('{}/adaboost.pkl'.format('scikit/models'))
-    xgb_model = xgb.XGBRegressor(silent=False, max_depth=100,
-                                 learning_rate=0.1, n_estimators=350, n_jobs=-1)
-    booster = xgb.Booster()
-    booster.load_model('{}/xgbooster.pkl'.format('scikit/models'))
-    xgb_model._Booster = booster
-    joblib.dump(xgb_model, '{}/xgboost.pkl'.format('scikit/models'))
-
-    tree = joblib.load('{}/extra_tree_regressior.pkl'.format('scikit/models'))
-
-    a_predict = adaboost.predict(data)
-    xg_predict = xgb_model.predict(data)
-    t_predict = tree.predict(data)
-    y_pred = np.array(0.2 * a_predict + 0.6 * xg_predict + 0.2 * t_predict)
+    y_pred = model.predict(data.values)
 
     y_test = [params['price']]
+
     logging.info("          Input Price: {}".format(y_test[0]))
-    logging.info("  Prediction Adaboost: {}".format(a_predict[0]))
-    logging.info("   Prediction XGBoost: {}".format(xg_predict[0]))
-    logging.info(" Prediction XtraTrees: {}".format(t_predict[0]))
-    logging.info("           Prediction: 0.2*{} +  0.6*{} + 0.2*{} = {}".format(a_predict[0], xg_predict[0], t_predict[0], y_pred[0]))
+    logging.info("           Prediction: {}".format(y_pred[0]))
     logging.info("                  APE: {:.3%}".format(helper.mape(y_test, y_pred)))
     logging.info("           Difference: {:10n}".format((np.fabs(y_test - y_pred))[0]))
 

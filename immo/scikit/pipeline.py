@@ -37,6 +37,7 @@ from sklearn import cross_validation, metrics   #Additional scklearn functions
 from .a_detection import AnomalyDetection
 from .helper import generate_matrix, ape, mape, mdape, gen_subplots, plot, train_statistics, feature_importance
 from .combined_ensemble import CombinedEnsemble
+from .stacked_regressor import StackedRegressor
 
 RNG = np.random.RandomState(42)
 
@@ -60,7 +61,7 @@ class Pipeline():
             logging.info("Directory for models does not exists. Create one")
             os.makedirs('{}'.format(self.model_folder))
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Load and Save Methods
     def load_csv(self, filename):
         def load_csv_inner(ads):
@@ -108,10 +109,10 @@ class Pipeline():
             return [self.load_df(filename)]
         else:
             return pipeline
-    
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Feature engineering
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def cleanup(self, remove):
         def inner_cleanup(ads):
             logging.info("Start preparing dataset")
@@ -289,7 +290,7 @@ class Pipeline():
                                    (ads['tags_waschmaschine'] == 1) |
                                    (ads['tags_wc'] == 1) |
                                    (ads['tags_keller'] == 1) |
-                                   (ads['tags_raum'] == 1) |                                   
+                                   (ads['tags_raum'] == 1) |
                                    (ads['tags_zimmer'] == 1), 1, 0)
 
         ads['exterior'] = np.where((ads['tags_aussicht'] == 1) |
@@ -327,10 +328,10 @@ class Pipeline():
 
         return ads.drop(drop_features, axis=1)
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Outlier detection
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     def outlier_detection(self, ads):
         """Detect outliers we do not want in our training phase
         The outlier model must be trained first
@@ -348,15 +349,15 @@ class Pipeline():
                                       np.linspace(0, max(ads['price']), 1000)),
             'last_construction': np.meshgrid(np.linspace(0, max(ads['last_construction']), 400),
                                              np.linspace(0, max(ads['price']), 1000)),
-            # 'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
-            #                            np.linspace(0, max(ads['price']), 1000))
+            'noise_level': np.meshgrid(np.linspace(0, max(ads['noise_level']), 400),
+                                       np.linspace(0, max(ads['price']), 1000))
         }
 
         anomaly_detection = AnomalyDetection(ads, self.image_folder, self.model_folder)
         ads = anomaly_detection.isolation_forest(self.settings['anomaly_detection'],
                                                  meshgrid, self.goal)
 
-        return ads 
+        return ads
 
 
     def train_outlier_detection(self, ads):
@@ -477,9 +478,9 @@ class Pipeline():
 
         return inner_predict
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Linear Regression
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def linear_regression(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
@@ -497,9 +498,9 @@ class Pipeline():
             plot(y_test, y_pred, self.image_folder, show=False, title="simpel_linear_regresion")
         return ads
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Ridge
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_ridge(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
@@ -510,9 +511,9 @@ class Pipeline():
         alpha = ridge.alpha_
 
         logging.info("Try again for more precision with alphas centered around " + str(alpha))
-        ridge = RidgeCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
+        ridge = RidgeCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85,
                                 alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
-                                alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
+                                alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4],
                         cv=5)
         ridge.fit(X_train, y_train)
 
@@ -533,13 +534,13 @@ class Pipeline():
             idx +=1
         return ads
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Lasso
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_lasso(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
-        
+
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RNG)
 
         lasso = LassoCV(alphas=[0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30])
@@ -547,9 +548,9 @@ class Pipeline():
         alpha = lasso.alpha_
 
         logging.info("Try again for more precision with alphas centered around " + str(alpha))
-        lasso = LassoCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85, 
+        lasso = LassoCV(alphas=[alpha * .6, alpha * .65, alpha * .7, alpha * .75, alpha * .8, alpha * .85,
                                 alpha * .9, alpha * .95, alpha, alpha * 1.05, alpha * 1.1, alpha * 1.15,
-                                alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4], 
+                                alpha * 1.25, alpha * 1.3, alpha * 1.35, alpha * 1.4],
                         cv=5)
         lasso.fit(X_train, y_train)
 
@@ -569,9 +570,9 @@ class Pipeline():
             idx += 1
         return ads
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # K nearest Neighbour
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_kneighbours(self, ads):
         # X, y = generate_matrix(ads, 'price')
         # X, y = X.values, y.values
@@ -584,32 +585,32 @@ class Pipeline():
         # logging.info("Best params: {}".format(gd.best_params_))
         # params = gd.best_params_
         params = {}
-        
+
         self.settings['k-neighbour'] = {}
         self.settings['k-neighbour']['n_neighbors'] = params.get('n_neighbors', 2)
         self.settings['k-neighbour']['leaf_size'] = params.get('leaf_size', 2)
         # Save best c for all features
         with open('{}/settings.json'.format(self.directory), 'w') as f:
             f.write(json.dumps(self.settings))
-    
+
         neigh = KNeighborsRegressor(weights='distance', n_jobs=-1,
                                     leaf_size=params.get('leaf_size', 100),
                                     n_neighbors=params.get('n_neighbors', 2))
         neigh.fit(self.X_train, self.y_train)
         joblib.dump(neigh, '{}/kneighbour.pkl'.format(self.model_folder))
-        
+
         y_pred = neigh.predict(self.X_test)
         train_statistics(self.y_test, y_pred, title="KNeighbour")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="KNeighbour")
 
         return ads
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # adaBOOST
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_adaBoost(self, ads):
         X, y = generate_matrix(ads, 'price')
-        X, y = X.values, y.values          
+        X, y = X.values, y.values
         # parameters = {"n_estimators": [17, 18, 19, 20], "learning_rate": [0.01, 0.1, 0.3]}
         # adaboost = AdaBoostRegressor(DecisionTreeRegressor(), random_state=RNG)
         # gd = GridSearchCV(adaboost, parameters, verbose=1, scoring=scorer, cv=5)
@@ -643,10 +644,10 @@ class Pipeline():
             logging.error("Could not get Feature importance")
             pass
         return ads
-    
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Random Forest
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_random_forest(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
@@ -666,7 +667,7 @@ class Pipeline():
         with open('{}/settings.json'.format(self.directory), 'w') as f:
             f.write(json.dumps(self.settings))
 
-        model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700), 
+        model = RandomForestRegressor(n_estimators=params.get('n_estimators', 700),
                                       max_features="auto", n_jobs=-1,
                                       min_samples_leaf=params.get('min_samples_leaf', 1))
         model.fit(self.X_train, self.y_train)
@@ -674,7 +675,7 @@ class Pipeline():
         y_pred = model.predict(self.X_test)
         train_statistics(self.y_test, y_pred, title="random_forest")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="random_forest")
-        
+
         # X values is numpy matrix with no keys()
         X, y = generate_matrix(ads, 'price')
         try:
@@ -686,9 +687,9 @@ class Pipeline():
         return ads
 
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # XGBoost
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_xgboost(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
@@ -725,9 +726,9 @@ class Pipeline():
         plot(self.y_test, y_pred, self.image_folder, show=False, title="xgboost")
         return ads
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Extra Tree
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def train_extra_tree(self, ads):
         X, y = generate_matrix(ads, 'price')
         X, y = X.values, y.values
@@ -748,7 +749,7 @@ class Pipeline():
 
         extra = ExtraTreesRegressor(n_estimators=params.get('n_estimators', 700),
                                     warm_start=True, n_jobs=-1, random_state=RNG)
-        
+
         extra.fit(self.X_train, self.y_train)
         joblib.dump(extra, '{}/extraTree.pkl'.format(self.model_folder))
         y_pred = extra.predict(self.X_test)
@@ -764,41 +765,38 @@ class Pipeline():
         return ads
         return ads
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Stacked model
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def stacked_models(self, ads):
         logging.info("Start extra Tree")
         params_tree = {}
-        extra = ExtraTreesRegressor(n_estimators=params_tree.get('n_estimators', 700),
-                                    warm_start=True, n_jobs=-1, random_state=RNG)
-        extra.fit(self.X_train, self.y_train)
-        
-        logging.info("Start xgb")
         params_xgb = {}
-        xgb_model = xgb.XGBRegressor(silent=False,
-                                     max_depth=params_xgb.get('max_depth', 100),
-                                     learning_rate=params_xgb.get('learning_rate', 0.1),
-                                     n_estimators=params_xgb.get('n_estimators', 350),
-                                     n_jobs=-1)
-        xgb_model.fit(self.X_train, self.y_train)
-
-        logging.info("Start adaboost")        
         params_ada = {}
-        boost = AdaBoostRegressor(DecisionTreeRegressor(),
-                                  n_estimators=params_ada.get('n_estimators', 18),
-                                  learning_rate=params_ada.get('learning_rate', 1),
-                                  random_state=RNG)
-        boost.fit(self.X_train, self.y_train)
 
-        t_predict = extra.predict(self.X_test)
-        xg_predict = xgb_model.predict(self.X_test)
-        a_predict = boost.predict(self.X_test)
+        estimator = StackedRegressor(estimators=[
+            ExtraTreesRegressor(n_estimators=params_tree.get('n_estimators', 700),
+                                warm_start=True, n_jobs=-1, random_state=RNG),
+            xgb.XGBRegressor(silent=False,
+                             max_depth=params_xgb.get('max_depth', 100),
+                             learning_rate=params_xgb.get('learning_rate', 0.1),
+                             n_estimators=params_xgb.get('n_estimators', 350),
+                             n_jobs=-1),
+            AdaBoostRegressor(DecisionTreeRegressor(),
+                              n_estimators=params_ada.get('n_estimators', 18),
+                              learning_rate=params_ada.get('learning_rate', 1),
+                              random_state=RNG)
+        ])
+
+        logging.info("Start stacked estimator fit")
+        estimator.fit(self.X_train, self.y_train)
+
+        t_predict, xg_predict, a_predict = estimator.predict_(self.X_test)
 
         y_pred = np.array(0.8*a_predict + 0.1*xg_predict + 0.1*t_predict)
         train_statistics(self.y_test, y_pred, title="08_01_01")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="08_01_01")
-        
+
         y_pred = np.array(0.7*a_predict + 0.2*xg_predict + 0.1*t_predict)
         train_statistics(self.y_test, y_pred, title="7_2_1")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="7_2_1")
@@ -834,12 +832,16 @@ class Pipeline():
         y_pred = np.array(0.8*a_predict + 0.2*xg_predict + 0.0*t_predict)
         train_statistics(self.y_test, y_pred, title="8_2_0")
         plot(self.y_test, y_pred, self.image_folder, show=False, title="8_2_0")
+
+        estimator.set_weights([0.2, 0.6, 0.2])
+        joblib.dump(estimator, '{}/stacked.pkl'.format(self.model_folder))
+
         return ads
 
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Combined
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def combinedEnsemble_settings(self, ads):
         self.n_estimators = 700
         self.min_samples_leaf = 5
@@ -933,3 +935,9 @@ class Pipeline():
             logging.info('combinedEnsemble_CV: combined statistics {}'.format(name))
             train_statistics(np.array(all_y_test[name]), np.array(all_y_pred[name]), title="CV combined")
         return ads
+
+    def cut(self, n_ads):
+        def cut_inner(ads):
+            return ads[:n_ads]
+
+        return cut_inner
