@@ -84,7 +84,7 @@ class Pipeline():
             X, y = generate_matrix(advertisements, 'price')
             self.X, self.y = X.values, y.values
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=RNG)
-            logging.info("Size of X_train: {}, size of X_test: {}".format(len(self.X_train), len(self.y_train)))
+            logging.info("Size of X_train: {}, size of X_test: {}".format(len(self.X_train), len(self.X_test)))
             return advertisements
         return inner_load_df
 
@@ -115,7 +115,6 @@ class Pipeline():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def cleanup(self, remove):
         def inner_cleanup(ads):
-            logging.info("Start preparing dataset")
             ads = ads.drop(ads[ads['price'] < 10].index)
             ads = ads.drop(ads[ads['build_year'] < 1200].index)
             ads = ads.drop(ads[ads['build_year'] > 2030].index)
@@ -588,7 +587,7 @@ class Pipeline():
 
         self.settings['k-neighbour'] = {}
         self.settings['k-neighbour']['n_neighbors'] = params.get('n_neighbors', 2)
-        self.settings['k-neighbour']['leaf_size'] = params.get('leaf_size', 2)
+        self.settings['k-neighbour']['leaf_size'] = params.get('leaf_size', 100)
         # Save best c for all features
         with open('{}/settings.json'.format(self.directory), 'w') as f:
             f.write(json.dumps(self.settings))

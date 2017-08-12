@@ -1,0 +1,35 @@
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\sffamily,
+  every matrix/.style={ampersand replacement=\&,column sep=1.5cm,row sep=.5cm},
+  source/.style={draw,thick,rounded corners,fill=yellow!20,inner sep=.3cm},
+  process2/.style={draw,thick,rounded corners,fill=blue!20,inner sep=.3cm},
+  process/.style={draw,thick,circle,fill=orange!20},
+  process3/.style={draw,thick,rounded corners,fill=orange!20, inner sep=.3cm},
+  sink/.style={source,fill=green!20},
+  datastore/.style={draw,very thick,shape=datastore,inner sep=.3cm},
+  dots/.style={gray,scale=2},
+  to/.style={->,>=stealth',shorten >=1pt,semithick,font=\sffamily\footnotesize},
+  dotted/.style={dashed,->,>=stealth',shorten >=1pt,semithick,font=\sffamily\footnotesize},
+  every node/.style={align=center}]
+% Position the nodes using a matrix layout
+\matrix{
+  \node[source] (data) {Data};
+      \& \node[process] (model) {Model};
+        \& \node[sink] (prediction) {Prediction}; \\
+};
+
+% Draw the arrows between the nodes and label them.
+\draw[to] (data) -- node[midway,above] {Train}
+    node[midway,below] {} (model);
+
+\draw[to] (model) -- node[midway,above] {Predict}
+    node[midway,below] {} (prediction);
+
+\draw[to] (prediction) to[bend right=50] node[midway,above] {Evaluate}
+    node[midway,below] {} (data);
+\end{tikzpicture}
+\caption[Schematischer Ablauf bei Machine Learning]{Schematischer Ablauf bei Machine Learning}%
+\label{fig:ml_process}
+\end{figure}

@@ -1,0 +1,197 @@
+%
+% Paket fuer den Font "Libertine" (XeTeX)
+%
+% (c) Michael Niedermair
+%
+% (License GPL)
+%
+% $Id: libertine.sty 67 2009 -05 -22 12:39:41Z mgn $
+%
+% 4.5.1a Umbenungung von xelibertine nach libertine
+% 4.5.1    neuer Font
+%          Umstelleung der Fontgenerierung (aus sfd)
+% 4.4.1    Umstellung der Versionsnummer auf LinLibertine_Re
+%          Deaktivierung hyphenchar
+% 0.2.1    Version Biolinum 0.4.1 und Libertine 4.4.1
+% 0.2a     Biolinum: Name umgestellt
+% 0.2      Erste Schritte mit LinBiolinumO
+% 0.1 beta Erste BETA -Version.
+% 0.1i     Version auf Makro umgestellt.
+% 0.1h     Umbenennung des Paketes
+% 0.1g     Umbenennung der Makros
+%          neue Makros erstellt
+%          Numbers und HyphenChar deaktiviert.
+% 0.1f     Als Standard Numbers und HyphenChar gesetzt.
+% 0.1e     Parameter 'draft '/'final ' hinzugefuegt.
+%          Parameter 'drafttext ' hizugefuegt.
+% 0.1d     Parameter 'dejavusans ' hinzugefuegt.
+%          Parameter 'dejavusansmono ' hinzugefuegt.
+% 0.1c     Ueberprueft , ob der Glyphname existiert.
+% 0.1b     Extrahieren alle Glyphen
+% 0.1a     Test der 'feature tags '
+% 0.1      erster Start
+%
+% -------------------------------------
+\def\libertineVersion{4.5.1a}
+\def\libertineVersionDate{2009/05/22}
+%
+\ProvidesPackage{libertine}[%
+   \libertineVersionDate\space-\space\libertineVersion\space-XeTeX:
+   Font libertine - (License GPL)
+   Michael Niedermair]
+%
+\RequirePackage{ifxetex,keyval,calc,ifthen,xcolor,xspace}
+%
+\ifxetex
+   \def\libertine@debug{false}%                debug
+   \def\libertine@amsmath{true}%               use amsmath
+   \def\libertine@lucida{false}%               use lucida font
+   \def\libertine@rawfeature{}%                use otf features
+   \def\libertine@script{}%                    otf scripts
+   \def\libertine@language{}%                  otf language
+   \def\libertine@biolinum{false}%             use the font LinBiolinum
+   \def\libertine@dejavusans{false}%           use the font DejaVu Sans
+   \def\libertine@dejavusansmono{false}%       use the font DejaVu Sans Mono
+   \def\libertine@draft{false}%                draft
+   \def\libertine@drafttext{Entwurf}%          draft text
+   \def\libertine@quotes{true}%                quotes
+   %
+   \define@key{libertine}{debug}[true]{\def\libertine@debug{#1}}
+   \define@key{libertine}{noamsmath}[false]{\def\libertine@amsmath{#1}}
+   \define@key{libertine}{lucida}[true]{\def\libertine@lucida{#1}}
+   \define@key{libertine}{rawfeature}[]{\def\libertine@rawfeature{#1}}
+   \define@key{libertine}{script}[]{\def\libertine@script{#1}}
+   \define@key{libertine}{language}[]{\def\libertine@language{#1}}
+   \define@key{libertine}{biolinum}[true]{\def\libertine@biolinum{#1}}
+   \define@key{libertine}{dejavusans}[true]{\def\libertine@dejavusans{#1}}
+   \define@key{libertine}{dejavusansmono}[true]{\def\libertine@dejavusansmono{#1}}
+   \define@key{libertine}{draft}[true]{\def\libertine@draft{true}}
+   \define@key{libertine}{final}[true]{\def\libertine@draft{false}}
+   \define@key{libertine}{drafttext}[Entwurf]{\def\libertine@drafttext{#1}}
+   \define@key{libertine}{noquotes}[true]{\def\libertine@quotes{false}}
+   %
+   \def\ProcessOptionsWithKV#1{%
+       \let\@tempc\relax
+       \let\libertine@tempa\@empty
+       \@for\CurrentOption:=\@classoptionslist\do{%
+         \@ifundefined{KV@#1@\CurrentOption}%
+         {}%
+         {%
+            \edef\libertine@tempa{\libertine@tempa,\CurrentOption,}%
+            \@expandtwoargs\@removeelement\CurrentOption
+              \@unusedoptionlist\@unusedoptionlist
+         }%
+      }%
+      \edef\libertine@tempa{%
+         \noexpand\setkeys{#1}{%
+            \libertine@tempa\@ptionlist{\@currname.\@currext}%
+         }%
+      }%
+      \libertine@tempa
+      \let\CurrentOption\@empty
+   }
+ \ProcessOptionsWithKV{libertine}
+ \AtEndOfPackage{%
+     \let\@unprocessedoptions\relax
+ }
+ % -------------------------------------------------------
+ % debug
+ \ifthenelse{\equal{\libertine@debug}{true}}{
+     \typeout{------ libertine: DEBUG ---------------------------}
+     \typeout{debug                = \libertine@debug}
+     \typeout{amsmath              = \libertine@amsmath}
+     \typeout{lucida               = \libertine@lucida}
+     \typeout{rawfeature           = \libertine@rawfeature }
+     \typeout{script               = \libertine@script}
+     \typeout{language             = \libertine@language }
+     \typeout{Font LinBiolinum     = \libertine@biolinum}
+     \typeout{Font DeJaVu Sans     = \libertine@dejavusans}
+     \typeout{Font DeJaVu SansMono = \libertine@dejavusansmono}
+     \typeout{draft                = \libertine@draft}
+     \typeout{drafttext            = \libertine@drafttext}
+     \typeout{quotes               = \libertine@quotes}
+     \typeout{---------- DEBUG ----------------------------------}
+ }{}%
+ % amsmath
+ \ifthenelse{\equal{\libertine@amsmath}{true}}{
+      \RequirePackage{amsmath}
+ }{}%
+ % lucida
+ \ifthenelse{\equal{\libertine@lucida}{true}}{
+      \RequirePackage[expert]{lucidabr}
+ }{}%
+ \RequirePackage{xltxtra}
+ \setromanfont[Mapping=tex-text%
+      ,RawFeature=\libertine@rawfeature%
+      ,Language=\libertine@language%
+      ,Script=\libertine@script%
+      %,HyphenChar="E130%
+      ]{Linux Libertine O}
+ \newfontfamily\libertine[RawFeature=\libertine@rawfeature%
+      ,Language=\libertine@language%
+      ,Script=\libertine@script%
+      %,HyphenChar="E130%
+      ]{Linux Libertine O}
+ % biolinum
+ \ifthenelse{\equal{\libertine@biolinum}{true}}{
+      \setsansfont[Mapping=tex-text]{Linux Biolinum O}
+      \newfontfamily\biolinum{Linux Biolinum O}
+ }{}%
+ % dejavu sans
+ \ifthenelse{\equal{\libertine@dejavusans}{true}}{
+      \setsansfont[Mapping=tex-text]{DejaVu Sans}
+ }{}%
+ % dejavu sans mono
+ \ifthenelse{\equal{\libertine@dejavusansmono}{true}}{
+      \setmonofont[Mapping=tex-text]{DejaVu Sans Mono}
+ }{}%
+ %
+    % draft
+    \ifthenelse{\equal{\libertine@draft}{true}}{
+        \RequirePackage{eso-pic}
+        \AddToShipoutPicture{%
+            \AtTextLowerLeft{%
+               \makebox(\LenToUnit{\textwidth},\LenToUnit{\textheight}){
+               \fontsize{6cm}{6cm}\selectfont%
+               \rotatebox[origin=c]{-50}{\textcolor{lightgray}{\libertine@drafttext}}
+        }}}%
+    }{}%
+    % quotes
+    \ifthenelse{\equal{\libertine@quotes}{true}}{
+        \ProvideTextCommand{\glqq}{EU1}{%
+            \textormath{\quotedblbase}{\mbox{\quotedblbase}}}
+        \ProvideTextCommand{\grqq}{EU1}{%
+            \textormath{\textquotedblleft}{\mbox{\textquotedblleft}}}
+    }{}%
+    % -----------------------------------------------------------------
+    %
+    \DeclareRobustCommand*\OTF[1]{\libertine\addfontfeature{RawFeature=#1}}
+    \DeclareRobustCommand*\Lglyph{\@ifstar{}{\libertine}\Lglyphx}
+    \DeclareRobustCommand*\Bglyph{\@ifstar{}{\biolinum}\Bglyphx}
+    \DeclareRobustCommand*\Lglyphx[1]{%
+        \@tempcnta=\XeTeXglyphindex"#1"\relax%
+        \ifnum\@tempcnta>0%
+            \XeTeXglyph\@tempcnta%
+        \fi
+    }
+    \DeclareRobustCommand*\Bglyphx[1]{%
+        \@tempcnta=\XeTeXglyphindex"#1"\relax%
+        \ifnum\@tempcnta>0%
+            \XeTeXglyph\@tempcnta%
+        \fi
+    }
+    \DeclareRobustCommand*\Leuro{\libertine\Lglyph{Euro}\xspace}
+    \DeclareRobustCommand*\Llogo{\mbox{%
+        \Lglyph{uniE041}%
+        \textcolor[HTML]{00710A}{\Lglyph{uniE042}}}}
+    \DeclareRobustCommand*\numprp{\OTF{-tnum;+pnum}}
+    \DeclareRobustCommand*\numtab{\OTF{-pnum;+tnum}}
+    \DeclareRobustCommand*\numold{\OTF{+onum }}
+    \DeclareRobustCommand*\numzero{\OTF{+zero}}
+    \DeclareRobustCommand*\numfrac{\OTF{+frac}}
+    % -------------------------------------------------------
+\else
+      \PackageWarning{libertine}{*** libertine.sty works only with xetex! ***^^J}
+\fi
+%
+\endinput

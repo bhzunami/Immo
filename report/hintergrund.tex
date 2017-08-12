@@ -1,0 +1,104 @@
+\section{Hintergrund}
+In diesem Kapitel wird auf die Konzepte und Begriffe von Webcrawlern und Machine Learning eingegangen. Es soll ein gemeinsames Grundwissen für beide Gebiete geschaffen werden.
+%
+\subsection{Webcrawler}
+Um Informationen von Webseiten zu sammeln, muss deren Inhalt analysiert und die gewünschten Daten extrahiert werden. Für diese Aufgabe eignen sich Webcrawler besonders gut \cite{scrapy_1, scrapy_2}.\\
+Dabei erhält ein Webcrawler eine oder mehrere Einstiegs-URLs. Diese werden dann vom Crawler aufgerufen und die dazugehörigen Seiten ausgewertet. Bei der Auswertung kann der Crawler auf weitere URLs stossen, die er in seine abzuarbeitende URL Liste aufnehmen kann. Sind alle URLs abgearbeitet ist der Crawler fertig. Je nach Aufgabenbereich existieren verschiedene Crawler-Techniken.\\
+Ist bekannt von welchen Seiten die Informationen gecrawlt werden können, eignet sich am besten ein fokussierter Crawler. Dieser Crawler steuert vordefinierte Seiten an und extrahiert Informationen nach vorgegebenen Regeln.\\
+Sind die Webseiten nicht bekannt oder kommt man nicht ohne weiteres an gesuchte Informationen, eignen sich Deep Web Crawler. Diese bewegen sich mehrheitlich autonom und versuchen durch Analysieren des Inhaltes herauszufinden ob der Inhalt von Interesse ist oder nicht.\\
+Sind es übermässig viele Seiten, die gecrawlt werden müssen, oder ist die Stabilität der Crawler wichtig, kommen verteilte Crawler zum Einsatz. Durch die Verteilung wird an Stabilität gewonnen und die Last auf die verschiedenen Crawler verteilt \cite{scrapy_3}.\\[2ex]
+%
+Um Daten von einer Webseite zu extrahieren, gibt es diverse Möglichkeiten. Von der einfachen Stringsuche bis zu Machine Learning Methoden gibt es nahezu alles. Beim fokussierten Crawlen wird häufig versucht Informationen über den XPATH oder über die CSS-Klassen zu extrahieren. Beide Varianten haben ihre Vor- und Nachteile, sind aber im Grunde sehr ähnlich \cite{xpath_vs_css}. Somit ist es dem Benutzer überlassen welche Variante er wählt \cite{xpath}.\\[2ex]
+%
+Eine Herausforderung beim Crawlen ist, dass der Crawler nicht als solchen vom Webseitenbetreiber erkannt wird. Diverse Betreiber möchten gerne verhindern, dass Informationen von Ihren Seiten gecrawlt werden \cite{comparis}.\\
+Ist ein Crawler zu aggressiv, kann es vorkommen, dass er vom Betreiber gesperrt wird. Es gilt daher mit einer gewissen Raffinesse vorzugehen. Um möglichst nicht aufzufallen, ist es sinnvoll nur ein paar Requests\footnote{Anfrage auf eine Webseite} pro Minute abzusetzen und einen existierenden User Agent anzugeben. Wenn das nicht ausreichend ist, können die Seiten über einen Pool von rotierenden IP-Adressen aufgerufen werden. So ist die Quelladresse nicht immer dieselbe \cite{offensive_crawling}.
+%
+\subsection{Machine Learning}
+Machine Learning ist eine Art Künstliche Intelligenz (AI), das Softwareapplikationen erlaubt Vorhersagen zu machen, anhand von trainierten Algorithmen.
+Die Definition von Machine Learning aus dem Jahr 1959 von Arthur Samuel, einer der Pioniere im Bereich Machine Learning, lautet \cite{what_is_ml}: 
+  \begin{quote}
+    Machine Learning: Field of study that gives computers the ability to learn without being explicitly programmed.
+  \end{quote}
+Mit Hilfe von Machine Learning Algorithmen können neben Vorhersagen auch Trends erkannt oder Klassifizierungen durchgeführt werden \cite{ml_book}.
+Dabei handelt es sich nicht um eine exakte Wissenschaft. Es lohnt sich verschiedene Algorithmen mit unterschiedlichen Parametern auszuprobieren, um die geeignetste Performance zu finden. Vieles hängt auch von den Ausgangsdaten ab \cite{ml_azure}.\\
+%
+Grundsätzlich erhält ein Algorithmus Daten, die er zu einem Modell verarbeitet. Dieses Modell wird ausgewertet. Entspricht es nicht den gewünschten Anforderungen wird versucht ein besseres Modell zu erstellen, bis das Resultat zufriedenstellend ist. Abbildung \ref{fig:ml_process} zeigt den schematischen Ablauf.\\
+\input{./ml_picture.tex}
+\newline
+%
+Es gibt drei verschiedene Kategorien von Machine Learning \cite{super_unsuper}.\\
+\textbf{Supervised Learning:}	Bei diesen Algorithmen sind die Daten gekennzeichnet. Das heisst, es ist erkenntlich, welchen Beobachtungswert die Daten darstellen. Mit Hilfe von diesen Daten, wird ein Modell erstellt, das möglichst nahe den Beobachtungswert schätzt. Dabei kann es sich um eine Klassifizierung oder Regression handeln.\\[2ex]
+%
+\textbf{Unsupervised Learning:} Hier hat man keine gekennzeichneten Daten. Es wird versucht Muster im Datensatz zu erkennen. Anhand von diesen können unter anderem Trends oder Ausreisser erkannt werden.\\[2ex]
+%
+\textbf{Reinforcement Learning:} Hier lernt der Algorithmus anhand seiner Aktionen. Für jede Aktion, die er berechnet, wird er entweder belohnt oder bestraft. Mit der Zeit kann der Algorithmus situationsbedingte Abläufe erlernen und später anwenden.\\[2ex]
+%
+Für eine Schätzung braucht jeder Machine Learning Algorithmus ein berechnetes Modell. Dieses kann unter anderem eine mathematische Formel oder eine Baumstruktur sein. Damit ein Modell erstellt werden kann, braucht jeder Algorithmus ein oder mehrere Features. Features sind messbare Merkmale, die einen Beobachtungswert, auch Target genannt, beschreiben. Es ist sinnvoll die Features im Voraus zu untersuchen und herauszufinden, welche Features wichtig sind und welche weggelassen werden können. Dabei können zwei oder mehrere Features kombiniert werden. Dieses Vorgehen wird auch Feature Engineering genannt.\\[2ex]
+%
+Damit ein Algorithmus überprüfen kann, wie gut seine Schätzungen sind, wird der Fehler, beziehungsweise die Residuals berechnet. Die Differenz zwischen einem geschätztem Wert und dem dazugehörigen beobachteten Wert wird als Residual bezeichnet. Dabei sind systematische\footnote{Ein falsches Modell wurde verwendet.} wie auch statistische Fehler\footnote{Es handelt sich um Ausreisser.} im Residual mit  eingerechnet. Formel \eqref{eq:residuals} zeigt die Berechnung des Residuals, dabei ist $\hat{y}$ der geschätzte Wert und y der beobachtete Wert. Es kann sich dabei sowohl um Skalare als auch Vektorenwerte handeln.\\
+\begin{equation}
+\label{eq:residuals}
+\hat{\varepsilon} = y - \hat{y}
+\end{equation}
+%
+\begin{table*}[hb]
+\centering
+\ra{1.3}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{@{}llll@{}}
+\toprule
+Name & Abkürzung & Formel & Modelart\\
+\midrule
+Mean Absolute Error & MAE & $\frac1n \sum_{i=1}^{n} |y_i - \hat{y_i}|$ & absolut\\
+Median Absolute Error & MdAE & $med(\sum_{i=1}^{n} |y_i - \hat{y_i}|)$ & absolut\\
+Sum of Squared Errors & SSE & $\sum_{i=1}^{n} (y_i - \hat{y_i})^2$ & quadratisch\\
+Root Mean Squared Errors & RMSE & $\sqrt{\frac1n \sum_{i=1}^{n} (y_i - \hat{y_i})^2}$ & quadratisch\\
+Mean Absolute Percentage Error & MAPE & $\frac1n \sum_{i=1}^{n} |\frac{y_i - \hat{y_i}}{y_i}|, y_1 \neq 0$ & prozentual\\
+Median Absolute Percentage Error & MdAPE & $med(\sum_{i=1}^{n} |\frac{y_i - \hat{y_i}}{y_i}|), y_1 \neq 0$ & prozentual\\
+\bottomrule
+\end{tabular}}
+\caption{Fehlermodelle mit Formelen}
+\label{tab:error_models}
+\end{table*}
+%
+Wie in Tabelle \ref{tab:error_models} gezeigt, haben sich mit der Zeit diverse Fehlermodelle entwickelt. Die Wahl des Fehlermodells ist vom Anwendungsfall abhängig. Grundsätzlich können Fehler absolut oder quadratisch berechnet werden \cite{error_models}.\\
+Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei bei quadratischen Fehler grössere Fehler durch das Quadrieren stärker gewichtet werden. Beim MAE hat ein Fehler bei einem hohen Beobachtungswert einen grösseren Einfluss auf den gesamten Fehler. Das kann durch den Median (MdAE) oder einer prozentualen Angabe wie der MAPE oder MdAPE vermieden werden. Eine prozentuale Angabe hat zusätzlich den Vorteil, dass sie intuitiver Interpretiert werden kann. Der Nachteil bei MAPE und MdAPE ist, dass sie bei einem y Wert von 0 nicht verwendet werden können \cite{error_models_2}.\\[2ex]
+%
+Eine weitere Möglichkeit die Performance eines Modells neben dem Fehlermodell zu bestimmen, ist der $R^2$ Wert. $R^2$ ist ein Gütemass, das beschreibt, wie gut die Features in der Lage sind, die Varianz der Zielvariable erklären zu können. Die Formel \eqref{eq:r2} zeigt, dass der Wert immer zwischen 0 bis 1 liegt. Dabei ist y der Beobachtungswert, $\hat{y}$ der geschätzte Wert und $\overline{y}$ der Durchschnitt aller y. Sind alle Beobachtungswerte gleich ist $R^2$ nicht definiert. Je näher sicher der Wert bei 1 befindet, desto besser ist das Modell.\\
+Es gilt jedoch zu beachten, dass der $R^2$ Wert die Varianzen aufzeigt. Somit kann nicht davon ausgegangen werden, dass ein hoher $R^2$ Wert auch eine hohe Genauigkeit beim Schätzen erzielt \cite{r2, r2_2}. 
+\begin{equation}
+\label{eq:r2}
+R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y_i})^2}{\sum_{i=1}^{n}(y_i - \overline{y})^2},\text{ falls nicht }y_1  = ... = y_n = \overline{y}
+\end{equation}
+%
+Es macht keinen Sinn auf denselben Daten zu trainieren und das Modell zu überprüfen. Deshalb wird der Datensatz in mindestens einen Trainings- und einen Testdatensatz aufgeteilt \cite{cross_validation}.
+Dadurch kann die Gefahr eines Overfit verringert werden. Bei einem Overfit wurde das Modell zu stark an den Testdaten trainiert. Wichtig dabei ist, dass die Daten vor dem Aufteilen gründlich gemischt werden. So, dass nicht alle Wohnungen im Trainingsdatensatz sind und nicht alle Häuser im Testdatensatz.\\
+Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser teilt den gesamten Datensatz in K-Teile auf. Dabei werden K-1 Datensätze für das Trainieren und 1 Datensatz für das Testen verwendet. Das ganze wird K-mal wiederholt, so, dass jeder Datensatz einmal als Testdatensatz verwendet wurde.
+%
+\subsubsection{Lineare Regression}
+Bei der Linearen Regression versucht man anhand einer linearen Funktion einen Beobachtungswert y durch einen oder mehrere Features X zu berechnen. Dabei handelt es sich um ein statistisches Verfahren bei dem davon ausgegangen wird, dass y abhängig von X ist. Weiter gilt, dass die unabhängigen Variablen X dichotom oder intervallskaliert sind.
+\begin{equation}
+\label{eq:linear}
+\hat{y} = h_\theta(x) = \sum_{j=0}^{N} \theta_j x_j
+\end{equation}
+Formel \eqref{eq:linear} zeigt die Lineare Regression wobei  den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die den kleinsten Abstand zu allen Punkten hat. Sprich, der Algorithmus versucht das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Es gibt auch noch weitere Methoden für die Optimierung.\\
+Das quadratische Fehlermodell macht den Algorithmus anfälliger auf Ausreisser. Diese sollten, wenn immer möglich, in einem vorherigen Schritt ausgemustert werden. Auch sollte der Fehler in den Daten normalverteilt sein und die Residuen eine Homoskedastizität aufweisen, da ansonsten keine gute Regression gefunden wird \cite{gradient_descent, gradient_descent_2, gradient_descent_3}.
+\begin{equation}
+\label{eq:cost_function}
+J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2
+\end{equation}
+%
+\textbf{Polynomial Regression}\\
+In vielen Fällen hat der Datensatz keine Homoskedastizität, sondern besitzt eine Heteroskedastizität \cite{poly}. Dies ist oft dann der Fall wenn das Verhältnis zwischen y und X einer Kurve entspricht. In solch einem Fall, erzielt die Lineare Regression keine gute Performance.
+Bei der Polynomialen Regression ist deshalb der beste Fit keine Gerade, sondern ähnelt einer Kurve. Je nachdem wie viele Polynome die Funktion besitzt, desto kurvenreicher ist die Funktion am Schluss.\\
+Die Formel für eine Polynom Gleichung zweiten Grades wird in Gleichung \eqref{eq:poly} dargestellt.
+%
+\begin{equation}
+\label{eq:poly}
+y = \theta_1 + \theta_2 * X + \theta_3 * X^2
+\end{equation}
+%
+\newline
+Je höher der Grad des Polynoms, desto genauer wird der Algorithmus auf den Trainingsdatensatz trainiert. Das hat den Nachteil, dass neue Datensätze ungenau geschätzt werden, da das Modell eine hohe Varianz aufweist. Dieses Phänomen nennt sich Overfitting. Der Algorithmus wurde zu stark am Trainingsdatensatz trainiert.\\
+Ist der Grad des Polynoms zu klein gewählt, kommt es zu einem Underfitting. Das Modell kann nur Features abbilden, die dem ausgewählten Grad entsprechen. Alle anderen Features werden ignoriert. So entsteht die Gefahr, dass wichtige Features nicht ins Modell miteinfliessen und das Modell einen hohen Bias besitzt.\\
+Es wird auch von dem \textit{Bias-Varianz-Dilemma} gesprochen \cite{bias_variance, bias_variance_2}. Denn die Kunst ist, die richtige Abstimmung zu finden, damit das Modell die beste Performance hat.
