@@ -15,9 +15,9 @@
 %
 % Das Dokument wird erzeugt mit: $ xelatex Report.tex
 % Aufgrund der Querverweise sind nach Änderungen jeweils zwei xelatex-Läufe nötig.
-
+%
 \documentclass[paper=A4,twoside=false,BCOR=0mm,DIV=calc,fontsize=12pt,enabledeprecatedfontcommands]{scrartcl}
-
+%
 \usepackage[automark,headsepline]{scrpage2}
 \usepackage{xunicode,fontspec,xltxtra}
 \usepackage[english,german]{babel}
@@ -26,14 +26,14 @@
 \usepackage[pagebackref=true,colorlinks=true,allcolors=black]{hyperref}
 \usepackage{listings}
 \usepackage{csquotes}
-
+%
 \usepackage{enumitem}
 \setlist[itemize]{noitemsep}
-
+%
 % Beautiful tables
 \usepackage{booktabs}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}} % Set on every table the space
-
+%
 % Graphs
 \usepackage{pgf}
 \usepackage{tikz}
@@ -41,24 +41,22 @@
 \usepackage{smartdiagram}
 \usepackage{color}
 \usepackage{xcolor}
-
+%
 \usepackage{pdfpages}
 \usepackage{rotating}
-
+%
 \usepackage{pgfplots}
 \usepgfplotslibrary{ternary}
 \pgfplotsset{compat=1.8}
-
+%
 \usepackage{mathtools}
 %\everymath{\displaystyle} use $\displaystyle \sum$ in text
 \usepackage{amstext}
 \renewcommand{\listfigurename}{Abbildungen}
-
+%
 % fuer Zitate
 \usepackage{cite}
-
 %\bibliographystyle{alphadin}
-
 %\usepackage[debug]{libertine}
 %\setromanfont[Mapping=tex-text]{Linux Libertine O}
 %\setsansfont[Mapping=tex-text]{Linux Biolinum O}
@@ -74,40 +72,40 @@
 
 % Two images beside
 \usepackage{subcaption}
-
-
+%
+%
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
-
+%
 \newenvironment{myenumerate}{
 \begin{enumerate}
   \setlength{\itemsep}{0pt}
   \setlength{\parskip}{0pt}
 }{\end{enumerate}}
-
+%
 \newenvironment{myitemize}{
 \begin{itemize}
   \setlength{\itemsep}{0pt}
   \setlength{\parskip}{0pt}
 }{\end{myitemize}}
-
+%
 \renewcommand*{\pnumfont}{
 	\normalfont\rmfamily\slshape
 }
-
+%
 \KOMAoptions{draft=true}
 \KOMAoptions{DIV=last}
-
+%
 \textheight=630pt
-
+%
 %\usepackage{layout}
 \begin{document}
 \overfullrule=0pt
-
+%
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
 \definecolor{purple}{rgb}{0.65, 0.12, 0.82}
-
+%
 \lstdefinelanguage{Python}{
   keywords={typeof, new, True, False, except, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
   keywordstyle=\color{blue}\bfseries,
@@ -122,7 +120,7 @@
   morestring=[b]',
   morestring=[b]"
 }
-
+%
 \lstset{
    language=Python,
    backgroundcolor=\color{lightgray},
@@ -138,7 +136,6 @@
    showtabs=false,
    captionpos=b
 }
-
 %
 %\layout
 %
@@ -204,16 +201,16 @@
 \clearpage
 \input{./architektur.tex}
 \newpage
-
+%
 \clearpage
 \input{./validierung.tex}
 \newpage
 \clearpage
-
+%
 \input{./diskussion.tex}
 \newpage
 \clearpage
-
+%
 \input{./zusammenfassung.tex}
 \newpage
 \clearpage
@@ -228,10 +225,9 @@
 %
 \addcontentsline{toc}{section}{Tabellen}
 \listoftables
-
+%
 \renewcommand{\lstlistlistingname}{Listingverzeichnis}
 \newpage
 \section{Anhang}
 %
-
 \end{document}

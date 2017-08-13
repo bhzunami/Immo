@@ -217,7 +217,7 @@ class DataAnalysis():
 
     def plot_numerical_values(self):
         ax = plt.axes()
-        ax.set_title("Vertielung des Kaufpreises")
+        ax.set_title("Verteilung des Kaufpreises")
         sns.distplot(self.ads['price'], kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
         ax.set_xlabel("Kaufpreis CHF")
         plt.savefig("images/analysis/Verteilung_des_kauf_preises.png", dpi=250)
@@ -226,7 +226,7 @@ class DataAnalysis():
         plt.close()
         
         ax = plt.axes()
-        ax.set_title("Vertielung des Kaufpreises mit log")
+        ax.set_title("Verteilung des Kaufpreises mit log")
         sns.distplot(np.log1p(self.ads['price']), kde=True, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
         ax.set_xlabel("Kaufpreis CHF (log)")
         plt.savefig("images/analysis/Verteilung_des_kauf_preises_log.png", dpi=250)
@@ -238,7 +238,7 @@ class DataAnalysis():
                         ('living_area', 'Fläche [m^2]'),
                         ('noise_level', 'Lärmbelastung')]:
             ax = plt.axes()
-            ax.set_title("Vertielung der {}".format(name))
+            ax.set_title("Verteilung der {}".format(name))
             sns.distplot(self.ads[f].dropna(), kde=False, bins=100, hist_kws={'alpha': 0.6}, ax=ax)
             ax.set_xlabel("{}".format(name))
             plt.savefig("images/analysis/Verteilung_{}.png".format(f), dpi=250)
