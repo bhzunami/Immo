@@ -195,7 +195,7 @@ Dabei ist $\hat{y}_{R_j}$ der durchschnittliche Beobachtungswert in der $j$-ten 
 Da es aber mit steigender Anzahl von Datensätzen praktisch unmöglich wird, jede mögliche optimale Region durchzurechnen, wird ein “greedy” Ansatz verwendet. Greedy deshalb, weil die nächstbeste Teilung nur mit den aktuell vorhandenen Regionen berechnet wird. Es wird nicht rekursiv vorausberechnet um mit weiteren Teilungen ein theoretisch besseren Baum zu erstellen. So wird nur ein lokales und kein globales Optimum gefunden. Die Aufteilung einer Region in zwei unterschiedliche Regionen nennt sich “recursive binary splitting” und wird in Formel \eqref{eq:splitting} gezeigt. Dabei gilt die Bedingung für die zuteilende Region $R$, wobei $s$ die Entscheidungsregel ist.
 
 \begin{equation}\label{eq:splitting}
-R_1(j,s) = \{X|X_j < s\} \text{and} R_2(j,s) = \{X|X_j \geq s\}
+R_1(j,s) = \{X|X_j < s\} \text{ and } R_2(j,s) = \{X|X_j \geq s\}
 \end{equation}
 
 Diese Splits werden solange rekursiv ausgeführt, bis eine der folgenden Abbruchbedingungen erfüllt ist:
@@ -218,18 +218,17 @@ Der Random Forest gehört in die Kategorie der Ensemblemethoden. Es handelt sich
 \hat{f_{bag}} = \frac{1}{B} \sum_{b=1}^{B} f^{(b)} (X)
 \end{equation}
 
-Der Nachteil von Bagging ist, dass immer der ganze Baum erstellt wird. Das erhöht die Komplexität um die Anzahl Bäume, die verwendet werden. Auch kann es sein, dass die Bäume untereinander korellieren und so die Vorhersage verfälscht wird.\\
-Der Random Forest Algorithmus eliminiert diese Probleme, indem er bei jeder Teilung in einem Subset nicht alle, sondern zufällig ausgewählte Features verwendet.
-Die Bäume sollten möglichst gross werden und es sollte kein Pruning durchgeführt werden.\\
-Breiman hat in einem Theorem bewiesen, dass mit dieser Methode kein Overfitting stattfinden kann, sofern genügend Trees verwendet werden \cite{random_forest, random_forest_1}.\\[2ex]
-%
+Es kann auftreten, dass die Bäume untereinander korrelieren und sich so die Vorhersage verschlechtert. Der Random Forest Algorithmus eliminiert dieses Problem, indem er bei jeder Teilung in einem Subset nicht alle, sondern nur weniger, zufällig ausgewählte Features verwendet. Die Bäume sollten möglichst gross werden und es sollte kein Pruning durchgeführt werden.\\
+Breiman hat in einem Theorem bewiesen, dass mit dieser Methode kein Overfitting stattfinden kann, sofern genügend Trees verwendet werden \cite{random_forest, random_forest_1}.
+
 \textbf{Extra Trees}\\
-Extra Trees (Extremely Randomized Trees) ist eine abgeänderte Variante des Random Forests. Im Unterschied zum Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen besser performed als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.\\[2ex]
+Extra Trees (Extremely Randomized Trees) ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen besser performed als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.\\[2ex]
 %
 \textbf{XGBoost}\\
 XGBoost steht für Extreme Gradient Boosting und gehört ebenfalls zur Familie der Ensemble-Algorithmen \cite{xgboost}.\\
-Im Unterschied zu Random Forest oder Extra Trees bauen die trainierten Decision Trees aufeinander auf und lernen von den Fehlern der vorher trainierten Decision Trees. Dies wird solange wiederholt, bis der Fehler so klein ist, dass keine Verbesserung erreicht werden kann. Dieses Vorgehen wird Boosting genannt und ist ein additives Lernen.\\
+Im Unterschied zu Random Forest oder Extra Trees bauen die trainierten Decision Trees aufeinander auf und lernen von den Fehlern der vorher trainierten Decision Trees. Dies wird solange wiederholt, bis der Fehler so klein ist, dass keine Verbesserung mehr erreicht werden kann. Dieses Vorgehen wird Boosting genannt und gehört zur Kategorie des additiven Lernens.\\
 Im Allgemeinen sieht die Formel für Gradient Boosting folgendermassen aus \eqref{eq:xgboost}:
+
 \begin{flalign}
 \label{eq:xgboost}
 \begin{split}
@@ -240,39 +239,40 @@ Im Allgemeinen sieht die Formel für Gradient Boosting folgendermassen aus \eqre
 \hat{y}_{i}^{(t)} &= \sum_{k=1}^{t} f_k(x_i) = hat{y}_{i}^{(t-1)} + f_t(x_i)
 \end{split}
 \end{flalign}
-\newline
-%
+
 $\hat{y}_{i}^{(t)}$ ist dabei der zu schätzende Wert für Datensatz i vom Decision Tree t. $f_t$ ist die Funktion vom Decision Tree t.\\[2ex]
 %
-Die Zielfunktion, in Formel \eqref{eq:xgboost_target} dargestellt, für XGBoost funktioniert im Endeffekt ähnlich wie bei einer Lasso Regression, indem der Residual Sum of Squares (RSS) berechnet wird (hier l()).
+Die Zielfunktion, in Formel \eqref{eq:xgboost_target} dargestellt, für XGBoost funktioniert im Endeffekt ähnlich wie bei einer Lasso Regression, indem der Residual Sum of Squares (RSS) berechnet wird (hier $l()$).
 Um ein Overfitting zu verhindern, wird die Regularisierungsfunktion $\Omega(f)$ hinzugenommen. Dieser Wert berechnet die Komplexität des Modells und hält die Parameter für den Decision Tree klein \cite{xgboost_1, xgboost_2}.
+
 \begin{equation}
 \label{eq:xgboost_target}
 obj^{(t)} = \sum_{i=1}^{n} l(y_i, \hat{y}_{i}^{(t)}) + \sum_{i=1}^{t} \Omega(f_i)
 \end{equation}
-\newline
-%
-Kritik an diesem und verwandten Algorithmen wird in \cite{critic} geäussert. Darin wird beschrieben, dass für Daten mit einem hohen Noise-Level, Boost Algorithmen versuchen diese Unreinheiten zu stark zu kompensieren. Dadurch erhalten sie so eine schlechtere Performance. Das kann aber mit Feature Engineering minimiert werden.
+
+Kritik an diesem und verwandten Algorithmen wird in \cite{critic} geäussert. Darin wird beschrieben, dass für Daten mit inkorrekten Einträgen die Boost Algorithmen versuchen, diese Unreinheiten zu stark zu kompensieren. Dadurch erhalten sie so eine schlechtere Performance. Das kann aber mit Feature Engineering minimiert werden.
 %
 \subsubsection{Isolation Forest}
-Der Isolation Forest Algorithmus ist ein relativ neuer Outlier Detection\footnote{Erkennung von Ausreisser} Algorithmus. Der Algorithmus wurde im Jahr 2008 von Fei Tony Liu, Kai Ming Ting und Zhi-Hua Zhou entwickelt und vorgestellt. Outlier Detection ist ein wichtiger Teil beim Machine Learning Prozess. Mit diesem werden Datensätze herausgefiltert, die zu stark von den erwarteten Grössen abweichen und somit einen Ausreisser darstellen \cite{isolation_forest_1}.\\
-Bekannte Anomaly Detection Algorithmen versuchen mit Hilfe der Distanz oder der Dichte Ausreisser zu erkennen. Der One-Class SVM sowie der Local Outlier Factor (LOF) messen die Dichte, wobei K-Nearest Neighbour die Distanz berechnet \cite{isolation_forest_2}.\\
-Diese erzielen bei unregelmässig verteilten Ausreisser ein gutes Ergebnis. Sind die Ausreisser aber als Gruppe vorhanden, haben Distanz- oder Dichtebasierte Algorithmen mehr Mühe diese als Ausreisser zu erkennen \cite{isolation_forest_3}.\\[2ex]
-%
+Der Isolation Forest Algorithmus ist ein neuerer Outlier Detection Algorithmus\footnote{Algorithmus zur Erkennung von Ausreissern.}. Der Algorithmus wurde im Jahr 2008 von Fei Tony Liu, Kai Ming Ting und Zhi-Hua Zhou entwickelt und vorgestellt. Outlier Detection ist ein wichtiger Teil beim Machine Learning Prozess. Mit diesem werden Datensätze herausgefiltert, die zu stark von den erwarteten Grössen abweichen und somit einen Ausreisser darstellen \cite{isolation_forest_1}.\\
+Bekannte Outlier Detection Algorithmen versuchen mit Hilfe der Distanz oder der Dichte die Ausreisser zu erkennen. Der One-Class SVM sowie der Local Outlier Factor (LOF) messen die Dichte, wobei K-Nearest Neighbour die Distanz berechnet \cite{isolation_forest_2}.\\
+Diese erzielen bei unregelmässig verteilten Ausreisser ein gutes Ergebnis. Sind die Ausreisser aber als Gruppe vorhanden, haben Distanz- oder Dichtebasierte Algorithmen mehr Mühe diese als Ausreisser zu erkennen \cite{isolation_forest_3}.
+
 Der Isolation Forest geht hier einen anderen Weg. Er geht davon aus, dass sich Ausreisser besser isolieren lassen als normale Datensätze.\\
-Unter Isolieren ist das Separieren eines Beobachtungswerts von den restlichen Werten gemeint. Dafür wird der Datensatz kontinuierlich partitioniert, bis er alleine in einer Partition vorkommt oder die maximale Anzahl an Partitionen erreicht wurde. Die Aufteilung der Partitionen wird als Binary Tree dargestellt. Jeder Knoten repräsentiert eine Eingrenzung und hat, wenn er kein Blatt ist, zwei Kinderknoten. Die Grenzen werden zufällig ausgewählt.\\
-Die Pfadlänge wird durch die Anzahl Knoten, die vom Root Node bis zum Ende durchlaufen werden müssen, bestimmt. Da die Partitionsgrenzen zufällig gewählt werden, führt man diese Isolation mehrmals für einen Punkt durch und nimmt davon die durchschnittliche Länge. Je kürzer ein Pfad ist, desto eher handelt es sich um einen Ausreisser. Denn dieser konnte schneller isoliert werden. Abbildung \ref{fig:isolation_forest} zeigt die Isolation  eines normalen Beobachtungswert Xi, wobei b die Isolation eines Ausreisser X0 darstellt.\\
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{images/isolation_forest.png}
-\caption[Isolation Forest]{Isolation Forest}%
-\label{fig:isolation_forest}
+Unter Isolieren ist das Separieren eines Beobachtungswerts von den restlichen Werten gemeint. Dafür wird der Datensatz kontinuierlich partitioniert, bis er alleine in einer Partition vorkommt oder die maximale Anzahl an Partitionen erreicht wurde. Die Aufteilung der Partitionen wird als Binary Tree dargestellt. Jeder Knoten repräsentiert eine Eingrenzung und hat, wenn er kein Blatt ist, zwei Kinderknoten. Die Grenzen werden wie bei Extra Trees zufällig ausgewählt.\\
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/isolation_forest.png}
+  \caption[Isolation Forest]{Isolation Forest}%
+  \label{fig:hintergrund_isolation_forest}
 \end{figure}
-%
-Der Anomaly Score wird mit Hilfe der nicht erfolgreichen Suche eines Binary Search Tree berechnet. Dabei ist n die Anzahl Knoten, E(h(x)) die durchschnittliche Pfadlänge und c(n) die durchschnittliche Kostenfunktion einer nicht erfolgreichen Suche im Binary Search Tree. Die Formel dafür sieht wie folgt aus:
-\begin{equation}
-\label{eq:isolation}
-s(x, n) = 2^(-\frac{E(h(x))}{c(n)})
+
+Die Pfadlänge wird durch die Anzahl Knoten, die vom Root Node bis zum Ende durchlaufen werden müssen, bestimmt. Da die Partitionsgrenzen zufällig gewählt werden, führt man diese Isolation mehrmals für einen Punkt durch und nimmt davon die durchschnittliche Länge. Je kürzer ein Pfad ist, desto eher handelt es sich um einen Ausreisser. Denn dieser konnte schneller isoliert werden. Abbildung \ref{fig:hintergrund_isolation_forest} zeigt die Isolation  eines normalen Beobachtungswert $Xi$, wobei $b$ die Isolation eines Ausreisser $X_0$ darstellt.
+
+Der Anomaly Score wird mit Hilfe der nicht erfolgreichen Suche eines Binary Search Tree berechnet. Dabei ist n die Anzahl Knoten, $E(h(x))$ die durchschnittliche Pfadlänge und $c(n)$ die durchschnittliche Kostenfunktion einer nicht erfolgreichen Suche im Binary Search Tree. Die Formel dafür sieht wie folgt aus:
+
+\begin{equation}\label{eq:isolation}
+s(x, n) = 2^{-\frac{E(h(x))}{c(n)}}
 \end{equation}
-\newline
-Die Funktion s(x, n) gibt immer einen Wert zwischen 0 und 1 zurück. Wobei 1 einem klarem Ausreisser entspricht \cite{isolation_forest_2}.
+
+Die Funktion $s(x, n)$ gibt immer einen Wert zwischen 0 und 1 zurück. Wobei 1 einem klarem Ausreisser entspricht \cite{isolation_forest_2}.
