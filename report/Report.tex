@@ -72,6 +72,9 @@
 %\ofoot{\today}
 \ofoot{Seite\pagemark\ von \pageref{LastPage}}
 
+% Two images beside
+\usepackage{subcaption}
+
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
@@ -98,7 +101,6 @@
 \textheight=630pt
 
 %\usepackage{layout}
-
 \begin{document}
 \overfullrule=0pt
 
@@ -203,6 +205,15 @@
 \input{./architektur.tex}
 \newpage
 
+\clearpage
+\input{./validierung.tex}
+\newpage
+
+
+
+
+
+\clearpage
 \addcontentsline{toc}{section}{Literatur}
 % Literaturliste anzeigen
 \bibliographystyle{ieeetr}
