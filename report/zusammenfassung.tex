@@ -1,1 +1,10 @@
 \section{Zusammenfassung}
+Im Rahmen dieser Arbeit wurde untersucht, wie anhand öffentlichen Immobiliendaten die Kaufpreise von Immobilien geschätzt werden können. Dafür wurden von vier grossen Immobilien Portalen 5 Monate lang alle Immobilien, die zum Kauf angeboten wurden, gesammelt. Um nicht von den Anbieter blockiert zu werden, wurde mehrere Proxy Instanzen auf Amazon verwendet. So konnten in dieser Zeit über 120’000 Inserate gesammelt werden.\\
+Zusätzlich zu den Inseraten wurde ortsbezogene Daten vom Bundesamt für Statistik mit den Immobilien verknüpft.
+Die gesammelten Daten wurden analysiert und gefiltert. Es zeigte sich, dass viele Inserate nicht verwendet werden können, da sie unvollständig sind. Somit konnten neben der Beschreibung und den Merkmalen nur vier Kennwerte verwendet werden. Die restlichen wurden zu wenig bei den Inseraten angegeben. Dafür konnten vom Bundesamt für Statistik über 30 Features gewonnen werden.\\
+Eine ausführliches Feature Engineering ermöglichte es die Performance für die Machine Leraning Modelle zu steigern. Dafür wurden Features kombiniert oder transformiert. Schlussendlich standen 2737 Features zur Verfügung.\\
+Eine Analyse der Machine Learning Algorithmen zeigte auf, dass sich Lineare Regressions Algorithmen nicht sonderlich gut eignen. Sie schnitten am schlechtesten unter allen Algorithmen ab.\\
+Der K-Nearest Neighbour hatte eine gute Performance und ist auch sehr schnell. Besser waren nur die Baumalgorithmen, insbesondere der Extra Tree, der XGBoost und der AdaBoost. Die Beste Ergebnisse bekamen wir durch eine Kombination aller drei. Wobei der AdaBoost die höchste Gewichtung bekam.\\
+Betrachtet man die Algorithmen einzel, ist der AdaBoost der beste Algorithmus. Neben seiner extrem schnellen berechnung, lieferte er auch die exaktesten Resultate.\\[2ex]
+
+Somit konnte belegt werden, dass die öffentlichen Immobilienplattformen ausreichen um akkurate Schätzungsmodelle zu berechnen. Die Performance konnte mit Hilfe von Ortsbezogenen Features und einer guten Outlier Detection gesteigert werden.
