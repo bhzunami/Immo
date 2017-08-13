@@ -1,26 +1,26 @@
 \section{Problemstellung}
 Machine Learning wird heute in sehr vielen Gebieten eingesetzt \cite{forbes}. Das Schätzen eines Kaufpreises einer Immobilie ist ein klassischer Anwendungsfall. Der Grund dafür sind die vielen Kennwerte, die eine Immobilie besitzt.\\
-Heute werden Immobilienpreise\footnote{wenn von einem Immobilienpreis gesprochen wird, handelt es sich um den Verkehrswert einer Immobilie.} immer noch von Experten geschätzt. Dies obwohl Machine Learning Algorithmen in der Lage sind eine gleichwertige oder sogar präzisere  Schätzung abzugeben.\\
-Damit ein gutes Schätzungsmodell berechnet werden kann, braucht es einen aussagekräftigen Datensatz. Einen solchen Datensatz mit genügend Daten zu erstellen ist nicht trivial und kostet viel Zeit. Ausserdem existiert noch kein öffentlich zugänglicher Datensatz für den Schweizerimmobilienmarkt.\\
-Für die Beschaffung der Immobiliendaten in der Schweiz bieten sich daher die vielen Immobilienplattformen im Internet an. Leider sind diese Daten stellenweise unvollständig und fehlerhaft erfasst. Auch können Inserate über zwei oder mehrere Plattformen mehrmals vorkommen.\\
-Es ist daher interessant zu wissen, ob man mit öffentlichen Daten einen Datensatz erstellen kann, der mit aktuellen Machine Learning Algorithmen den Immobilienpreis akkurat schätzt. Zudem wäre dies auch für Makler und Immobilienbesitzer attraktiv, da sie diese Schätzungen als Unterstützung verwenden können.
+Heute werden Immobilienpreise\footnote{Der Verkehrswert einer Immobilie.} immer noch von Experten geschätzt. Dies obwohl Machine Learning Algorithmen in der Lage sind eine gleichwertige oder sogar präzisere  Schätzung abzugeben.\\
+Damit ein gutes Schätzungsmodell berechnet werden kann, braucht es einen aussagekräftigen Datensatz. Einen solchen Datensatz mit genügend Daten zu erstellen ist nicht trivial und kostet viel Zeit. Ausserdem existiert noch kein öffentlich zugänglicher Datensatz für den schweizer Immobilienmarkt.\\
+Für die Beschaffung der Immobiliendaten in der Schweiz bieten sich daher die vielen Immobilienplattformen im Internet an. Leider sind diese Daten stellenweise unvollständig oder fehlerhaft erfasst. Auch können Immobilien über zwei oder mehrere Plattformen beworben werden.\\
+Es ist daher interessant zu wissen, ob mit öffentlichen Daten einen Datensatz erstellt werden kann, der mit aktuellen Machine Learning Algorithmen den Immobilienpreis akkurat schätzt. Zudem wäre dies auch für Makler und Immobilienbesitzer attraktiv, da sie diese Schätzungen als Unterstützung verwenden können.
 %
 %
 \subsection{Ausgangslage}
-In der Schweiz gibt es im Internet dutzende Immobilienplattformen, auf denen Immobilien zum Kauf oder Miete ausgeschrieben sind. Täglich kommen neue Inserate hinzu. Diese Daten stehen jedem frei zur Verfügung. Sie sind jedoch von Plattform zu Plattform unterschiedlich erfasst und müssen für die weitere Verwendung harmonisiert werden. Darüber hinaus müssen fehlerhafte oder doppelte Inserate erkannt und entfernt werden. Ferner können ortsbezogene Informationen vom Bundesamt für Statistik (BFS) eingeholt werden, um ein Inserat mit zusätzlichen Informationen zu ergänzen. Die Daten vom BFS stehen ebenso öffentlich zur Verfügung.\\[2ex]
-%
-Zum Thema “Kaufpreise für Immobilien schätzen” gibt es diverse Forschungsarbeiten (vgl. \cite{existing_work_1, existing_work_2, existing_work_4}).
-Nicht immer ist der einzelne Kaufpreis einer Immobilie gefragt, sondern mehr die Entwicklung des Immobilienpreis für eine spezifische Ortschaft \cite{existing_work_5}.\\
+In der Schweiz konkurrieren dutzende Immobilienplattformen im Internet, auf denen Immobilien zum Kauf oder Miete ausgeschrieben sind. Täglich kommen neue Inserate hinzu. Diese Daten stehen jedem frei zur Verfügung. Sie sind jedoch von Plattform zu Plattform unterschiedlich erfasst und müssen für die weitere Verwendung harmonisiert werden. Darüber hinaus müssen fehlerhafte oder doppelte Inserate erkannt und entfernt werden. Ferner können ortsbezogene Informationen vom Bundesamt für Statistik (BFS) eingeholt werden, um ein Inserat mit zusätzlichen Informationen zu ergänzen. Die Daten vom BFS stehen ebenso öffentlich zur Verfügung.
+
+Zum Thema “Kaufpreise für Immobilien schätzen” wurden diverse Forschungsarbeiten veröffentlicht (vgl. \cite{existing_work_1, existing_work_2, existing_work_4}).
+Nicht immer ist der einzelne Kaufpreis einer Immobilie gefragt, sondern mehr die Entwicklung des Immobilienpreises für eine spezifische Ortschaft \cite{existing_work_5}.\\
 Für die Schweiz gibt es ähnliche Forschungsarbeiten. Meist wird jedoch versucht den Mietpreis pro Quadratmeter und nicht den Kaufpreis zu schätzen \cite{existing_work_3, existing_work_6}.
 %
 \subsection{Hypothese und Forschungsfragen}
 In dieser Arbeit soll erforscht werden ob mit öffentlich zugänglichen Immobilieninseraten und Machine Learning Algorithmen der Kaufpreis einer Immobilie akkurat geschätzt werden kann.\\
-Zusätzlich zu den Immobilieninseraten werden geobasierte Daten vom Bundesamt für Statistik hinzugezogen um zu überprüfen ob eine präzisere Schätzung erzielt werden kann.\\[2ex]
-%
-Um den Kaufpreis einer Immobilie zu bestimmen, gibt es verschiedene Verfahren. Diese Verfahren entsprechen keiner exakten Wissenschaft. Unter anderem auch deshalb, weil der Kaufpreis stark von Angebot und Nachfrage abhängig ist. Man spricht von einem wirtschaftlich verkraftbaren Preis. Somit unterliegen die Preise einer gewissen Schwankung. Bei einer Experteneinschätzung wird von einer übereinstimmenden Bewertung gesprochen, wenn die Schätzwerte nicht mehr als 10\% voneinander abweichen vgl \cite{immo_1, immo_2}.\\[2ex]
+Zusätzlich zu den Immobilieninseraten werden geobasierte Daten vom Bundesamt für Statistik hinzugezogen um zu überprüfen ob eine präzisere Schätzung erzielt werden kann.
+
+Um den Kaufpreis einer Immobilie zu bestimmen, können verschiedene Verfahren angewendet werden. Diese Verfahren entsprechen keiner exakten Wissenschaft. Unter anderem auch deshalb, weil der Kaufpreis stark von Angebot und Nachfrage abhängig ist. Experten auf dem Gebiet sprechen von einem wirtschaftlich verkraftbaren Preis. Somit unterliegen die Preise einer gewissen Schwankung. Bei einer Experteneinschätzung wird von einer übereinstimmenden Bewertung gesprochen, wenn die Schätzwerte nicht mehr als 10\% voneinander abweichen vgl. \cite{immo_1, immo_2}.\\[2ex]
 %
 Für die Arbeit wird folgende These aufgestellt:\\[2ex]
-\textit{Anhand von öffentlich gesammelten Daten können drei Viertel aller Immobilienpreise mithilfe von Machine Learning Algorithmen mit einer Abweichung von 10\% richtig geschätzt werden.}\\[4ex]
+\textit{Anhand von öffentlich gesammelten Daten können drei Viertel aller Immobilienpreise mithilfe von Machine Learning Algorithmen mit einer maximalen Abweichung von 10\% geschätzt werden.}\\[4ex]
 %
 Um diese These zu beantworten, werden folgende Forschungsfragen untersucht:
 \begin{enumerate}
@@ -28,10 +28,10 @@ Um diese These zu beantworten, werden folgende Forschungsfragen untersucht:
 \item Wie stark kann das Resultat verbessert werden, wenn geobasierte Daten hinzugefügt werden?
 \item Welche Machine Learning Algorithmen eignen sich am Besten, um Immobilienpreise zu schätzen?
 \end{enumerate}
-Als Endergebnis soll eine Softwareapplikation aufzeigen, wie genau der Immobilienpreis geschätzt werden kann. Dazu werden diverse Algorithmen mit verschiedenen Parametern untersucht. Dabei kann nicht ausgeschlossen werden, dass es noch bessere Varianten oder Algorithmen gibt, die ein genaueres Resultat erzielen.
+Als Endergebnis soll eine Softwareapplikation aufzeigen, wie genau der Immobilienpreis geschätzt werden kann. Dazu werden diverse Algorithmen mit verschiedenen Parametern untersucht. Dabei kann nicht ausgeschlossen werden, dass noch exaktere Varianten oder Algorithmen vorhanden sind, die ein genaueres Resultat erzielen.
 %
 \subsection{Methode}
 Für diese Arbeit wird mit dem iterativen Vorgehensmodell Plan Do Check Act (PDCA) gearbeitet. Dies erlaubt nach jeder Iteration das Resultat zu analysieren und, wenn möglich, in einer weiteren Iteration zu verbessern. Dazu ist es flexibel genug um auf Fehlentscheide schnell reagieren zu können.
 %
 \subsection{Struktur}
-Im nächsten Kapitel werden die verwendeten Machine Learning Algorithmen vorgestellt. Darauffolgend wird die Architektur aufgezeigt. Im Kapitel 4 werden die gesammelten Daten ausgewertet und die Machine Learning Algorithmen untersucht um die Studienfrage zu beantworten. Im letzten Kapitel findet sich ein Résumé der Arbeit.
+Im nächsten Kapitel werden die verwendeten Machine Learning Algorithmen vorgestellt. Darauffolgend wird die Architektur aufgezeigt. Im Kapitel Validierung werden die gesammelten Daten ausgewertet und die Machine Learning Algorithmen untersucht um die Studienfrage zu beantworten. Im letzten Kapitel findet sich ein Résumé der Arbeit.

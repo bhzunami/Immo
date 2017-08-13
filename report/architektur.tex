@@ -12,8 +12,8 @@ Abbildung \ref{fig:system} zeigt den ganzen Systemaufbau dieser Arbeit, wobei de
 \end{figure}
 Es gibt diverse Schnittstellen zu externen APIs oder Datenbanken, die wir verwenden um zusätzliche Informationen zu bekommen. Die drei wichtigsten Komponenten sind:
 \begin{description}
-\item[Crawler:] Sie sammeln die Immobiliendaten auf den verschiedenen Portalen. Die Crawler besitzen diverse Schnittstellen zu anderen Anbieter wie auch Datenbanken. 
-\item[Datenbank:] Die Datenbank ist die zentrale Speicherstelle für unsere Inserate. Die Datenbank wurde ganz am Anfang mit ortsbezogenen Daten vom Bundesamt für Statistik befüllt. 
+\item[Crawler:] Sie sammeln die Immobiliendaten auf den verschiedenen Portalen. Die Crawler besitzen diverse Schnittstellen zu anderen Anbieter wie auch Datenbanken.
+\item[Datenbank:] Die Datenbank ist die zentrale Speicherstelle für unsere Inserate. Die Datenbank wurde ganz am Anfang mit ortsbezogenen Daten vom Bundesamt für Statistik befüllt.
 \item[Machine Learning:] Die Daten für das Datenset werden aus der Datenbank geladen und für die verschiedenen Algorithmen bereitgestellt.
 \end{description}
 In den folgenden Kapiteln wird auf diese drei Komponente genauer eingegangen.
@@ -55,7 +55,7 @@ Diese Einstiegsseiten beinhalten eine Liste aller verfügbaren Immobilien in die
 Demzufolge braucht ein Crawler fürs Portal zwei verschiedene Parser. Einer der die Übersicht und einer der die Detailseite parsed.\\[2ex]
 %
 Das Parsen der Seite erfolgt mit Hilfe von XPath. Die XPath Regeln wurden für alle Seiten im Voraus definiert. Bis auf die Bilder werden alle Informationen, die der Verkäufer eingeben kann, gesammelt (siehe Anhang).\\
-Viele Immobilien sind nur wenige Tage online. Um später die Möglichkeit zu haben, weitere Informationen aus den Inseraten zu beschaffen, wurde zusätzlich der ganze HTML Code zum Inserat gespeichert.\\[2ex] 
+Viele Immobilien sind nur wenige Tage online. Um später die Möglichkeit zu haben, weitere Informationen aus den Inseraten zu beschaffen, wurde zusätzlich der ganze HTML Code zum Inserat gespeichert.\\[2ex]
 %
 \textbf{Zuordnung Gemeinde}\\
 Vom Bundesamt für Statistik werden geobasierte Informationen der Gemeinden und Kantonen bezogen. Deshalb muss das Inserat anhand seiner Adresse einer Gemeinde zugeordnet werden. Dies geschieht in einem mehrstufigen Prozess.\\
@@ -117,22 +117,22 @@ Der gesamte Code mit Dokumentation wird ein einem Git Repositroy auf Github verw
 Die grobe Ordnerstruktur des Projektes sieht wie folgt aus:
 \begin{verbatim}
 immo/
-  crawler
+  crawler              # Scrapy Struktur
     crawler
       pipelines        # Definitionen der Pipelines
       spiders          # Definitionen der spiders
       ...
     ...
-  models               # Objektdefinition
-  scikit               # Machine Leraning 
-    main.py            # Hauptdatei zum Starten der Pipeline
+  models               # DB-Objektdefinition
+  scikit               # Machine Learning
+    main.py            # Hauptdatei zum starten der Pipeline
     pipeline.py        # Definitionen der verschiedenen ML-Algorithmen
-    helper.py          # Anzeigen der Resultatstatistik
     data_analysis.py   # Holen und analysieren der Daten
     settings.json      # Speicherung der besten Parameter
     ...
   commands.json        # Definition der Pipeline
+  Dockerfile           # Definition für Crawlerinfrastruktur
   ...
-report                 # \LaTeX Report
+report                 # LaTeX Report
 daten                  # Import Daten für Datenbank
 \end{verbatim}
