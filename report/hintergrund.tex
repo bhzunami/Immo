@@ -36,13 +36,14 @@ Machine Learning Algorithmen lassen sich grob in die folgenden Kategorien eintei
 
 Für eine Schätzung braucht jeder Machine Learning Algorithmus ein berechnetes Modell. Dieses kann unter anderem eine mathematische Formel oder eine Baumstruktur sein. Damit ein Modell erstellt werden kann, braucht jeder Algorithmus ein oder mehrere Features. Features sind messbare Merkmale, die einen Beobachtungswert, auch Target genannt, beschreiben. Es ist sinnvoll die Features im Voraus zu untersuchen und herauszufinden, welche Features wichtig sind und welche weggelassen werden können. Dabei können auch Features miteinander kombiniert werden. Dieses Vorgehen wird Feature Engineering genannt.\\[2ex]
 %
-Damit ein Algorithmus überprüfen kann, wie gut seine Schätzungen sind, wird der Fehler, beziehungsweise die Residuen berechnet. Die Differenz zwischen einem geschätztem Wert und dem dazugehörigen beobachteten Wert wird als Residue bezeichnet. Dabei sind systematische\footnote{Ein falsches Modell wurde verwendet.} wie auch statistische Fehler\footnote{Es handelt sich um Ausreisser.} im Residual mit  eingerechnet. Formel \eqref{eq:residuals} zeigt die Berechnung des Residuals, dabei ist $\hat{y}$ der geschätzte Wert und $y$ der beobachtete Wert. Es kann sich dabei sowohl um Skalare als auch Vektorenwerte handeln.\\
+Damit ein Algorithmus überprüfen kann, wie gut seine Schätzungen sind, wird der Fehler, beziehungsweise die Residuen berechnet. Die Differenz zwischen einem geschätztem Wert und dem dazugehörigen beobachteten Wert wird als Residue bezeichnet. Dabei sind systematische\footnote{Ein falsches Modell wurde verwendet.} wie auch statistische Fehler\footnote{Es handelt sich um Ausreisser.} im Residual mit  eingerechnet. Formel \eqref{eq:residuals} zeigt die Berechnung des Residuals, dabei ist $\hat{y}$ der geschätzte Wert und $y$ der beobachtete Wert. Es kann sich dabei sowohl um Skalare als auch Vektorenwerte handeln.
+
 \begin{equation}
 \label{eq:residuals}
 \hat{\varepsilon} = y - \hat{y}
 \end{equation}
-%
-\begin{table*}[h]\label{tab:error_models}
+
+\begin{table}[h]
 \centering
 \ra{1.3}
 \resizebox{\textwidth}{!}{
@@ -59,7 +60,8 @@ Median Absolute Percentage Error & MdAPE & $med(\sum_{i=1}^{n} |\frac{y_i - \hat
 \bottomrule
 \end{tabular}}
 \caption{Fehlermodelle mit Formelen}
-\end{table*}
+\label{tab:error_models}
+\end{table}
 
 Wie in Tabelle \ref{tab:error_models} gezeigt, haben sich mit der Zeit diverse Fehlermodelle entwickelt. Die Wahl des Fehlermodells ist vom Anwendungsfall abhängig. Grundsätzlich können Fehler absolut, quadratisch oder prozentual berechnet werden \cite{error_models}.\\
 Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei beim quadratischen Fehlermodell grössere Fehler durch quadrieren stärker gewichtet werden. Beim MAE hat ein Fehler bei einem hohen Beobachtungswert einen grösseren Einfluss auf den gesamten Fehler. Das kann durch den Median (MdAE) oder einer prozentualen Angabe wie der MAPE oder MdAPE vermieden werden. Eine prozentuale Angabe hat zusätzlich den Vorteil, dass sie intuitiver Interpretiert werden kann. Der Nachteil bei MAPE und MdAPE ist, dass sie bei einem $y$ Wert von 0 nicht verwendet werden können \cite{error_models_2}.
@@ -67,8 +69,7 @@ Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei beim quadr
 Eine weitere Möglichkeit die Performance eines Modells neben dem Fehlermodell zu bestimmen, ist der $R^2$ Wert. $R^2$ ist ein Gütemass, das beschreibt, wie gut die Features in der Lage sind, die Varianz der Zielvariable erklären zu können. Dabei ist $y$ der Beobachtungswert, $\hat{y}$ der geschätzte Wert und $\overline{y}$ der Durchschnitt aller gegebenen $y$. Sind alle Beobachtungswerte gleich, ist $R^2$ nicht definiert. Die Interpretation der Formel \eqref{eq:r2} zeigt, dass mit einem hohen Wert (maximal 1) die statistische Varianz der Daten gut erklärt werden kann. Mit einem tiefen Wert (gegen 0), kann die Varianz nicht gut erklärt werden. \\
 Es gilt jedoch zu beachten, dass der $R^2$ Wert die Varianzen aufzeigt. Somit kann nicht davon ausgegangen werden, dass ein hoher $R^2$ Wert auch eine hohe Genauigkeit beim Schätzen erzielt \cite{r2, r2_2}.
 
-\begin{equation}
-\label{eq:r2}
+\begin{equation}\label{eq:r2}
 R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y_i})^2}{\sum_{i=1}^{n}(y_i - \overline{y})^2},\text{ falls } \neg \forall y:y = \overline{y}
 \end{equation}
 
@@ -79,23 +80,21 @@ Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser
 \subsubsection{Lineare Regression}
 Bei der Linearen Regression wird versucht, anhand einer linearen Funktion einen Beobachtungswert $y$ durch einen oder mehrere Features aus $X$ zu berechnen. Dabei handelt es sich um ein statistisches Verfahren bei dem davon ausgegangen wird, dass $y$ abhängig von $X$ ist. Weiter gilt, dass die unabhängigen Variablen $X$ dichotom oder intervallskaliert sind.
 
-\begin{equation}
-\label{eq:linear}
+\begin{equation}\label{eq:linear}
 \hat{y} = h_\theta(x) = \sum_{j=0}^{N} \theta_j x_j
 \end{equation}
-Formel \eqref{eq:linear} zeigt die Lineare Regression wobei  den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die den kleinsten Abstand zu allen Punkten hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.\\
-\begin{equation}
-\label{eq:cost_function}
+Formel \eqref{eq:linear} zeigt die lineare Regression wobei  den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die den kleinsten Abstand zu allen Punkten hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.
+
+\begin{equation}\label{eq:cost_function}
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2
 \end{equation}
 Das quadratische Fehlermodell macht den Algorithmus anfälliger auf Ausreisser. Diese sollten, wenn immer möglich, in einem vorherigen Schritt erkannt und herausgefiltert werden. Auch sollte der Fehler in den Daten normalverteilt sein und die Residuen eine Homoskedastizität aufweisen, da ansonsten keine gute Regression gefunden wird \cite{gradient_descent, gradient_descent_2, gradient_descent_3}.
 
 \textbf{Polynomial Regression}\\
-In vielen Fällen hat der Datensatz keine Homoskedastizität, sondern besitzt eine Heteroskedastizität \cite{poly}. Dies ist oft dann der Fall wenn das Verhältnis zwischen y und X einer Kurve entspricht. In solch einem Fall, erzielt die Lineare Regression keine gute Performance.
+In vielen Fällen hat der Datensatz keine Homoskedastizität, sondern besitzt eine Heteroskedastizität \cite{poly}. Dies ist oft dann der Fall wenn das Verhältnis zwischen y und X einer Kurve entspricht. In solch einem Fall, erzielt die lineare Regression keine gute Performance.
 Bei der Polynomialen Regression ist deshalb das beste Modell keine Gerade durch den Datensatz, sondern ähnelt der einer Kurve. Je nachdem wievielten Grades die Regression ist, desto kurvenreicher ist die Funktion am Schluss. Die Formel für eine Polynomgleichung zweiten Grades wird in Gleichung \eqref{eq:poly} dargestellt.
 
-\begin{equation}
-\label{eq:poly}
+\begin{equation}\label{eq:poly}
 y = \theta_0 + \theta_1 * X + \theta_2 * X^2
 \end{equation}
 
@@ -103,10 +102,11 @@ Je höher der Grad des Polynoms, desto genauer wird der Algorithmus auf den Trai
 Ist der Grad des Polynoms zu klein gewählt, kommt es zu einem Underfitting. Das Modell kann nur Features abbilden, die dem ausgewählten Grad entsprechen. Alle anderen Features werden ignoriert. So entsteht die Gefahr, dass wichtige Features nicht ins Modell miteinfliessen und das Modell einen hohen Bias besitzt. Abbildung \ref{fig:under_overfit} zeigt den Vergleich von Underfit zu einem Overfit.\\
 Es wird auch vom \textit{Bias-Varianz-Dilemma} gesprochen \cite{bias_variance, bias_variance_2}. Die Kunst ist, die richtige Abstimmung zu finden, damit das Modell die beste Performance hat.
 
-\begin{figure}[ht]\label{fig:under_overfit}
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{images/overfit_underfit.png}
 \caption[Vergleich von Overfit zu Underfit]{Vergleich von Overfit zu Underfit}
+\label{fig:under_overfit}
 \end{figure}
 
 Das Bias-Varianz-Dilemma ergibt sich durch die Komplexität eines Modells. Die Komplexität wird durch hinzufügen von Polynomen oder Features gesteigert.
@@ -146,10 +146,11 @@ D(x, p_i) = \sqrt{(x - p_i)^2}
 
 Auch bei diesem Algorithmus trit die Gefahr von einem Underfit und Overfit auf. Wird $K$ zu gross gewählt, kommt es zu einem Underfit. Ist $K$ sehr klein kann es zu einem Overfit kommen. Das optimale $K$ hängt vom Datensatz und der gewünschten Performance ab. Abbildung \ref{fig:under_overfit_knn} zeigt den Vergleich von einem Underfit zu einem Overfit bei einem KNN Algorithmus.
 
-\begin{figure}[ht]\label{fig:under_overfit_knn}
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{images/knears_overfit.png}
 \caption[Vergleich von Overfit zu Underfit bei einem KNN]{Vergleich von Overfit zu Underfit bei einem KNN}
+\label{fig:under_overfit_knn}
 \end{figure}
 
 Der KNN Algorithmus kann erweitert werden, indem näher gelegene Punkte stärker gewichtet werden als weiter entfernte. So ist der Algorithmus weniger anfällig auf unregelmässige Daten oder Ausreisser.\\

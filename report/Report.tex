@@ -24,6 +24,15 @@
 \usepackage{graphicx}
 \usepackage{lastpage}
 \usepackage[pagebackref=true,colorlinks=true,allcolors=black]{hyperref}
+% suppress babel warnings for hyperref
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\pdfstringdef}
+  {\csname HyPsd@babel@}
+  {\let\bbl@info\@gobble\csname HyPsd@babel@}
+  {}{}
+\makeatother
+
 \usepackage{listings}
 \usepackage{csquotes}
 %

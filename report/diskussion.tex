@@ -11,12 +11,12 @@ Es ist eventuell sogar sinnvoll nur von einer Plattform die Daten zu sammeln. So
 Das Untersuchen eines Machine Learning Algorithmus ist nicht immer einfach. Vor allem bei Baumalgorithmen. Denn die Teilung ist nicht immer gleich, auch wenn immer der gleiche Seed verwendet wird. So kann es sein, dass bei einem erneuten Durchlauf ein wenig bessere oder schlechtere Resultate herauskommen.\\
 Zusätzlich muss beachtet werden, dass wir vor allem Standardimmobilien in unserem Datensatz haben. Sprich ausgefallene Inserate können nur schwer geschätzt werden, wenn sie nicht schon bei der Outlier Detection herausgenommen wurden. Somit eignen sich unsere Modell nicht für ausgefallene Immobilien.\\[2ex]
 %
-Aufgefallen ist uns auch, dass je mehr Inserate man verwendet desto besser wurden die Baumalgorithmen. Verwendeten wir nur die Hälfte der Inserate konnten die Modelle nur noch etwa 72\% Prozent mit einer Abweichung von 10\% richtig schätzen. Besitzt man weniger Inserate, könnte ein Baumalgorithmus nicht unbedingt am geeignesten sein. Hier lohnt es sich eventuell den K-Nearest Neighbour zu verwenden.
+Aufgefallen ist uns auch, dass je mehr Inserate man verwendet desto besser wurden die Baumalgorithmen. Verwendeten wir nur die Hälfte der Inserate konnten die Modelle nur noch etwa 72\% Prozent mit einer Abweichung von 10\% richtig schätzen. Besitzt man weniger Inserate, könnte ein Baumalgorithmus nicht unbedingt am geeignesten sein. Hier lohnt es sich eventuell den $K$-Nearest Neighbour zu verwenden.
 \\[2ex]
 %
 Unsere eigen aufgebautes Pipeline-System hat uns beim Iterativen Prozess sehr unterstützt. So konnte ohne grosse Mühe diverse Szenarien durchgerechnet werden, ohne dass dazwischen Daten verändert werden müssen.
-%	
-\subsection{Weiterführende Anwendung} 
-Es gibt noch viele weitere Machine Learning Algorithmen, die man untersuchen könnte. Unter Anderem wäre der LightGBM wie auch Neurale Netzwerke interessant zu untersuchen.\\ 
-Weiter können unsere Modelle für Immobilienmakler verwendet werden. Dazu müsste man eine Web-Applikation zur Verfügung stellen, bei dem die Kennwerte eingetragen werden können und der Preis geschätzt wird. 
+%
+\subsection{Weiterführende Anwendung}
+Es gibt noch viele weitere Machine Learning Algorithmen, die man untersuchen könnte. Unter Anderem wäre der LightGBM wie auch Neurale Netzwerke interessant zu untersuchen.\\
+Weiter können unsere Modelle für Immobilienmakler verwendet werden. Dazu müsste man eine Web-Applikation zur Verfügung stellen, bei dem die Kennwerte eingetragen werden können und der Preis geschätzt wird.
 
