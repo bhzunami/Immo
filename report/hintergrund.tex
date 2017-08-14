@@ -17,7 +17,7 @@ Ist ein Crawler zu aggressiv, kann es vorkommen, dass er vom Betreiber gesperrt 
 Machine Learning ist eine Art Künstliche Intelligenz (AI), das Softwareapplikationen erlaubt Vorhersagen anhand von trainierten Algorithmen zu erstellen.
 Die Definition von Machine Learning aus dem Jahr 1959 von Arthur Samuel, einer der Pioniere im Bereich Machine Learning, lautet \cite{what_is_ml}:
   \begin{quote}
-    Machine Learning: Field of study that gives computers the ability to learn without being explicitly programmed.
+  \textit{Machine Learning: Field of study that gives computers the ability to learn without being explicitly programmed.}
   \end{quote}
 Mit Hilfe von Machine Learning Algorithmen können neben Vorhersagen auch Trends erkannt oder Klassifizierungen durchgeführt werden \cite{ml_book}.
 Dabei handelt es sich nicht um eine exakte Wissenschaft. Es lohnt sich verschiedene Algorithmen mit unterschiedlichen Parametern auszuprobieren, um die beste Performance zu finden. Vieles hängt auch von den Ausgangsdaten ab \cite{ml_azure}.
@@ -63,7 +63,7 @@ Median Absolute Percentage Error & MdAPE & $med(\sum_{i=1}^{n} |\frac{y_i - \hat
 \label{tab:error_models}
 \end{table}
 
-Wie in Tabelle \ref{tab:error_models} gezeigt, haben sich mit der Zeit diverse Fehlermodelle entwickelt. Die Wahl des Fehlermodells ist vom Anwendungsfall abhängig. Grundsätzlich können Fehler absolut, quadratisch oder prozentual berechnet werden \cite{error_models}.\\
+Wie in Tabelle \ref{tab:error_models} gezeigt, haben sich mit der Zeit diverse Fehlermodelle entwickelt \cite{error_models}. Die Wahl des Fehlermodells ist vom Anwendungsfall abhängig. Grundsätzlich können Fehler absolut, quadratisch oder prozentual berechnet werden.\\
 Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei beim quadratischen Fehlermodell grössere Fehler durch quadrieren stärker gewichtet werden. Beim MAE hat ein Fehler bei einem hohen Beobachtungswert einen grösseren Einfluss auf den gesamten Fehler. Das kann durch den Median (MdAE) oder einer prozentualen Angabe wie der MAPE oder MdAPE vermieden werden. Eine prozentuale Angabe hat zusätzlich den Vorteil, dass sie intuitiver Interpretiert werden kann. Der Nachteil bei MAPE und MdAPE ist, dass sie bei einem $y$ Wert von 0 nicht verwendet werden können \cite{error_models_2}.
 
 Eine weitere Möglichkeit die Performance eines Modells neben dem Fehlermodell zu bestimmen, ist der $R^2$ Wert. $R^2$ ist ein Gütemass, das beschreibt, wie gut die Features in der Lage sind, die Varianz der Zielvariable erklären zu können. Dabei ist $y$ der Beobachtungswert, $\hat{y}$ der geschätzte Wert und $\overline{y}$ der Durchschnitt aller gegebenen $y$. Sind alle Beobachtungswerte gleich, ist $R^2$ nicht definiert. Die Interpretation der Formel \eqref{eq:r2} zeigt, dass mit einem hohen Wert (maximal 1) die statistische Varianz der Daten gut erklärt werden kann. Mit einem tiefen Wert (gegen 0), kann die Varianz nicht gut erklärt werden. \\
@@ -74,7 +74,7 @@ R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y_i})^2}{\sum_{i=1}^{n}(y_i - \overli
 \end{equation}
 
 Es macht keinen Sinn auf denselben Daten zu trainieren und das Modell zu überprüfen. Deshalb wird der Datensatz in mindestens einen Trainings- und einen Testdatensatz aufgeteilt \cite{cross_validation}.
-Dadurch kann die Gefahr eines Overfits (“Überanpassung”) verringert werden. Bei einem Overfit wurde das Modell zu stark an den Trainingsdaten trainiert und schneidet schlecht ab bei den Testdaten. Wichtig dabei ist, dass die Daten vor dem Aufteilen gut gemischt werden. So soll beispielsweise verhindert werden, dass nicht nur Wohnungen im Trainingsdatensatz und nicht alle Häuser nur im Testdatensatz sind.\\
+Dadurch kann die Gefahr eines Overfits\footnote{Überanpassung} verringert werden. Bei einem Overfit wurde das Modell zu stark an den Trainingsdaten trainiert und schneidet schlecht ab bei den Testdaten. Wichtig dabei ist, dass die Daten vor dem Aufteilen gut gemischt werden. So soll beispielsweise verhindert werden, dass nicht nur Wohnungen im Trainingsdatensatz und nicht alle Häuser nur im Testdatensatz sind.\\
 Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser teilt den gesamten Datensatz in K-Teile auf. Dabei werden K-1 Datensätze für das Trainieren und 1 Datensatz für das Testen verwendet. Das ganze wird K-mal wiederholt, so dass jeder Datensatz einmal als Testdatensatz verwendet wurde.
 %
 \subsubsection{Lineare Regression}
@@ -83,11 +83,13 @@ Bei der Linearen Regression wird versucht, anhand einer linearen Funktion einen 
 \begin{equation}\label{eq:linear}
 \hat{y} = h_\theta(x) = \sum_{j=0}^{N} \theta_j x_j
 \end{equation}
+
 Formel \eqref{eq:linear} zeigt die lineare Regression wobei  den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die den kleinsten Abstand zu allen Punkten hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.
 
 \begin{equation}\label{eq:cost_function}
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2
 \end{equation}
+
 Das quadratische Fehlermodell macht den Algorithmus anfälliger auf Ausreisser. Diese sollten, wenn immer möglich, in einem vorherigen Schritt erkannt und herausgefiltert werden. Auch sollte der Fehler in den Daten normalverteilt sein und die Residuen eine Homoskedastizität aufweisen, da ansonsten keine gute Regression gefunden wird \cite{gradient_descent, gradient_descent_2, gradient_descent_3}.
 
 \textbf{Polynomial Regression}\\
@@ -177,7 +179,7 @@ Ein anderer Ansatz von Machine Learning besteht aus den Tree Based Learning Algo
 \begin{figure}[h]\label{fig:decision_tree}
   \centering
   \includegraphics[width=0.7\textwidth]{images/decision_tree.png}
-  \caption[Decision Tree]{Decision Tree}
+  \caption[Aufbau eines Decision Trees]{Aufbau eines Decision Trees}
 \end{figure}
 
 Ein Decision Tree (Entscheidungsbaum) ist eine Baumstruktur, die es erlaubt, Daten mithilfe von Entscheidungsregeln zu kategorisieren. Bei den Daten kann es sich sowohl um diskrete als auch um kontinuierliche Werte handeln.\\
@@ -221,14 +223,14 @@ Der Random Forest gehört in die Kategorie der Ensemblemethoden. Es handelt sich
 
 Es kann auftreten, dass die Bäume untereinander korrelieren und sich so die Vorhersage verschlechtert. Der Random Forest Algorithmus eliminiert dieses Problem, indem er bei jeder Teilung in einem Subset nicht alle, sondern nur weniger, zufällig ausgewählte Features verwendet. Die Bäume sollten möglichst gross werden und es sollte kein Pruning durchgeführt werden.\\
 Breiman hat in einem Theorem bewiesen, dass mit dieser Methode kein Overfitting stattfinden kann, sofern genügend Trees verwendet werden \cite{random_forest, random_forest_1}.
-
-\textbf{Extra Trees}\\
-Extra Trees (Extremely Randomized Trees) ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen besser performed als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.\\[2ex]
 %
+\newpage
+\textbf{Extra Trees}\\
+Extra Trees (Extremely Randomized Trees) ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen besser performed als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.
+
 \textbf{XGBoost}\\
 XGBoost steht für Extreme Gradient Boosting und gehört ebenfalls zur Familie der Ensemble-Algorithmen \cite{xgboost}.\\
-Im Unterschied zu Random Forest oder Extra Trees bauen die trainierten Decision Trees aufeinander auf und lernen von den Fehlern der vorher trainierten Decision Trees. Dies wird solange wiederholt, bis der Fehler so klein ist, dass keine Verbesserung mehr erreicht werden kann. Dieses Vorgehen wird Boosting genannt und gehört zur Kategorie des additiven Lernens.\\
-Im Allgemeinen sieht die Formel für Gradient Boosting folgendermassen aus \eqref{eq:xgboost}:
+Im Unterschied zu Random Forest oder Extra Trees bauen die trainierten Decision Trees aufeinander auf und lernen von den Fehlern der vorher trainierten Decision Trees. Dies wird solange wiederholt, bis der Fehler so klein ist, dass keine Verbesserung mehr erreicht werden kann. Dieses Vorgehen wird Boosting genannt und gehört zur Kategorie des additiven Lernens. Im Allgemeinen sieht die Formel für Gradient Boosting folgendermassen aus \eqref{eq:xgboost}:
 
 \begin{flalign}
 \label{eq:xgboost}
@@ -237,12 +239,12 @@ Im Allgemeinen sieht die Formel für Gradient Boosting folgendermassen aus \eqre
 \hat{y}_{i}^{(1)} &= f_1(x_i) = \hat{y}_{i}^{(0)} + f_1(x_i)\\
 \hat{y}_{i}^{(2)} &= f_1(x_i) + f_2(x_i)= \hat{y}_{i}^{(1)} + f_2(x_i)\\
 \text{\ldots}\\
-\hat{y}_{i}^{(t)} &= \sum_{k=1}^{t} f_k(x_i) = hat{y}_{i}^{(t-1)} + f_t(x_i)
+\hat{y}_{i}^{(t)} &= \sum_{k=1}^{t} f_k(x_i) = \hat{y}_{i}^{(t-1)} + f_t(x_i)
 \end{split}
 \end{flalign}
 
-$\hat{y}_{i}^{(t)}$ ist dabei der zu schätzende Wert für Datensatz i vom Decision Tree t. $f_t$ ist die Funktion vom Decision Tree t.\\[2ex]
-%
+$\hat{y}_{i}^{(t)}$ ist dabei der zu schätzende Wert für Datensatz i vom Decision Tree t. $f_t$ ist die Funktion vom Decision Tree t.
+
 Die Zielfunktion, in Formel \eqref{eq:xgboost_target} dargestellt, für XGBoost funktioniert im Endeffekt ähnlich wie bei einer Lasso Regression, indem der Residual Sum of Squares (RSS) berechnet wird (hier $l()$).
 Um ein Overfitting zu verhindern, wird die Regularisierungsfunktion $\Omega(f)$ hinzugenommen. Dieser Wert berechnet die Komplexität des Modells und hält die Parameter für den Decision Tree klein \cite{xgboost_1, xgboost_2}.
 
@@ -259,7 +261,7 @@ Bekannte Outlier Detection Algorithmen versuchen mit Hilfe der Distanz oder der 
 Diese erzielen bei unregelmässig verteilten Ausreisser ein gutes Ergebnis. Sind die Ausreisser aber als Gruppe vorhanden, haben Distanz- oder Dichtebasierte Algorithmen mehr Mühe diese als Ausreisser zu erkennen \cite{isolation_forest_3}.
 
 Der Isolation Forest geht hier einen anderen Weg. Er geht davon aus, dass sich Ausreisser besser isolieren lassen als normale Datensätze.\\
-Unter Isolieren ist das Separieren eines Beobachtungswerts von den restlichen Werten gemeint. Dafür wird der Datensatz kontinuierlich partitioniert, bis er alleine in einer Partition vorkommt oder die maximale Anzahl an Partitionen erreicht wurde. Die Aufteilung der Partitionen wird als Binary Tree dargestellt. Jeder Knoten repräsentiert eine Eingrenzung und hat, wenn er kein Blatt ist, zwei Kinderknoten. Die Grenzen werden wie bei Extra Trees zufällig ausgewählt.\\
+Unter Isolieren ist das Separieren eines Beobachtungswerts von den restlichen Werten gemeint. Dafür wird der Datensatz kontinuierlich partitioniert, bis er alleine in einer Partition vorkommt oder die maximale Anzahl an Partitionen erreicht wurde. Die Aufteilung der Partitionen wird als Binary Tree dargestellt. Jeder Knoten repräsentiert eine Eingrenzung und hat, wenn er kein Blatt ist, zwei Kinderknoten. Die Grenzen werden wie bei Extra Trees zufällig ausgewählt.
 
 \begin{figure}[h]
   \centering
@@ -270,6 +272,7 @@ Unter Isolieren ist das Separieren eines Beobachtungswerts von den restlichen We
 
 Die Pfadlänge wird durch die Anzahl Knoten, die vom Root Node bis zum Ende durchlaufen werden müssen, bestimmt. Da die Partitionsgrenzen zufällig gewählt werden, führt man diese Isolation mehrmals für einen Punkt durch und nimmt davon die durchschnittliche Länge. Je kürzer ein Pfad ist, desto eher handelt es sich um einen Ausreisser. Denn dieser konnte schneller isoliert werden. Abbildung \ref{fig:hintergrund_isolation_forest} zeigt die Isolation  eines normalen Beobachtungswert $Xi$, wobei $b$ die Isolation eines Ausreisser $X_0$ darstellt.
 
+% Newpage if not on new page TODO
 Der Anomaly Score wird mit Hilfe der nicht erfolgreichen Suche eines Binary Search Tree berechnet. Dabei ist n die Anzahl Knoten, $E(h(x))$ die durchschnittliche Pfadlänge und $c(n)$ die durchschnittliche Kostenfunktion einer nicht erfolgreichen Suche im Binary Search Tree. Die Formel dafür sieht wie folgt aus:
 
 \begin{equation}\label{eq:isolation}

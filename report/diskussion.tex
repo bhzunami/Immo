@@ -1,22 +1,27 @@
 \section{Diskussion}
 In dieser Arbeit konnte erfolgreich aufgezeigt werden, dass anhand von öffentlichen Daten und modernen Machine Learning Methoden eine akkurate Schätzung abgeben werden kann.\\[2ex]
 %
-Das sammeln von öffentlichen Daten ist jedoch mit einem gewissen Aufwand verbunden. Die Datenqualität der verschiedenen Immobilienplattformen sind eher dürftig. Es konnten somit nur sehr wenige Kennwerte einer Immobilie verwendet werden. Bei einer professionellen Schätzung kämen noch diverse andere Kennwerte zum Einsatz.\\
-Ist die Idee über längere Zeit Daten zu sammeln, lohnt es sich in einen autonomen Crawler Zeit zu investieren. So ist man nicht abhängig vom XPath oder CSS und ist gegenüber einem Redesign der Seiten gewappnet. Eine weitere Möglichkeit wäre die Daten bei einem vorhandenen Immobilienplattform direkt zu beziehen.\\
+Das sammeln von öffentlichen Daten ist jedoch mit einem gewissen Aufwand verbunden. Die Datenqualität der verschiedenen Immobilienplattformen sind eher dürftig. Es konnten somit nur sehr wenige Kennwerte verwendet werden. Bei einer professionellen Schätzung kämen noch diverse andere Kennwerte zum Einsatz. Ständen diese zu Verfügung, könnte man den maximalen Fehler sicher noch verringern.\\
+Ist die Idee über längere Zeit Daten zu sammeln, lohnt es sich in einen autonomen Crawler Zeit zu investieren. So ist man nicht abhängig vom XPath oder CSS und ist gegenüber einem Redesign der Seiten gewappnet. Eine weitere Möglichkeit wäre, die Daten bei einem vorhandenen Immobilienplattform direkt zu beziehen.\\
 Die Verknüpfung der ortsbezogenen Daten mit den Inseraten kann zum Teil mühsam sein. Wir haben OpenStreetMap verwendet, um möglichst Kostengünstig die Koordinaten zu erhalten. Der Nachteil an OpenStreetMap ist, dass es mehrheitlich nur Städte abdeckt. Hier lohnt sich auf jeden Fall ein Konto bei Google Maps, da die Adresssuche viel besser ist.\\[2ex]
 %
 Das Crawlen über ein Proxy lohnt sich, da somit die Gefahr, als Crawler erkannt zu werden, verringert wird. Durch das wir über einen Server ausserhalb der Schweiz gingen, konnten wir nicht alle Plattformen, wie zum Beispiel Comparis, aufrufen.\\
 Es ist eventuell sogar sinnvoll nur von einer Plattform die Daten zu sammeln. So müssen nicht die Unterschiedlichen Bezeichnungen harmonisiert werden.\\[2ex]
 %
+Das Untersuchen und Vergleichen von verschiedenen Machine Learning Algorithmen ist nicht einfach. Da es sich bei diesen Algorithmen nicht um eine exakte Resultate handeln. Es kann sein, dass zwei fits mit den gleichen Daten leicht Unterschiedliche Werte ausgeben.\\
+Bei gewissen Algorithmen haben wir eine MdAPE von 0. Somit konnte der Algorithmus die meisten Preise richtig schätzen. Es stellte sich jedoch heraus, dass es gar nicht so viele verschiedene Immobilienpreise gibt. In 73'483 Inseraten gibt es lediglich 1'970 unterschiedliche Preise. Davon sind die meisten auf den nächsten 1000 gerundet.\\
+Somit erklären wir uns auch eine MdAPE von 0\% beim K-Nearest Neighbour. Da wir nur 2 Nachbarn verwenden und die wahrscheinlichkeit gross ist, dass diese zwei Nachbarn den selben Preisbesitzen. Durch das wird der exakte Preis geschätzt und hat keine Abweichung.
+
+
 Das Untersuchen eines Machine Learning Algorithmus ist nicht immer einfach. Vor allem bei Baumalgorithmen. Denn die Teilung ist nicht immer gleich, auch wenn immer der gleiche Seed verwendet wird. So kann es sein, dass bei einem erneuten Durchlauf ein wenig bessere oder schlechtere Resultate herauskommen.\\
 Zusätzlich muss beachtet werden, dass wir vor allem Standardimmobilien in unserem Datensatz haben. Sprich ausgefallene Inserate können nur schwer geschätzt werden, wenn sie nicht schon bei der Outlier Detection herausgenommen wurden. Somit eignen sich unsere Modell nicht für ausgefallene Immobilien.\\[2ex]
 %
-Aufgefallen ist uns auch, dass je mehr Inserate man verwendet desto besser wurden die Baumalgorithmen. Verwendeten wir nur die Hälfte der Inserate konnten die Modelle nur noch etwa 72\% Prozent mit einer Abweichung von 10\% richtig schätzen. Besitzt man weniger Inserate, könnte ein Baumalgorithmus nicht unbedingt am geeignesten sein. Hier lohnt es sich eventuell den $K$-Nearest Neighbour zu verwenden.
+Aufgefallen ist uns auch, dass je mehr Inserate man verwendet desto besser wurden die Baumalgorithmen. Verwendeten wir nur die Hälfte der Inserate konnten die Modelle nur noch etwa 72\% Prozent mit einer Abweichung von 10\% richtig schätzen. Besitzt man weniger Inserate, könnte ein Baumalgorithmus nicht unbedingt am geeignesten sein. Hier lohnt es sich eventuell den K-Nearest Neighbour zu verwenden.
 \\[2ex]
 %
 Unsere eigen aufgebautes Pipeline-System hat uns beim Iterativen Prozess sehr unterstützt. So konnte ohne grosse Mühe diverse Szenarien durchgerechnet werden, ohne dass dazwischen Daten verändert werden müssen.
-%
-\subsection{Weiterführende Anwendung}
-Es gibt noch viele weitere Machine Learning Algorithmen, die man untersuchen könnte. Unter Anderem wäre der LightGBM wie auch Neurale Netzwerke interessant zu untersuchen.\\
-Weiter können unsere Modelle für Immobilienmakler verwendet werden. Dazu müsste man eine Web-Applikation zur Verfügung stellen, bei dem die Kennwerte eingetragen werden können und der Preis geschätzt wird.
+%	
+\subsection{Weiterführende Anwendung} 
+Es gibt noch viele weitere Machine Learning Algorithmen, die man untersuchen könnte. Unter Anderem wäre der LightGBM wie auch Neurale Netzwerke interessant zu untersuchen.\\ 
+Weiter können unsere Modelle für Immobilienmakler verwendet werden. Dazu müsste man eine Web-Applikation zur Verfügung stellen, bei dem die Kennwerte eingetragen werden können und der Preis geschätzt wird. 
 

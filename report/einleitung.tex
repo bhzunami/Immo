@@ -5,13 +5,11 @@ Damit ein gutes Schätzungsmodell berechnet werden kann, braucht es einen aussag
 Für die Beschaffung der Immobiliendaten in der Schweiz bieten sich daher die vielen Immobilienplattformen im Internet an. Leider sind diese Daten stellenweise unvollständig oder fehlerhaft erfasst. Auch können Immobilien über zwei oder mehrere Plattformen beworben werden.\\
 Es ist daher interessant zu wissen, ob mit öffentlichen Daten einen Datensatz erstellt werden kann, der mit aktuellen Machine Learning Algorithmen den Immobilienpreis akkurat schätzt. Zudem wäre dies auch für Makler und Immobilienbesitzer attraktiv, da sie diese Schätzungen als Unterstützung verwenden können.
 %
-%
 \subsection{Ausgangslage}
 In der Schweiz konkurrieren dutzende Immobilienplattformen im Internet, auf denen Immobilien zum Kauf oder Miete ausgeschrieben sind. Täglich kommen neue Inserate hinzu. Diese Daten stehen jedem frei zur Verfügung. Sie sind jedoch von Plattform zu Plattform unterschiedlich erfasst und müssen für die weitere Verwendung harmonisiert werden. Darüber hinaus müssen fehlerhafte oder doppelte Inserate erkannt und entfernt werden. Ferner können ortsbezogene Informationen vom Bundesamt für Statistik (BFS) eingeholt werden, um ein Inserat mit zusätzlichen Informationen zu ergänzen. Die Daten vom BFS stehen ebenso öffentlich zur Verfügung.
 
-Zum Thema “Kaufpreise für Immobilien schätzen” wurden diverse Forschungsarbeiten veröffentlicht (vgl. \cite{existing_work_1, existing_work_2, existing_work_4}).
-Nicht immer ist der einzelne Kaufpreis einer Immobilie gefragt, sondern mehr die Entwicklung des Immobilienpreises für eine spezifische Ortschaft \cite{existing_work_5}.\\
-Ähnliche Forschungsarbeiten wurden auch für die Schweiz durchgeführt. Meist wird jedoch versucht den Mietpreis pro Quadratmeter und nicht den Kaufpreis zu schätzen \cite{existing_work_3, existing_work_6}.
+Zum Thema \textit{Kaufpreise für Immobilien schätzen} wurden diverse Forschungsarbeiten veröffentlicht \cite{existing_work_1, existing_work_2, existing_work_4}.
+Nicht immer ist der einzelne Kaufpreis einer Immobilie gefragt, sondern mehr die Entwicklung des Immobilienpreises für eine spezifische Ortschaft \cite{existing_work_5}. Ähnliche Forschungsarbeiten wurden auch für die Schweiz durchgeführt. Meist wird jedoch versucht den Mietpreis pro Quadratmeter und nicht den Kaufpreis zu schätzen \cite{existing_work_3, existing_work_6}.
 %
 \subsection{Hypothese und Forschungsfragen}
 In dieser Arbeit soll erforscht werden ob mit öffentlich zugänglichen Immobilieninseraten und Machine Learning Algorithmen der Kaufpreis einer Immobilie akkurat geschätzt werden kann.\\
