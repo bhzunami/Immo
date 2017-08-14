@@ -316,7 +316,7 @@ Für die Outlier Detection verwendeten wir einen Isolation Forest Algorithmus. E
 Beim Isolation Forest definiert ein Prozentsatz die Anzahl an markierten Outliers. 
 Um einen geeigneten Prozentsatz zu bestimmen, vergleichen wir die entwicklung Standardabweichung bei Erhöhung des Prozentsatz.\\
 Ist die Differenz der Standardabweichung mit der Vorherigen nicht um mehr als 2.5\% gesunken, haben wir unseren optimalen Prozentsatz gefunden.\\
-Abbildung \ref{fig:outlier} zeigt die Reduktion der Standardabweichung \ref{{fig:isolation_std}} und die gefundenen Outlier \ref{fig:isolation_forest} bei der Wohnfläche. 
+Abbildung \ref{fig:outlier} zeigt die Reduktion der Standardabweichung \ref{fig:isolation_std} und die gefundenen Outlier \ref{fig:isolation_forest} bei der Wohnfläche. 
 %
 \begin{figure}[ht]
 \begin{subfigure}{.5\textwidth}
@@ -324,7 +324,7 @@ Abbildung \ref{fig:outlier} zeigt die Reduktion der Standardabweichung \ref{{fig
   \includegraphics[width=\linewidth]{images/living_area_IsolationForest.png}
   \caption[Isolation Forest angewendet auf Wohnfläche]{Isolation Forest angewendet auf Wohnfläche}
   \label{fig:isolation_forest}
-\end{subfigure}%
+\end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=\linewidth]{images/living_area_std.png}
@@ -466,14 +466,14 @@ ML Algorithmus & $R^2$ & MAPE & MdAPE & 10\% Abweichung & Maximaler Fehler\\
 Extra Trees mit KNN & 43.636 & 13.451 & 40.034 &  0.619114 & 2.94294e+07\\
 \bottomrule
 \end{tabular}}
-\caption{Ergebnisse ohne ortsbezogenen Daten vom BFS}
+\caption{Ergebnisse eigen entwickelter Algorithmus}
 \label{tab:combined}
 \end{table*}
 %
 Wie man in Tabelle \ref{tab:combined} sieht, waren die Ergebnisse weitaus schlechter als oben verwendete Algorithmen. Wir können uns dieses Verhalten nicht erklären. Weitere Forschungen konnten nicht durchgeführt werden, da uns für das die Zeit fehlte.\\[2ex]
 %
 Als letztes kombinieren wir noch die drei Baumalgorithmen miteinander. Da der AdaBoost immer ein bisschen besser war als die anderen beiden, erhält dieser mehr Gewicht für die Schätzung. Das Resultat konnte nochmals verbessert werden, wie Tabelle \ref{tab:combined_2} angezeigt.\\
-Hierfür wurden dem AdaBoost 0.8, dem XGBoost 0.2 und dem Extra Trees 0.1  Gewichtung gegeben.
+Hierfür wurden dem AdaBoost 0.7, dem XGBoost 0.2 und dem Extra Trees 0.1  Gewichtung gegeben.
 %
 \begin{table*}[ht]
 \centering
@@ -486,23 +486,28 @@ ML Algorithmus & $R^2$ & MAPE & MdAPE & 10\% Abweichung & Maximaler Fehler\\
 Kombiniert & 0.94646 & 4.416 & 0.07 & 87.03	& 1.77E+06\\
 \bottomrule
 \end{tabular}}
-\caption{Ergebnisse ohne ortsbezogenen Daten vom BFS}
+\caption{Kombination von AdaBoost, XGBoost und Extra Trees}
 \label{tab:combined_2}
 \end{table*}
 
 %
 \subsection{Auswertung}
-Es hat sich gezeigt, dass eine Kombination des AdaBoost, Extra Trees und XGBoost die besten Resultate erzielt. Betrachtet man die Algorithmen alleine hatte bei unseren Daten der AdaBoost die besten Ergebnisse.\\ 
-Von der Berechnungszeit ist der AdaBoost klar der Beste, da dieser für ein Fit ungefähr 10 Minuten benötigt, während er XGBoost under der Extra Trees über eine Stunde benötigen.\\
-Wir konnten mit unserer eigenen Implementation eines Machine Learning Algorithmus keinen Erfolg erzielen, da die Performance nicht zufriedenstellend war.\\[2ex]
+Es hat sich gezeigt, dass eine Kombination von AdaBoost, XGBoost und Extra Trees das exakteste Resultat erzielt wurde. Dabei erhält der AdaBoost die höchste Gewichtung von 70\%, der XGBoost 20\% und der Extra Trees 10\%.\\
+Werden die Algorithmen einzeln betrachtet, sticht der AdaBoost anhand seiner schnellen und exakten Berechnung hervor. Jedoch sind die Ergebnisse bei diesen drei Algorithmen sehr ähnlich und unterscheiden sich nicht stark.\\
+Mit unseren eigenen Implementation eines Machine Learning Algorithmus hatten wir keinen Erfolg. Obwohl die Idee vielversprechend aussah, konnten am Schluss die Resultate nicht überzeugen.\\[2ex]
 %
-Weiter konnte bewiesen werden, dass sich ein ausgiebiges Feature Engineering auf die Performance positiv auswirkt. Vor allem eine Outlier Detection kann das Modell um 10\% verbessern. Der Versuch seltene Features so zu transformieren, dass man sie verwenden kann, hilft auch um eine bessere Performance zu erhalten. \\
-Es ist Sinnvoll ortsbezogene Daten als Features zu verwenden. Mit diesen Features konnte eine Steigerung von 4\% bei den richtig Geschätzten Immobilien erzielt werden. Das zeigt, dass der Preis nicht nur von der Immobilie sondern auch vom Standort abhängig ist. \\[2ex]
+Weiter konnte bewiesen werden, das ortsbezogene Daten das Resultat masgeblich verbessern können. In unserem Fall büsste die MAPE 2.5\% ein und es konnten 7\% weniger Häuser mit einer maximalen Abweichung von 10\% richtig geschätzt werden.\\
+So konnte aufgezeigt werden, dass bei einer Schätzung eines Immobilienpreises, der Standort mit seinen Eigenschaften für das Schätzungsmodell wichtig ingesamt.\\[2ex]
 %
-Auch wenn die öffentlichen Daten von Immobilien eine eher schlechte Qualität besitzen, reichen sie aus für ein gutes Schätzungsmodell. Insgesamt konnten 85’845 von 162’225 verwendet werden. Die meisten Inserate konnten nicht verwendet werden, da sie keine Angaben über wichtige Kennwerte hatten.
+Die Qualität der Daten von Immobilienplattformen sind eher durchmischt. Es gibt qualitativ sehr gute Inserate, mit vielen Kennwerten und einer ausführlichen Beschreibung. Im Schnitt jedoch können neben dem Preis nur die vier Kennwerte Wohnfläche, Anzahl Zimmer, Baujahr und Renovationsjahr verwendet werden.\\
+Mit Hilfe der Anzahl und einem ausgiebigen Feature Engineering, können trotzdem genug Daten zusammengetragen werden. So konnten von Insgesamt 162’225 Inserate 85’845 für den Machine Learning Teil aufbereitet werden.\\
+Die Outlier Detection spielt dabei eine wichtige Rolle, da sie den maximalen Fehler stark reduzierte, indem sie 12'362 abnormale Inserate aussortierte.\\[2ex]
+%
+\subsection{Gültigkeitsrisiken}
+Zu beachten gilt, dass wir unsere Modelle auf geschätzten Werten trainiert haben. Somit sind unsere Schätzungen als Unterstützung und nicht als Endpreis zu betrachten. Zudem ist der Immobilienpreis immer gewissen Schwankungen ausgesetzt. Die Modelle schätzen somit die Immobilienpreise in der gesammelten Zeit.\\
+Einen Blick auf die Verteilung des Preises zeigt, dass sich der Preis vor allem zwischen 300'000 CHF und 1'300'000 CHF befindet. Durch das können extraordinäre Immobilien nur sehr schwer geschätzt werden. Das gleiche gilt auch für günstige Immobilien.\\[2ex]
+%
+Wir haben die Kennwerte von öffentlichen Immobilienplattformen gesammelt. Dort geht es hauptsächlich darum, die Immobilie zu verkaufen. So wird auch gerne mal ein bisschen geschummelt, oder schöngeredet indem Kennwerte falsch eingetragen werden. Eine Outlier Detection kann nur grobe Ausreisser erkennen. Kleinere Ausreisser bleiben somit unentdeckt und verfälschen das Modell.\\
+Wird eine neue Siedlung oder ein neuer Wohnblock inseriert, kann es vorkommen, dass 10 mal die gleiche Wohnung inseriert wird. Dies ist unschön, da diese Wohnungen im Modell mehr Gewicht erhalten. Wir haben uns jedoch stark bemüht, solche Duplikate zu erkennen und zu entfernen.
 
-subsection{Gültigkeitsrisiken}
-Man muss bedenken, dass wir unsere Modelle auf geschätzten Werten trainiert haben. Somit ist der geschätzte Wert mit Vorsicht zu betrachten. Auch ist der Immobilienpreis immer gewissen Schwankungen ausgesetzt sodass dieser in einem halben Jahr schon wieder anderst ist.\\
-Wir haben die Kennwerte von öffentlichen Immobilienplattformen gesammelt. Es geht dort hauptsächlich darum die Immobilie zu verkaufen. So wird auch gerne mal ein bisschen geschummelt, schöngeredet oder die Angaben der Kennwerte werden falsch eingetragen. Eine Outlier Detection kann nur grobe Ausreisser erkennen. Kleinere Ausreisser bleiben somit unentdeckt und können das Modell verfälschen.\\
-Wird eine neue Siedlung oder ein neuer Wohnblock inseriert, kann es vorkommen, dass 10 mal die gleiche Wohnung inseriert wird. Dies ist unschön, da diese Wohnungen mehr Gewicht erhalten.
-
+%1970 von ingesamt 73483
