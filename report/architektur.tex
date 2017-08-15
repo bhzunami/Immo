@@ -79,7 +79,9 @@ Das NLTK-Module, das für solche Aufgaben gedacht ist, hat aber nur sehr wenige 
 Um die Koordinaten zu setzen, braucht es eine Strassenanschrift. Ist diese nicht vorhanden werden auch keine Koordinaten gesetzt. Das Beschaffen der Koordinaten ist ein mehrstufiger Prozess. Da von Google Maps eine Limite von 2'500 Requests pro Tag existiert, wird versucht zuerst über die OpenStreetMap API die Koordinaten zu beschaffen. OpenStreetMap hat vergleichsweise zu Google viel weniger Einträge. Wenn bei OpenStreetMap keine Koordinaten gefunden werden, wird die Google Maps API angesteuert.\\[2ex]
 %
 \textbf{Lärmbelastung}\\
-Die Lärmbelastung für die ganze Schweiz liegt wird vom Bundesamt für Umwelt bereitgestellt im GDAL-Format. Hierfür werden die Koordinaten in das Schweizer Koordinatensystem LV03 umgerechnet. Mit diesen kann in einem nächsten Schritt die Lärmbelastung berechnet werden. Dieser Schritt ist der einzige in der Pipeline, der abhängig vom vorherigen Schritt ist. Denn sind keine Koordinaten vorhanden, kann auch keine Lärmbelastung berechnet werden.
+Das Bundesamt für Umwelt stellt die Lärmdatenbank sonBASE\footnote{https://www.bafu.admin.ch/dam/bafu/de/dokumente/laerm/statistik/laerm-berechnungsonbaseermitteltlaermbelastunginderschweiz.pdf} im GDAL-Format online zur Verfügung. Diese beinhaltet unter anderem den Strassenverkehrslärm für die ganze Schweiz. Da wir für einige Häuser eine exakte Adresse besitzen, können wir anhand den Koordinaten die Lärmbelastung aus der \mbox{sonBASE} berechnen.\\
+Die Schweiz besitzt eine eigene Landestriangulation namens LV03. Um die Lärmbelastung eines Punktes zu erhalten, müssen die vorher gesetzen Koordinaten ins LV03-System transformiert werden.\\
+Dieser Schritt ist der einzige in der Pipeline, der abhängig vom vorherigen Schritt ist. Denn sind keine Koordinaten vorhanden, kann auch keine Lärmbelastung berechnet werden.
 
 \textbf{Speichern}\\
 Schlussendlich wird das gecrawlte und ergänzte Item in die Datenbank gespeichert.
