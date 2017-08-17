@@ -1,0 +1,598 @@
+
+2017-08-07 15:25:32,196: INFO - Start with args Namespace(file='/Users/nicolas/Projects/Python/Immo/immo/scikit/advertisements.csv', goal='price', predict=False, run=False, train=True)
+2017-08-07 15:25:33,396: INFO - Apply transformation: replace_zeros_with_nan
+2017-08-07 15:25:33,405: INFO - Apply transformation: cleanup
+2017-08-07 15:25:33,405: INFO - Start preparing dataset
+2017-08-07 15:25:34,009: INFO - Apply transformation: run
+2017-08-07 15:25:34,009: INFO - Before Transformation
+2017-08-07 15:25:34,009: INFO - ======================================================================
+2017-08-07 15:25:34,009: INFO - We have total 85845 values
+2017-08-07 15:25:34,009: INFO - Feature                   | NaN-Values        | usable Values
+2017-08-07 15:25:34,009: INFO - ----------------------------------------------------------------------
+2017-08-07 15:25:34,011: INFO - price                     |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,012: INFO - living_area               |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,014: INFO - num_rooms                 |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,015: INFO - build_year                |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,023: INFO - tags                      |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,028: INFO - municipality              |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,029: INFO - canton_id                 |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,031: INFO - district_id               |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,032: INFO - planning_region_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,033: INFO - mountain_region_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,035: INFO - ase                       |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,036: INFO - greater_region_id         |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,037: INFO - language_region_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,038: INFO - ms_region_id              |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,040: INFO - job_market_region_id      |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,041: INFO - agglomeration_id          |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,042: INFO - metropole_region_id       |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,044: INFO - tourism_region_id         |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,046: INFO - municipal_size_class_id   |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,049: INFO - urban_character_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,051: INFO - agglomeration_size_class_id |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,052: INFO - is_town                   |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,054: INFO - degurba_id                |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,055: INFO - municipal_type22_id       |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,056: INFO - municipal_type9_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,057: INFO - m_noise_level             |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,062: INFO - otype                     |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,067: INFO - ogroup                    |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,067: INFO - ----------------------------------------------------------------------
+2017-08-07 15:25:34,067: INFO - Total                     |                 0 | 85845
+2017-08-07 15:25:34,067: INFO - Apply transformation: run
+2017-08-07 15:25:34,068: INFO - After Transformation
+2017-08-07 15:25:34,068: INFO - ======================================================================
+2017-08-07 15:25:34,068: INFO - We have total 85845 values
+2017-08-07 15:25:34,068: INFO - Feature                   | NaN-Values        | usable Values
+2017-08-07 15:25:34,068: INFO - ----------------------------------------------------------------------
+2017-08-07 15:25:34,070: INFO - price                     |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,071: INFO - living_area               |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,072: INFO - num_rooms                 |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,074: INFO - build_year                |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,084: INFO - tags                      |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,092: INFO - municipality              |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,094: INFO - canton_id                 |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,097: INFO - district_id               |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,101: INFO - planning_region_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,102: INFO - mountain_region_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,104: INFO - ase                       |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,105: INFO - greater_region_id         |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,107: INFO - language_region_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,108: INFO - ms_region_id              |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,110: INFO - job_market_region_id      |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,112: INFO - agglomeration_id          |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,114: INFO - metropole_region_id       |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,115: INFO - tourism_region_id         |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,116: INFO - municipal_size_class_id   |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,118: INFO - urban_character_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,119: INFO - agglomeration_size_class_id |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,120: INFO - is_town                   |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,121: INFO - degurba_id                |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,122: INFO - municipal_type22_id       |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,124: INFO - municipal_type9_id        |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,125: INFO - m_noise_level             |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,132: INFO - otype                     |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,136: INFO - ogroup                    |        0 ( 0.00%) |    85845 (100%)
+2017-08-07 15:25:34,136: INFO - ----------------------------------------------------------------------
+2017-08-07 15:25:34,136: INFO - Total                     |                 0 | 85845
+2017-08-07 15:25:34,136: INFO - Apply transformation: transform_tags
+2017-08-07 15:26:12,042: INFO - Apply transformation: transform_onehot
+2017-08-07 15:26:14,399: INFO - Apply transformation: predict_living_area
+2017-08-07 15:26:14,399: ERROR - Could not load living area model. Did you forget to train living area?
+2017-08-07 15:26:15,326: INFO - Apply transformation: inner_save_as_df
+2017-08-07 15:26:16,106: INFO - Apply transformation: linear_regression
+2017-08-07 15:26:17,681: INFO - Linear regression new split
+2017-08-07 15:26:23,372: INFO - Size of training data: 57230
+2017-08-07 15:26:23,373: INFO - Size of testing data: 28615
+2017-08-07 15:29:08,889: INFO - Statistics for: dummy
+2017-08-07 15:29:08,890: INFO -                  MAPE: inf%
+2017-08-07 15:29:08,891: INFO -                 MdAPE: 16.103%
+2017-08-07 15:29:08,891: INFO -             Min error:   0.539483
+2017-08-07 15:29:08,892: INFO -             Max error:        inf
+2017-08-07 15:30:00,341: INFO - Apply transformation: inner_load_df
+2017-08-07 15:30:01,294: INFO - Apply transformation: linear_regression
+2017-08-07 15:30:02,696: INFO - Linear regression new split
+2017-08-07 15:30:06,385: INFO - Size of training data: 57230
+2017-08-07 15:30:06,385: INFO - Size of testing data: 28615
+2017-08-07 15:33:32,230: INFO - Linear regression new split
+2017-08-07 15:33:36,060: INFO - Size of training data: 57230
+2017-08-07 15:33:36,060: INFO - Size of testing data: 28615
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/scipy/linalg/basic.py:884: RuntimeWarning: internal gelsd driver lwork query error, required iwork dimension not returned. This is likely the result of LAPACK bug 0038, fixed in LAPACK 3.2.2 (released July 21, 2010). Falling back to 'gelss' driver.
+  warnings.warn(mesg, RuntimeWarning)
+2017-08-07 15:36:09,333: INFO - Statistics for: dummy
+2017-08-07 15:36:09,336: INFO -              R²-Score: -9.27657e+25
+2017-08-07 15:36:09,336: INFO -                  MAPE: 60032279814738.969%
+2017-08-07 15:36:09,337: INFO -                 MdAPE: 23.442%
+2017-08-07 15:36:09,338: INFO -             Min error:         16
+2017-08-07 15:36:09,338: INFO -             Max error: 4.14104e+20
+2017-08-07 15:36:09,339: INFO -   Mean absolute error: 3.40883e+17
+2017-08-07 15:36:09,340: INFO - Median absolute error:     200176
+2017-08-07 15:36:09,341: INFO -    Mean squared error: 8.66943e+37
+2017-08-07 15:36:09,341: INFO - I  5: 12.203%
+2017-08-07 15:36:09,341: INFO - I 10: 23.442%
+2017-08-07 15:36:09,342: INFO - I 15: 34.223%
+2017-08-07 15:36:09,342: INFO - I 20: 43.883%
+2017-08-07 15:36:09,343: INFO - I 25: 52.546%
+2017-08-07 15:36:09,343: INFO - I 30: 60.017%
+2017-08-07 15:36:09,343: INFO - I 35: 66.081%
+2017-08-07 15:36:09,344: INFO - I 40: 71.050%
+2017-08-07 15:36:09,344: INFO - I 45: 75.317%
+2017-08-07 15:36:09,345: INFO - I 50: 78.641%
+2017-08-07 15:36:09,345: INFO - I 55: 81.342%
+2017-08-07 15:36:09,345: INFO - I 60: 83.669%
+2017-08-07 15:36:09,346: INFO - I 65: 85.724%
+2017-08-07 15:36:09,346: INFO - I 70: 87.255%
+2017-08-07 15:36:09,347: INFO - I 75: 88.684%
+2017-08-07 15:36:09,348: INFO - I 80: 89.803%
+2017-08-07 15:36:09,348: INFO - I 85: 90.872%
+2017-08-07 15:36:09,349: INFO - I 90: 91.781%
+2017-08-07 15:36:09,349: INFO - I 95: 92.595%
+2017-08-07 15:36:10,481: INFO - Linear regression new split
+2017-08-07 15:36:15,717: INFO - Size of training data: 57230
+2017-08-07 15:36:15,717: INFO - Size of testing data: 28615
+2017-08-07 15:39:24,210: INFO - Statistics for: dummy
+2017-08-07 15:39:24,212: INFO -              R²-Score: -1.38523e+26
+2017-08-07 15:39:24,213: INFO -                  MAPE: 70049117240643.078%
+2017-08-07 15:39:24,214: INFO -                 MdAPE: 22.673%
+2017-08-07 15:39:24,215: INFO -             Min error:         48
+2017-08-07 15:39:24,215: INFO -             Max error: 7.05036e+20
+2017-08-07 15:39:24,216: INFO -   Mean absolute error: 4.43554e+17
+2017-08-07 15:39:24,217: INFO - Median absolute error:     195784
+2017-08-07 15:39:24,218: INFO -    Mean squared error: 1.52791e+38
+2017-08-07 15:39:24,218: INFO - I  5: 12.570%
+2017-08-07 15:39:24,219: INFO - I 10: 24.344%
+2017-08-07 15:39:24,220: INFO - I 15: 35.020%
+2017-08-07 15:39:24,220: INFO - I 20: 45.127%
+2017-08-07 15:39:24,221: INFO - I 25: 53.759%
+2017-08-07 15:39:24,221: INFO - I 30: 61.034%
+2017-08-07 15:39:24,222: INFO - I 35: 66.898%
+2017-08-07 15:39:24,222: INFO - I 40: 71.882%
+2017-08-07 15:39:24,222: INFO - I 45: 75.789%
+2017-08-07 15:39:24,223: INFO - I 50: 79.088%
+2017-08-07 15:39:24,223: INFO - I 55: 81.681%
+2017-08-07 15:39:24,223: INFO - I 60: 84.124%
+2017-08-07 15:39:24,223: INFO - I 65: 85.990%
+2017-08-07 15:39:24,224: INFO - I 70: 87.671%
+2017-08-07 15:39:24,224: INFO - I 75: 89.030%
+2017-08-07 15:39:24,224: INFO - I 80: 90.023%
+2017-08-07 15:39:24,224: INFO - I 85: 91.075%
+2017-08-07 15:39:24,225: INFO - I 90: 91.899%
+2017-08-07 15:39:24,225: INFO - I 95: 92.640%
+2017-08-07 15:39:25,524: INFO - Linear regression new split
+2017-08-07 15:39:30,122: INFO - Size of training data: 57230
+2017-08-07 15:39:30,122: INFO - Size of testing data: 28615
+2017-08-07 15:41:58,728: INFO - Statistics for: dummy
+2017-08-07 15:41:58,729: INFO -              R²-Score: -2.40435e+26
+2017-08-07 15:41:58,729: INFO -                  MAPE: 92378187382025.922%
+2017-08-07 15:41:58,730: INFO -                 MdAPE: 24.729%
+2017-08-07 15:41:58,730: INFO -             Min error:          8
+2017-08-07 15:41:58,731: INFO -             Max error: 8.05922e+20
+2017-08-07 15:41:58,731: INFO -   Mean absolute error: 5.98861e+17
+2017-08-07 15:41:58,732: INFO - Median absolute error:     212560
+2017-08-07 15:41:58,732: INFO -    Mean squared error: 2.44413e+38
+2017-08-07 15:41:58,732: INFO - I  5: 11.291%
+2017-08-07 15:41:58,733: INFO - I 10: 22.163%
+2017-08-07 15:41:58,733: INFO - I 15: 32.612%
+2017-08-07 15:41:58,733: INFO - I 20: 41.740%
+2017-08-07 15:41:58,733: INFO - I 25: 50.505%
+2017-08-07 15:41:58,733: INFO - I 30: 57.735%
+2017-08-07 15:41:58,734: INFO - I 35: 63.806%
+2017-08-07 15:41:58,734: INFO - I 40: 68.904%
+2017-08-07 15:41:58,734: INFO - I 45: 73.276%
+2017-08-07 15:41:58,734: INFO - I 50: 76.732%
+2017-08-07 15:41:58,735: INFO - I 55: 79.825%
+2017-08-07 15:41:58,735: INFO - I 60: 82.310%
+2017-08-07 15:41:58,735: INFO - I 65: 84.386%
+2017-08-07 15:41:58,735: INFO - I 70: 86.186%
+2017-08-07 15:41:58,736: INFO - I 75: 87.727%
+2017-08-07 15:41:58,736: INFO - I 80: 89.055%
+2017-08-07 15:41:58,736: INFO - I 85: 90.093%
+2017-08-07 15:41:58,736: INFO - I 90: 90.980%
+2017-08-07 15:41:58,736: INFO - I 95: 91.840%
+2017-08-07 15:41:59,921: INFO - Apply transformation: ridge_regression
+2017-08-07 15:44:35,684: INFO - Try again for more precision with alphas centered around 3.0
+2017-08-07 16:00:54,706: INFO - Best alpha: 4.199999999999999
+2017-08-07 16:01:07,356: INFO - Statistics for: dummy
+2017-08-07 16:01:07,361: INFO -              R²-Score:    0.38876
+2017-08-07 16:01:07,362: INFO -                  MAPE: 64.799%
+2017-08-07 16:01:07,363: INFO -                 MdAPE: 28.663%
+2017-08-07 16:01:07,363: INFO -             Min error:    1.32856
+2017-08-07 16:01:07,363: INFO -             Max error: 2.81695e+07
+2017-08-07 16:01:07,364: INFO -   Mean absolute error:     367180
+2017-08-07 16:01:07,365: INFO - Median absolute error:     240782
+2017-08-07 16:01:07,365: INFO -    Mean squared error: 5.94967e+11
+2017-08-07 16:01:07,366: INFO - I  5: 9.455%
+2017-08-07 16:01:07,366: INFO - I 10: 18.653%
+2017-08-07 16:01:07,367: INFO - I 15: 27.526%
+2017-08-07 16:01:07,367: INFO - I 20: 36.115%
+2017-08-07 16:01:07,367: INFO - I 25: 44.463%
+2017-08-07 16:01:07,368: INFO - I 30: 51.875%
+2017-08-07 16:01:07,368: INFO - I 35: 58.581%
+2017-08-07 16:01:07,369: INFO - I 40: 64.363%
+2017-08-07 16:01:07,370: INFO - I 45: 69.372%
+2017-08-07 16:01:07,370: INFO - I 50: 73.325%
+2017-08-07 16:01:07,370: INFO - I 55: 76.734%
+2017-08-07 16:01:07,371: INFO - I 60: 79.432%
+2017-08-07 16:01:07,371: INFO - I 65: 81.945%
+2017-08-07 16:01:07,372: INFO - I 70: 83.987%
+2017-08-07 16:01:07,372: INFO - I 75: 85.637%
+2017-08-07 16:01:07,373: INFO - I 80: 87.120%
+2017-08-07 16:01:07,373: INFO - I 85: 88.184%
+2017-08-07 16:01:07,373: INFO - I 90: 89.178%
+2017-08-07 16:01:07,374: INFO - I 95: 90.009%
+2017-08-07 16:01:08,233: INFO - Apply transformation: lasso_regression
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:484: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Fitting data with very small alpha may cause precision problems.
+  ConvergenceWarning)
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:484: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Fitting data with very small alpha may cause precision problems.
+  ConvergenceWarning)
+2017-08-07 16:10:14,209: INFO - Try again for more precision with alphas centered around 10.0
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:484: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Fitting data with very small alpha may cause precision problems.
+  ConvergenceWarning)
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/linear_model/coordinate_descent.py:484: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations. Fitting data with very small alpha may cause precision problems.
+  ConvergenceWarning)
+2017-08-07 16:23:24,372: INFO - Best alpha: 13.0
+2017-08-07 16:23:49,060: INFO - Statistics for: dummy
+2017-08-07 16:23:49,064: INFO -              R²-Score:    0.60087
+2017-08-07 16:23:49,065: INFO -                  MAPE: 53.579%
+2017-08-07 16:23:49,067: INFO -                 MdAPE: 20.081%
+2017-08-07 16:23:49,067: INFO -             Min error:    18.1097
+2017-08-07 16:23:49,068: INFO -             Max error: 2.80871e+07
+2017-08-07 16:23:49,069: INFO -   Mean absolute error:     285889
+2017-08-07 16:23:49,070: INFO - Median absolute error:     164876
+2017-08-07 16:23:49,071: INFO -    Mean squared error: 3.99669e+11
+2017-08-07 16:23:49,072: INFO - I  5: 13.664%
+2017-08-07 16:23:49,073: INFO - I 10: 27.351%
+2017-08-07 16:23:49,073: INFO - I 15: 39.353%
+2017-08-07 16:23:49,073: INFO - I 20: 49.864%
+2017-08-07 16:23:49,074: INFO - I 25: 58.845%
+2017-08-07 16:23:49,074: INFO - I 30: 66.867%
+2017-08-07 16:23:49,075: INFO - I 35: 72.987%
+2017-08-07 16:23:49,075: INFO - I 40: 77.833%
+2017-08-07 16:23:49,076: INFO - I 45: 81.448%
+2017-08-07 16:23:49,077: INFO - I 50: 84.282%
+2017-08-07 16:23:49,077: INFO - I 55: 86.612%
+2017-08-07 16:23:49,078: INFO - I 60: 88.545%
+2017-08-07 16:23:49,079: INFO - I 65: 90.141%
+2017-08-07 16:23:49,079: INFO - I 70: 91.318%
+2017-08-07 16:23:49,080: INFO - I 75: 92.331%
+2017-08-07 16:23:49,080: INFO - I 80: 93.337%
+2017-08-07 16:23:49,081: INFO - I 85: 93.997%
+2017-08-07 16:23:49,081: INFO - I 90: 94.560%
+2017-08-07 16:23:49,082: INFO - I 95: 95.150%
+2017-08-07 16:23:50,024: INFO - Pipeline finished.
+(venv) nicolas@MacBook-Pro ~/Projects/Python/Immo/immo (master) $ python -m scikit.main -t
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/cross_validation.py:44: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
+  "This module will be removed in 0.20.", DeprecationWarning)
+/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/grid_search.py:43: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. This module will be removed in 0.20.
+  DeprecationWarning)
+2017-08-07 16:23:55,178: INFO - Start with args Namespace(file='/Users/nicolas/Projects/Python/Immo/immo/scikit/advertisements.csv', goal='price', predict=False, run=False, train=True)
+2017-08-07 16:23:57,020: INFO - Apply transformation: inner_load_df
+2017-08-07 16:23:57,597: INFO - Apply transformation: kneighbours
+2017-08-07 16:23:58,993: INFO - K neighbour new split
+2017-08-07 16:24:02,861: INFO - KNeighborsRegressor with leaf size: 50
+2017-08-07 16:25:02,715: INFO - Statistics for: KNeighbour with leaf size: 50
+2017-08-07 16:25:02,716: INFO -              R²-Score:    0.76734
+2017-08-07 16:25:02,717: INFO -                  MAPE: 19.629%
+2017-08-07 16:25:02,717: INFO -                 MdAPE: 0.000%
+2017-08-07 16:25:02,718: INFO -             Min error:          0
+2017-08-07 16:25:02,718: INFO -             Max error: 2.82371e+07
+2017-08-07 16:25:02,718: INFO -   Mean absolute error:     112887
+2017-08-07 16:25:02,719: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:25:02,719: INFO -    Mean squared error: 2.25204e+11
+2017-08-07 16:25:02,720: INFO - I  5: 69.079%
+2017-08-07 16:25:02,720: INFO - I 10: 77.879%
+2017-08-07 16:25:02,720: INFO - I 15: 82.922%
+2017-08-07 16:25:02,720: INFO - I 20: 86.224%
+2017-08-07 16:25:02,720: INFO - I 25: 88.551%
+2017-08-07 16:25:02,721: INFO - I 30: 90.474%
+2017-08-07 16:25:02,721: INFO - I 35: 91.952%
+2017-08-07 16:25:02,721: INFO - I 40: 93.164%
+2017-08-07 16:25:02,721: INFO - I 45: 94.129%
+2017-08-07 16:25:02,721: INFO - I 50: 94.919%
+2017-08-07 16:25:02,721: INFO - I 55: 95.590%
+2017-08-07 16:25:02,722: INFO - I 60: 96.208%
+2017-08-07 16:25:02,722: INFO - I 65: 96.722%
+2017-08-07 16:25:02,722: INFO - I 70: 97.113%
+2017-08-07 16:25:02,722: INFO - I 75: 97.428%
+2017-08-07 16:25:02,723: INFO - I 80: 97.746%
+2017-08-07 16:25:02,723: INFO - I 85: 97.984%
+2017-08-07 16:25:02,723: INFO - I 90: 98.179%
+2017-08-07 16:25:02,723: INFO - I 95: 98.340%
+2017-08-07 16:25:03,813: INFO - KNeighborsRegressor with leaf size: 100
+2017-08-07 16:26:04,971: INFO - Statistics for: KNeighbour with leaf size: 100
+2017-08-07 16:26:04,972: INFO -              R²-Score:   0.767282
+2017-08-07 16:26:04,972: INFO -                  MAPE: 19.631%
+2017-08-07 16:26:04,973: INFO -                 MdAPE: 0.000%
+2017-08-07 16:26:04,973: INFO -             Min error:          0
+2017-08-07 16:26:04,973: INFO -             Max error: 2.82371e+07
+2017-08-07 16:26:04,974: INFO -   Mean absolute error:     112908
+2017-08-07 16:26:04,975: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:26:04,976: INFO -    Mean squared error: 2.2526e+11
+2017-08-07 16:26:04,976: INFO - I  5: 69.044%
+2017-08-07 16:26:04,976: INFO - I 10: 77.921%
+2017-08-07 16:26:04,977: INFO - I 15: 82.936%
+2017-08-07 16:26:04,977: INFO - I 20: 86.234%
+2017-08-07 16:26:04,977: INFO - I 25: 88.541%
+2017-08-07 16:26:04,977: INFO - I 30: 90.477%
+2017-08-07 16:26:04,977: INFO - I 35: 91.955%
+2017-08-07 16:26:04,977: INFO - I 40: 93.161%
+2017-08-07 16:26:04,978: INFO - I 45: 94.122%
+2017-08-07 16:26:04,978: INFO - I 50: 94.908%
+2017-08-07 16:26:04,978: INFO - I 55: 95.583%
+2017-08-07 16:26:04,978: INFO - I 60: 96.208%
+2017-08-07 16:26:04,978: INFO - I 65: 96.719%
+2017-08-07 16:26:04,978: INFO - I 70: 97.113%
+2017-08-07 16:26:04,978: INFO - I 75: 97.424%
+2017-08-07 16:26:04,979: INFO - I 80: 97.746%
+2017-08-07 16:26:04,979: INFO - I 85: 97.980%
+2017-08-07 16:26:04,979: INFO - I 90: 98.176%
+2017-08-07 16:26:04,979: INFO - I 95: 98.340%
+2017-08-07 16:26:05,768: INFO - KNeighborsRegressor with leaf size: 200
+2017-08-07 16:27:14,042: INFO - Statistics for: KNeighbour with leaf size: 200
+2017-08-07 16:27:14,043: INFO -              R²-Score:   0.767303
+2017-08-07 16:27:14,043: INFO -                  MAPE: 19.630%
+2017-08-07 16:27:14,043: INFO -                 MdAPE: 0.000%
+2017-08-07 16:27:14,044: INFO -             Min error:          0
+2017-08-07 16:27:14,044: INFO -             Max error: 2.82371e+07
+2017-08-07 16:27:14,044: INFO -   Mean absolute error:     112902
+2017-08-07 16:27:14,045: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:27:14,045: INFO -    Mean squared error: 2.2524e+11
+2017-08-07 16:27:14,046: INFO - I  5: 69.058%
+2017-08-07 16:27:14,046: INFO - I 10: 77.910%
+2017-08-07 16:27:14,046: INFO - I 15: 82.953%
+2017-08-07 16:27:14,046: INFO - I 20: 86.234%
+2017-08-07 16:27:14,047: INFO - I 25: 88.527%
+2017-08-07 16:27:14,047: INFO - I 30: 90.470%
+2017-08-07 16:27:14,047: INFO - I 35: 91.966%
+2017-08-07 16:27:14,047: INFO - I 40: 93.178%
+2017-08-07 16:27:14,047: INFO - I 45: 94.132%
+2017-08-07 16:27:14,047: INFO - I 50: 94.919%
+2017-08-07 16:27:14,047: INFO - I 55: 95.590%
+2017-08-07 16:27:14,048: INFO - I 60: 96.212%
+2017-08-07 16:27:14,048: INFO - I 65: 96.719%
+2017-08-07 16:27:14,048: INFO - I 70: 97.113%
+2017-08-07 16:27:14,048: INFO - I 75: 97.417%
+2017-08-07 16:27:14,048: INFO - I 80: 97.739%
+2017-08-07 16:27:14,048: INFO - I 85: 97.977%
+2017-08-07 16:27:14,048: INFO - I 90: 98.172%
+2017-08-07 16:27:14,048: INFO - I 95: 98.337%
+2017-08-07 16:27:14,855: INFO - K neighbour new split
+2017-08-07 16:27:19,830: INFO - KNeighborsRegressor with leaf size: 50
+2017-08-07 16:28:21,945: INFO - Statistics for: KNeighbour with leaf size: 50
+2017-08-07 16:28:21,946: INFO -              R²-Score:   0.777266
+2017-08-07 16:28:21,946: INFO -                  MAPE: 37.352%
+2017-08-07 16:28:21,947: INFO -                 MdAPE: 0.000%
+2017-08-07 16:28:21,947: INFO -             Min error:          0
+2017-08-07 16:28:21,948: INFO -             Max error: 1.77784e+07
+2017-08-07 16:28:21,948: INFO -   Mean absolute error:     119598
+2017-08-07 16:28:21,949: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:28:21,949: INFO -    Mean squared error: 2.41053e+11
+2017-08-07 16:28:21,949: INFO - I  5: 68.212%
+2017-08-07 16:28:21,949: INFO - I 10: 77.232%
+2017-08-07 16:28:21,950: INFO - I 15: 82.317%
+2017-08-07 16:28:21,950: INFO - I 20: 85.661%
+2017-08-07 16:28:21,950: INFO - I 25: 88.031%
+2017-08-07 16:28:21,950: INFO - I 30: 89.785%
+2017-08-07 16:28:21,950: INFO - I 35: 91.473%
+2017-08-07 16:28:21,951: INFO - I 40: 92.745%
+2017-08-07 16:28:21,951: INFO - I 45: 93.870%
+2017-08-07 16:28:21,951: INFO - I 50: 94.741%
+2017-08-07 16:28:21,951: INFO - I 55: 95.460%
+2017-08-07 16:28:21,951: INFO - I 60: 96.034%
+2017-08-07 16:28:21,951: INFO - I 65: 96.470%
+2017-08-07 16:28:21,951: INFO - I 70: 96.984%
+2017-08-07 16:28:21,951: INFO - I 75: 97.229%
+2017-08-07 16:28:21,952: INFO - I 80: 97.487%
+2017-08-07 16:28:21,952: INFO - I 85: 97.735%
+2017-08-07 16:28:21,952: INFO - I 90: 97.966%
+2017-08-07 16:28:21,952: INFO - I 95: 98.099%
+2017-08-07 16:28:22,766: INFO - KNeighborsRegressor with leaf size: 100
+2017-08-07 16:29:18,881: INFO - Statistics for: KNeighbour with leaf size: 100
+2017-08-07 16:29:18,881: INFO -              R²-Score:   0.777248
+2017-08-07 16:29:18,882: INFO -                  MAPE: 37.351%
+2017-08-07 16:29:18,882: INFO -                 MdAPE: 0.000%
+2017-08-07 16:29:18,883: INFO -             Min error:          0
+2017-08-07 16:29:18,883: INFO -             Max error: 1.77784e+07
+2017-08-07 16:29:18,883: INFO -   Mean absolute error:     119634
+2017-08-07 16:29:18,884: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:29:18,884: INFO -    Mean squared error: 2.41072e+11
+2017-08-07 16:29:18,885: INFO - I  5: 68.205%
+2017-08-07 16:29:18,885: INFO - I 10: 77.222%
+2017-08-07 16:29:18,885: INFO - I 15: 82.306%
+2017-08-07 16:29:18,885: INFO - I 20: 85.654%
+2017-08-07 16:29:18,886: INFO - I 25: 88.048%
+2017-08-07 16:29:18,886: INFO - I 30: 89.806%
+2017-08-07 16:29:18,886: INFO - I 35: 91.476%
+2017-08-07 16:29:18,886: INFO - I 40: 92.752%
+2017-08-07 16:29:18,886: INFO - I 45: 93.877%
+2017-08-07 16:29:18,887: INFO - I 50: 94.734%
+2017-08-07 16:29:18,887: INFO - I 55: 95.457%
+2017-08-07 16:29:18,887: INFO - I 60: 96.037%
+2017-08-07 16:29:18,887: INFO - I 65: 96.474%
+2017-08-07 16:29:18,887: INFO - I 70: 96.984%
+2017-08-07 16:29:18,888: INFO - I 75: 97.229%
+2017-08-07 16:29:18,888: INFO - I 80: 97.487%
+2017-08-07 16:29:18,888: INFO - I 85: 97.735%
+2017-08-07 16:29:18,888: INFO - I 90: 97.966%
+2017-08-07 16:29:18,889: INFO - I 95: 98.102%
+2017-08-07 16:29:19,704: INFO - KNeighborsRegressor with leaf size: 200
+2017-08-07 16:30:25,094: INFO - Statistics for: KNeighbour with leaf size: 200
+2017-08-07 16:30:25,095: INFO -              R²-Score:   0.777244
+2017-08-07 16:30:25,095: INFO -                  MAPE: 37.355%
+2017-08-07 16:30:25,096: INFO -                 MdAPE: 0.000%
+2017-08-07 16:30:25,097: INFO -             Min error:          0
+2017-08-07 16:30:25,097: INFO -             Max error: 1.77784e+07
+2017-08-07 16:30:25,097: INFO -   Mean absolute error:     119673
+2017-08-07 16:30:25,098: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:30:25,098: INFO -    Mean squared error: 2.41076e+11
+2017-08-07 16:30:25,099: INFO - I  5: 68.293%
+2017-08-07 16:30:25,099: INFO - I 10: 77.187%
+2017-08-07 16:30:25,099: INFO - I 15: 82.268%
+2017-08-07 16:30:25,099: INFO - I 20: 85.612%
+2017-08-07 16:30:25,099: INFO - I 25: 88.052%
+2017-08-07 16:30:25,099: INFO - I 30: 89.796%
+2017-08-07 16:30:25,099: INFO - I 35: 91.466%
+2017-08-07 16:30:25,100: INFO - I 40: 92.752%
+2017-08-07 16:30:25,100: INFO - I 45: 93.867%
+2017-08-07 16:30:25,100: INFO - I 50: 94.730%
+2017-08-07 16:30:25,100: INFO - I 55: 95.453%
+2017-08-07 16:30:25,100: INFO - I 60: 96.034%
+2017-08-07 16:30:25,100: INFO - I 65: 96.474%
+2017-08-07 16:30:25,100: INFO - I 70: 96.984%
+2017-08-07 16:30:25,101: INFO - I 75: 97.229%
+2017-08-07 16:30:25,101: INFO - I 80: 97.487%
+2017-08-07 16:30:25,101: INFO - I 85: 97.742%
+2017-08-07 16:30:25,101: INFO - I 90: 97.970%
+2017-08-07 16:30:25,101: INFO - I 95: 98.102%
+2017-08-07 16:30:26,330: INFO - K neighbour new split
+2017-08-07 16:30:31,565: INFO - KNeighborsRegressor with leaf size: 50
+2017-08-07 16:31:25,992: INFO - Statistics for: KNeighbour with leaf size: 50
+2017-08-07 16:31:25,994: INFO -              R²-Score:    0.77147
+2017-08-07 16:31:25,994: INFO -                  MAPE: 23.607%
+2017-08-07 16:31:25,996: INFO -                 MdAPE: 0.000%
+2017-08-07 16:31:25,997: INFO -             Min error:          0
+2017-08-07 16:31:25,997: INFO -             Max error: 2.48182e+07
+2017-08-07 16:31:25,998: INFO -   Mean absolute error:     117774
+2017-08-07 16:31:25,999: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:31:25,999: INFO -    Mean squared error: 2.29418e+11
+2017-08-07 16:31:26,000: INFO - I  5: 68.621%
+2017-08-07 16:31:26,000: INFO - I 10: 77.229%
+2017-08-07 16:31:26,001: INFO - I 15: 82.457%
+2017-08-07 16:31:26,001: INFO - I 20: 85.745%
+2017-08-07 16:31:26,001: INFO - I 25: 88.209%
+2017-08-07 16:31:26,001: INFO - I 30: 90.190%
+2017-08-07 16:31:26,002: INFO - I 35: 91.662%
+2017-08-07 16:31:26,002: INFO - I 40: 92.825%
+2017-08-07 16:31:26,002: INFO - I 45: 93.919%
+2017-08-07 16:31:26,002: INFO - I 50: 94.782%
+2017-08-07 16:31:26,002: INFO - I 55: 95.541%
+2017-08-07 16:31:26,002: INFO - I 60: 96.048%
+2017-08-07 16:31:26,002: INFO - I 65: 96.554%
+2017-08-07 16:31:26,002: INFO - I 70: 96.946%
+2017-08-07 16:31:26,003: INFO - I 75: 97.334%
+2017-08-07 16:31:26,003: INFO - I 80: 97.641%
+2017-08-07 16:31:26,003: INFO - I 85: 97.847%
+2017-08-07 16:31:26,003: INFO - I 90: 98.005%
+2017-08-07 16:31:26,004: INFO - I 95: 98.225%
+2017-08-07 16:31:26,814: INFO - KNeighborsRegressor with leaf size: 100
+2017-08-07 16:32:26,879: INFO - Statistics for: KNeighbour with leaf size: 100
+2017-08-07 16:32:26,880: INFO -              R²-Score:   0.771466
+2017-08-07 16:32:26,880: INFO -                  MAPE: 23.609%
+2017-08-07 16:32:26,881: INFO -                 MdAPE: 0.000%
+2017-08-07 16:32:26,881: INFO -             Min error:          0
+2017-08-07 16:32:26,881: INFO -             Max error: 2.48182e+07
+2017-08-07 16:32:26,882: INFO -   Mean absolute error:     117787
+2017-08-07 16:32:26,882: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:32:26,883: INFO -    Mean squared error: 2.29422e+11
+2017-08-07 16:32:26,883: INFO - I  5: 68.576%
+2017-08-07 16:32:26,883: INFO - I 10: 77.197%
+2017-08-07 16:32:26,883: INFO - I 15: 82.443%
+2017-08-07 16:32:26,884: INFO - I 20: 85.759%
+2017-08-07 16:32:26,884: INFO - I 25: 88.233%
+2017-08-07 16:32:26,884: INFO - I 30: 90.190%
+2017-08-07 16:32:26,884: INFO - I 35: 91.669%
+2017-08-07 16:32:26,884: INFO - I 40: 92.832%
+2017-08-07 16:32:26,884: INFO - I 45: 93.916%
+2017-08-07 16:32:26,885: INFO - I 50: 94.782%
+2017-08-07 16:32:26,885: INFO - I 55: 95.544%
+2017-08-07 16:32:26,885: INFO - I 60: 96.048%
+2017-08-07 16:32:26,885: INFO - I 65: 96.554%
+2017-08-07 16:32:26,886: INFO - I 70: 96.946%
+2017-08-07 16:32:26,886: INFO - I 75: 97.334%
+2017-08-07 16:32:26,886: INFO - I 80: 97.641%
+2017-08-07 16:32:26,886: INFO - I 85: 97.847%
+2017-08-07 16:32:26,886: INFO - I 90: 98.005%
+2017-08-07 16:32:26,886: INFO - I 95: 98.225%
+2017-08-07 16:32:27,831: INFO - KNeighborsRegressor with leaf size: 200
+2017-08-07 16:33:38,260: INFO - Statistics for: KNeighbour with leaf size: 200
+2017-08-07 16:33:38,261: INFO -              R²-Score:   0.771494
+2017-08-07 16:33:38,261: INFO -                  MAPE: 23.602%
+2017-08-07 16:33:38,262: INFO -                 MdAPE: 0.000%
+2017-08-07 16:33:38,262: INFO -             Min error:          0
+2017-08-07 16:33:38,262: INFO -             Max error: 2.48182e+07
+2017-08-07 16:33:38,263: INFO -   Mean absolute error:     117738
+2017-08-07 16:33:38,263: INFO - Median absolute error: 1.16415e-10
+2017-08-07 16:33:38,264: INFO -    Mean squared error: 2.29395e+11
+2017-08-07 16:33:38,264: INFO - I  5: 68.600%
+2017-08-07 16:33:38,264: INFO - I 10: 77.211%
+2017-08-07 16:33:38,265: INFO - I 15: 82.453%
+2017-08-07 16:33:38,265: INFO - I 20: 85.777%
+2017-08-07 16:33:38,265: INFO - I 25: 88.226%
+2017-08-07 16:33:38,265: INFO - I 30: 90.194%
+2017-08-07 16:33:38,265: INFO - I 35: 91.676%
+2017-08-07 16:33:38,266: INFO - I 40: 92.839%
+2017-08-07 16:33:38,266: INFO - I 45: 93.919%
+2017-08-07 16:33:38,266: INFO - I 50: 94.789%
+2017-08-07 16:33:38,266: INFO - I 55: 95.551%
+2017-08-07 16:33:38,266: INFO - I 60: 96.055%
+2017-08-07 16:33:38,266: INFO - I 65: 96.558%
+2017-08-07 16:33:38,266: INFO - I 70: 96.946%
+2017-08-07 16:33:38,266: INFO - I 75: 97.334%
+2017-08-07 16:33:38,266: INFO - I 80: 97.641%
+2017-08-07 16:33:38,266: INFO - I 85: 97.847%
+2017-08-07 16:33:38,267: INFO - I 90: 98.001%
+2017-08-07 16:33:38,267: INFO - I 95: 98.225%
+2017-08-07 16:33:39,232: INFO - Apply transformation: random_forest
+2017-08-07 16:33:41,536: INFO - random forest new split
+2017-08-07 16:33:47,330: INFO - Try estimator: 100
+2017-08-07 16:50:49,899: INFO - Statistics for: dummy
+2017-08-07 16:50:49,900: INFO -              R²-Score:   0.836764
+2017-08-07 16:50:49,900: INFO -                  MAPE: 24.809%
+2017-08-07 16:50:49,901: INFO -                 MdAPE: 3.089%
+2017-08-07 16:50:49,901: INFO -             Min error:          0
+2017-08-07 16:50:49,901: INFO -             Max error: 2.8461e+07
+2017-08-07 16:50:49,902: INFO -   Mean absolute error:     104575
+2017-08-07 16:50:49,903: INFO - Median absolute error:    24227.5
+2017-08-07 16:50:49,903: INFO -    Mean squared error: 1.69129e+11
+2017-08-07 16:50:49,904: INFO - I  5: 60.101%
+2017-08-07 16:50:49,904: INFO - I 10: 74.866%
+2017-08-07 16:50:49,904: INFO - I 15: 82.652%
+2017-08-07 16:50:49,904: INFO - I 20: 87.720%
+2017-08-07 16:50:49,905: INFO - I 25: 91.008%
+2017-08-07 16:50:49,905: INFO - I 30: 93.308%
+2017-08-07 16:50:49,905: INFO - I 35: 94.877%
+2017-08-07 16:50:49,905: INFO - I 40: 96.075%
+2017-08-07 16:50:49,905: INFO - I 45: 96.837%
+2017-08-07 16:50:49,905: INFO - I 50: 97.484%
+2017-08-07 16:50:49,905: INFO - I 55: 97.935%
+2017-08-07 16:50:49,905: INFO - I 60: 98.246%
+2017-08-07 16:50:49,905: INFO - I 65: 98.476%
+2017-08-07 16:50:49,906: INFO - I 70: 98.710%
+2017-08-07 16:50:49,906: INFO - I 75: 98.885%
+2017-08-07 16:50:49,906: INFO - I 80: 99.008%
+2017-08-07 16:50:49,906: INFO - I 85: 99.147%
+2017-08-07 16:50:49,906: INFO - I 90: 99.221%
+2017-08-07 16:50:49,906: INFO - I 95: 99.277%
+2017-08-07 16:50:50,834: INFO - Try estimator: 400
+^CTraceback (most recent call last):
+  File "/Users/nicolas/.homebrew/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/nicolas/.homebrew/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/nicolas/Projects/Python/Immo/immo/scikit/main.py", line 75, in <module>
+    main(args)
+  File "/Users/nicolas/Projects/Python/Immo/immo/scikit/main.py", line 58, in main
+    ads = f(ads)
+  File "/Users/nicolas/Projects/Python/Immo/immo/scikit/train_pipeline.py", line 240, in random_forest
+    model.fit(X_train, y_train)
+  File "/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/ensemble/forest.py", line 326, in fit
+    for i, t in enumerate(trees))
+  File "/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/externals/joblib/parallel.py", line 768, in __call__
+    self.retrieve()
+  File "/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/externals/joblib/parallel.py", line 719, in retrieve
+    raise exception
+  File "/Users/nicolas/Projects/Python/Immo/venv/lib/python3.6/site-packages/sklearn/externals/joblib/parallel.py", line 682, in retrieve
+    self._output.extend(job.get(timeout=self.timeout))
+  File "/Users/nicolas/.homebrew/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/multiprocessing/pool.py", line 602, in get
+    self.wait(timeout)
+  File "/Users/nicolas/.homebrew/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/multiprocessing/pool.py", line 599, in wait
+    self._event.wait(timeout)
+  File "/Users/nicolas/.homebrew/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 551, in wait
+    signaled = self._cond.wait(timeout)
+  File "/Users/nicolas/.homebrew/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 295, in wait
+    waiter.acquire()
+KeyboardInterrupt
+^C
+(venv) nicolas@MacBook-Pro ~/Projects/Python/Immo/immo (master) $
+(venv) nicolas@MacBook-Pro ~/Projects/Python/Immo/immo (master) $
+(venv) nicolas@MacBook-Pro ~/Projects/Python/Immo/immo (master) $

@@ -940,3 +940,23 @@ class Pipeline():
             return ads[:n_ads]
 
         return cut_inner
+
+
+    # def lgb(self, ads):
+
+    #     X, y = generate_matrix(ads, 'price')
+    #     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    #     model = lgb.LGBMRegressor(objective='regression',num_leaves=800,
+    #                               learning_rate=0.05, n_estimators=720,
+    #                               max_bin = 55, bagging_fraction = 0.8,
+    #                               bagging_freq = 5, feature_fraction = 0.2319,
+    #                               feature_fraction_seed=9, bagging_seed=9,
+    #                               min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
+
+    #     model.fit(X_train, y_train)
+    #     joblib.dump(model, '{}/lgb.pkl'.format(self.model_folder))
+    #     y_pred = model.predict(X_test)
+    #     train_statistics(y_test, y_pred, title="lgb")
+    #     plot(y_test, y_pred, self.image_folder, show=True, title="lgb")
+
+    #     return ads

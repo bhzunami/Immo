@@ -36,6 +36,8 @@
 \usepackage{listings}
 \usepackage{csquotes}
 %
+
+\usepackage{float}
 \usepackage{enumitem}
 \setlist[itemize]{noitemsep}
 %
@@ -54,6 +56,9 @@
 \usepackage{pdfpages}
 \usepackage{rotating}
 %
+% PDF einbinden
+\usepackage{pdfpages}
+
 \usepackage{pgfplots}
 \usepgfplotslibrary{ternary}
 \pgfplotsset{compat=1.8}
@@ -161,10 +166,10 @@
 		Mit Machine Learning Immobilienpreise schätzen\\[1.7ex]
 	}
 	{\Large\bfseries\normalfont\sffamily
-		Vergleich von verschiedenen Machine Learning Algorithmen um Immobilienpreise zu schätzen.\\[2.2ex]
+		Akkurate Schätzungsmodelle erstellen mittels öffentlichen Immobiliendaten\\[2.2ex]
 	}
 	{\large\bfseries\normalfont\sffamily
-		Projekt 6 von\\[1.5ex]
+		Bachelorarbeit von\\[1.5ex]
 		Piero Steinger\\[1.5ex]
 		Nicolas Mauchle\\[1.5ex]
 	}
@@ -189,7 +194,7 @@
 %
 \newpage
 %
-\pagenumbering{Roman}
+%\pagenumbering{Roman}
 % --- Zusammenfassung --- %
 \input{./vorwort.tex}
 %
@@ -198,7 +203,7 @@
 	\tableofcontents
 %
 \clearpage
-\pagenumbering{arabic}
+%\pagenumbering{arabic}
 \newpage
 %
 % --- Einleitung --- %
@@ -223,21 +228,25 @@
 \input{./zusammenfassung.tex}
 \newpage
 \clearpage
-\addcontentsline{toc}{section}{Literatur}
+
+\appendix
+\renewcommand{\lstlistlistingname}{Literaturverzeichnis}
+\addcontentsline{toc}{section}{\lstlistlistingname}
 % Literaturliste anzeigen
 \bibliographystyle{ieeetr}
+% Kein blocksatz
+\raggedright
 \bibliography{literatur}
 %
 \clearpage
-\addcontentsline{toc}{section}{Abbildungen}
+\addcontentsline{toc}{section}{Abbildungsverzeichnis}
 \listoffigures
 %
-\addcontentsline{toc}{section}{Tabellen}
+\addcontentsline{toc}{section}{Tabellenverzeichnis}
 \listoftables
 %
-\renewcommand{\lstlistlistingname}{Listingverzeichnis}
 \newpage
-\section*{Ehrlichkeitserklärung}
+\section{Ehrlichkeitserklärung}
 Hiermit erklären wir, die vorliegende Bachelor Thesis selbständig, ohne Hilfe Dritter und nur unter Benutzung der angegebenen Quellen verfasst zu haben.\\
 
 
@@ -250,6 +259,10 @@ Nicolas Mauchle & \hrulefill \\
 \\[4ex]
 Windisch, 18. August 2017
 \newpage
-\section{Anhang}
+%
+%\pagestyle{plain}
+%\section{Anhang}
+\input{./anhang.tex}
+
 %
 \end{document}

@@ -10,6 +10,10 @@ if [ "$operation" = "cleanup" ]; then
   rm -f "${dir}/Report.aux" "${dir}/Report.log" "${dir}/Report.out" "${dir}/Report.toc" "${dir}/Report.pdf" \
         "${dir}/Report.brf" "${dir}/Report.blg" "${dir}/Report.bbl"
 
+elif [ "$operation" = "fast" ]; then
+  old_dir=${PWD}
+  cd "${dir}" && xelatex "${dir}/Report.tex"
+
 elif [ "$operation" = "build" ]; then
   old_dir=${PWD}
   rm -f "${dir}/Report.aux"

@@ -1,4 +1,5 @@
 import pdb
+import re
 
 """
 
@@ -8,6 +9,9 @@ STOP_WORDS = ["mean living area", "Renovation", "Noise level", "Outlier detectio
               "Tags gruppieren", "Stacked model", "Without Tags"]
 
 STATS_WORD = ["R²-Score:", "MAPE:", "MdAPE:", "Min", "Max", "Max", "Mean", "Median", "Mean"]
+
+regex = re.compile('^([0-9]{1,2}?)')
+
 def main():
     with open('train.log', 'r') as f:
         lines = f.readlines()
@@ -16,7 +20,7 @@ def main():
     table_per = ""
     table_stat = ""
     table_featue = ""
-    f_c = 0
+    feature_c = 0
     counter = 0
     idx = 0
     for line in lines:
@@ -91,6 +95,40 @@ Name & Wert in \\\\
             table_stat += """
             {} & {:.2f}\\\\""".format(name.replace(":", "").replace("%", ""), float(value.split("%")[0]))
 
+
+        if l.startswith('Feature Ranking'):
+            
+            if feature_c == 0:
+                table_featue += """
+\\begin{table*}[ht]
+\\begin{minipage}{.3\\textwidth}
+\centering
+\\ra{1.3}
+\\resizebox{\\textwidth}{!}{
+\\begin{tabular}{@{}lr@{}}
+\\toprule
+Feature &  Gewichtung in \%\\\\
+\midrule"""
+            if feature_c >= 1:
+                table_featue += """\\begin{minipage}{.3\\textwidth}
+\centering
+\\ra{1.3}
+\\resizebox{\\textwidth}{!}{
+\\begin{tabular}{@{}lr@{}}
+\\toprule
+Feature & Gewichtung in \%\\\\
+\midrule"""
+
+        if re.match(regex, l):
+            try:
+                nr, dummy, *feature, percent = l.split()
+            except Exception:
+                pdb.set_trace()
+            percent = float(percent.replace("(", "").replace(")", ""))
+            if percent > 0.0001:
+                table_featue += """
+{} & {:.5f}\\\\""".format(feature[0].replace("_", "\_"), percent)
+
         if l.startswith('I'):
             percent, value = l.split(':')
 
@@ -106,6 +144,12 @@ Name & Wert in \\\\
 \end{minipage}
 """
                 table_stat += """
+\\bottomrule
+\end{tabular}}
+\caption{""" +table_name+"""}
+\end{minipage}
+"""
+                table_featue += """
 \\bottomrule
 \end{tabular}}
 \caption{""" +table_name+"""}
@@ -127,15 +171,29 @@ Name & Wert in \\\\
 \end{minipage}
 \end{table*}
                 """
+
+                table_featue += """
+\\bottomrule
+\end{tabular}}
+\caption{""" +table_name+"""}
+\end{minipage}
+\end{table*}
+                """
+
+                
                 with open("./report/attachments/ml_results_{}.tex".format(idx), 'w') as file:
                     file.write(table_per)
 
                 with open("./report/attachments/ml_results2_{}.tex".format(idx), 'w') as file:
                     file.write(table_stat)
+
+                with open("./report/attachments/feature_impl{}.tex".format(idx), 'w') as file:
+                    file.write(table_featue)
                 
                 idx += 1
                 table_per = ""
                 table_stat = ""
+                table_featue = ""
             counter = (counter+1) % 3
 
 if __name__ == "__main__":

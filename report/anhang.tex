@@ -1,0 +1,451 @@
+\section{Anhang}
+\subsection{Projektbeschreibung}
+\includegraphics[trim={1.5cm 2.3cm 1.5cm 2.5cm},clip,width=\textwidth]{ausschreibung.pdf}
+\newpage
+\subsection{Crawler}
+\label{crawler_a}
+Tabelle \ref{tab:crawled_info} zeigt alle gesammelten Informationen eines Inserates.
+
+\begin{table*}[ht]
+  \centering
+  \ra{1.3}
+  \resizebox{\textwidth}{!}{
+  \begin{tabular}{@{}ll@{}}
+  \toprule
+  Kennwert & Beschreibung\\
+  \midrule
+  object\_id & Objektid der Plattform zur Wiedererkennung.\\
+  reference\_no & Offizielle Referenznummer. \\
+  raw\_data & Die ganze Seite als HTML.\\
+  crawler & Name der Plattform.\\
+  url & URL zum Inserat.\\
+  available & Ist es noch zu kaufen.\\
+  street & Strassenanschrift der Immobilie.\\
+  place & PLZ und Ortschaft der Immobilie.\\
+  price\_brutto & Gesamter Kaufpreis der Immobilie.\\
+  price\_netto & Nettopreis der Immobilie.\\
+  additional\_costs & Zusätzliche Kosten für diverse Sachen.\\
+  description & Die Beschreibung der Immobbilie.\\
+  living\_area & Die Wohnflöche der Immobilie.\\
+  floor & Auf welchem Stockwerk sich die Immobilie befindet.\\
+  num\_rooms & Die Anzahl an Zimmer die die Immobilie besitzt.\\
+  num\_floors & Die Anzahl an Stockwerken die die Immobbilie besitzt.\\
+  build\_year & Baujahr der Immobilie.\\
+  last\_renovation\_year & Letztes Renovationsjahr der Immobilie.\\
+  cubature & Die Kubatur der Immobilie.\\
+  room\_height & Die Raumhöhe der Immobilie.\\
+  effective\_area & Die Nutzfläche oder effektive Fläche der Immobile.\\
+  plot\_area & Die Grundstückfläche auf der die Immobilie liegt.\\
+  floors\_house & Die Anzahl an Stockwerken insgesamt, die diese Immobilie besitzt.\\
+  characteristics & Zusätzliche Merkmale der Imobilie.\\
+  additional\_data & Daten die noch nicht zugeordnet werden können, aber die Immobilie beschreiben.\\
+  owner  & Besitzer der Immobilie.\\
+  objecttype & Objekttyp\\
+  condition & In welchem Zustand sich die Immobilie befindet.\\
+  longitude & Longitude Koordinate für die Lärmbelastungsberechnung.\\
+  latitude & Latitude Koordinate für die Lärmbelastungsberechnung.\\
+  quality\_label & Welches Qualitätslabel die Immobilie besitzt.\\
+  \bottomrule
+\end{tabular}}
+\caption{Gesammelten Informationen eines Inserates}
+\label{tab:crawled_info}
+\end{table*}
+
+\subsection{Datenanlyse}
+\label{daten_analys}
+Im folgenden werden alle Diagramme angezeigt die bei der Analyse der Daten erstellt und verwendet wurden.
+
+\begin{figure}[h]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/Verteilung_living_area.png}
+  \caption{Verteilung der Wohnfläche}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/Verteilung_noise_level.png}
+  \caption{Verteilung der Lärmbelastung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/Verteilung_num_rooms.png}
+  \caption{Verteilung der Anzahl Zimmer}
+\end{subfigure}
+\caption{Verteilung der nummerischen Werten}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/skewness.png}
+  \caption{Preis - Skewness}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/log_skewness.png}
+  \caption{Preis - Skewness mit Log} 
+\end{subfigure}
+\caption{Preisanalyse}
+\end{figure}
+
+\begin{figure}[h]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_agglomeration_size_class_id.png}
+  \caption{Agglomerationsgrössen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_canton.png}
+  \caption{Kanton} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_degurba_id.png}
+  \caption{Grad der Urbanisierung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_greater_region_id.png}
+  \caption{Grossregionen} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_gruppen.png}
+  \caption{Immobilientypen} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_is_town.png}
+  \caption{Ist eine Stadt} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_job_market_region_id.png}
+  \caption{Jobregionen} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_language_region_id.png}
+  \caption{Sprachregionen} 
+\end{subfigure}
+\caption{Barplots für ortsbezogene Kategorien 1}
+\end{figure}
+
+\begin{figure}[h]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_metropole_region_id.png}
+  \caption{Metropolregionen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_mountain_region_id.png}
+  \caption{Bergregionen} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_municipal_size_class_id.png}
+  \caption{Gemeindegrössen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/barplot_tourism_region_id.png}
+  \caption{Tourismusregionen} 
+\end{subfigure}
+\caption{Barplots für ortsbezogene Kategorien 2}
+\end{figure}
+
+\begin{figure}[h]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_agglomeration_size_class_id.png}
+  \caption{Agglomerationsgrössen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_degurba_id.png}
+  \caption{Grad der Urbanisierung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_greater_region_id.png}
+  \caption{Grossregionen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_is_town.png}
+  \caption{Ist eine Stadt} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_job_market_region_id.png}
+  \caption{Jobregionen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_language_region_id.png}
+  \caption{Sprachregionen} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_metropole_region_id.png}
+  \caption{Metropolregionen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_mountain_region_id.png}
+  \caption{Bergregionen} 
+\end{subfigure}
+\caption{Boxplots für ortsbezogene Kategorien 1}
+\end{figure}
+
+\begin{figure}[h]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_municipal_size_class_id.png}
+  \caption{Gemeindegrössen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/boxplot_tourism_region_id.png}
+  \caption{Tourismusregionen} 
+\end{subfigure}
+\caption{Boxplots für ortsbezogene Kategorien 2}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/HeatMap_Importance.png}
+  \caption{Heatmap mit Zahlen der Korrelation}
+  \end{figure}
+  
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/HeatMap_all.png}
+  \caption{Heatmap mit Tags} 
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/cross.png}
+  \caption{Vergleich aller nummerischen Features} 
+\end{figure}
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/analysis/Verteilung.png}
+  \caption{Verteilung der nummerischen Features} 
+\end{figure}
+
+
+
+\begin{figure}[h]
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/anhang/analysis/avg_room_to_price.png}
+    \caption{Durchschnittliche Raumgrösse zu Preis}
+  \end{subfigure}
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/anhang/analysis/Raum_zu_Preis.png}
+    \caption{Raum zu Preis} 
+  \end{subfigure}
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/anhang/analysis/BYear_zu_preis.png}
+    \caption{Baujahr zu Preis} 
+  \end{subfigure}
+  \caption{Nummerische Features zum Preis}
+  \end{figure}
+
+
+% - - - - - - - - - - - - - - - - - 
+% OUTLIER DETECTION
+% - - - - - - - - - - - - - - - - - 
+\clearpage
+\subsection{Outlier Detection}
+Im folgenden werden die Oultiers Detecion Diagramme angezeigt.
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/build_year_IsolationForest.png}
+  \caption{Isolation Forest}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/build_year_diff_of_std.png}
+  \caption{Differenz der Standardabweichug} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/build_year_std.png}
+  \caption{Veränderung der Standardabweichung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/last_construction_IsolationForest.png}
+  \caption{Isolation Forest}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/last_construction_diff_of_std.png}
+  \caption{Differenz der Standardabweichug} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/last_construction_std.png}
+  \caption{Veränderung der Standardabweichung} 
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[h]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/living_area_diff_of_std.png}
+  \caption{Differenz der Standardabweichung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/noise_level_IsolationForest.png}
+  \caption{Isolation Forest} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/noise_level_diff_of_std.png}
+  \caption{Differenz der Standardabweichung}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/noise_level_std.png}
+  \caption{Veränderung der Standardabweichung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/num_rooms_IsolationForest.png}
+  \caption{Isolation Forest} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/num_rooms_diff_of_std.png}
+  \caption{Differenz der Standardabweichung} 
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/outlier_detection/num_rooms_std.png}
+  \caption{Veränderung der Standardabweichung} 
+\end{subfigure}
+\caption{Outlier Detection 2}
+\end{figure}
+
+% - - - - - - - - - - - - - - - - - 
+% Machine Learning
+% - - - - - - - - - - - - - - - - - 
+\clearpage
+\subsection{Machine Learning Resultate}
+Im folgenden Abschnitt werden die Performancestatistiken der einezlnen Algorithmen dargestellt.\\[2ex]
+\textbf{Lineare Regressions Algorithmen}\\
+Performance
+
+\input{./attachments/ml_results2_0.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_0.tex}
+%
+\newpage
+\textbf{KNN und Random Forest}\\
+Performance
+
+\input{./attachments/ml_results2_1.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_1.tex}
+%
+\newpage
+\textbf{Baumalgorithmen}\\
+Performance
+
+\input{./attachments/ml_results2_2.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_2.tex}
+%
+\newpage
+\textbf{Mit durchschnittlicher Zimmergrösse}\\
+Performance
+
+\input{./attachments/ml_results2_3.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_3.tex}
+%
+\newpage
+\textbf{Mit Rennovationsjahr transformiert}\\
+Performance
+
+\input{./attachments/ml_results2_4.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_4.tex}
+%
+\newpage
+\textbf{Mit Lärmbelastung}\\
+Performance:
+
+\input{./attachments/ml_results2_5.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_5.tex}
+%
+\newpage
+\textbf{Mit Outlier Detection}\\
+Performance
+
+\input{./attachments/ml_results2_6.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_6.tex}
+%
+\newpage
+\textbf{Mit Steuerfuss}\\
+Performance
+
+\input{./attachments/ml_results2_7.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_7.tex}
+%
+\newpage
+\textbf{Mit Tags gruppiert}\\
+Performance
+
+\input{./attachments/ml_results2_8.tex}
+Abdeckung der Inserate mit Testdaten
+
+\input{./attachments/ml_results_8.tex}
+%
+%
+\newpage
+\textbf{AdaBoost, XGBoost und Extra Trees zusammen}\\
+Der Name der Tabelle zeigt die Gewichtung der einzelnen Modelle, wobei die erste Zahl dem AdaBoost, die zweite Zahl dem XGBoost und die dritte dem Extra Trees zugeordnet werden muss.
+
+\input{./attachments/ml_results2_9.tex}
+\input{./attachments/ml_results_9.tex}
+% %
+\input{./attachments/ml_results2_10.tex}
+\input{./attachments/ml_results_10.tex}
+\input{./attachments/ml_results2_11.tex}
+\input{./attachments/ml_results_11.tex}
+% %
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/ml/Feature_importance_Tree.png}
+  \caption{Feature Importance} 
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/anhang/xgboost.png}
+  \caption{XGBoost GridsearchCV} 
+\end{figure}

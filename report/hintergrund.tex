@@ -3,18 +3,18 @@ In diesem Kapitel wird auf die Konzepte und Begriffe von Webcrawlern und Machine
 %
 \subsection{Webcrawler}
 Um Informationen von Webseiten zu sammeln, muss deren Inhalt analysiert und die gewünschten Daten extrahiert werden. Für diese Aufgabe eignen sich Webcrawler besonders gut \cite{scrapy_1, scrapy_2}.\\
-Dabei erhält ein Webcrawler eine oder mehrere Einstiegs-URLs. Diese werden dann vom Crawler aufgerufen und die dazugehörigen Seiten ausgewertet. Bei der Auswertung kann der Crawler auf weitere URLs stossen, die er in seine Liste der abzuarbeitenden URLs aufnehmen kann. Sind alle URLs abgearbeitet ist der Crawler fertig. Je nach Aufgabenbereich existieren verschiedene Crawler-Techniken.\\
+Dabei erhält ein Webcrawler eine oder mehrere Einstiegs-URLs. Diese werden dann vom Crawler aufgerufen und die dazugehörigen Seiten ausgewertet. Bei der Auswertung kann der Crawler auf weitere URLs stossen, die er in seine Liste der abzuarbeitenden URLs aufnehmen kann. Sind alle URLs abgearbeitet, ist der Crawler fertig. Je nach Aufgabenbereich existieren verschiedene Crawler-Techniken.\\
 Ist bekannt von welchen Seiten die Informationen gecrawlt werden können, eignet sich am besten ein fokussierter Crawler. Dieser Crawler steuert vordefinierte Seiten an und extrahiert Informationen nach vorgegebenen Regeln.\\
 Sind die Webseiten nicht bekannt oder haben die gesuchten Informationen keine definierte Struktur, eignen sich Deep Web Crawler. Diese bewegen sich mehrheitlich autonom und versuchen durch analysieren des Inhaltes herauszufinden, ob der Inhalt von Interesse ist oder nicht.\\
 Sind übermässig viele Seiten zu crawlen, oder ist die Stabilität der Crawler wichtig, kommen verteilte Crawler zum Einsatz. Durch die Verteilung wird an Stabilität gewonnen und die Last auf die verschiedenen Crawler verteilt \cite{scrapy_3}.\\[2ex]
 %
-Um Daten von einer Webseite zu extrahieren, gibt es diverse Möglichkeiten. Von der einfachen Stringsuche bis zu Machine Learning Methoden kann nahezu alles angewendet werden. Beim fokussierten Crawlen wird häufig versucht Informationen über den XPATH oder über die CSS-Klassen zu extrahieren. Beide Varianten haben ihre Vor- und Nachteile, sind aber im Grunde sehr ähnlich \cite{xpath_vs_css}. Somit ist es dem Benutzer überlassen welche Variante er wählt \cite{xpath}.\\[2ex]
+Um Daten von einer Webseite zu extrahieren, gibt es diverse Möglichkeiten. Von der einfachen Stringsuche bis zu Machine Learning Methoden kann nahezu alles angewandt werden. Beim fokussierten Crawlen wird häufig versucht Informationen über den XPATH oder über die CSS-Klassen zu extrahieren. Beide Varianten haben ihre Vor- und Nachteile, sind aber im Grunde sehr ähnlich \cite{xpath_vs_css}. Somit ist es dem Benutzer überlassen, welche Variante er wählt \cite{xpath}.\\[2ex]
 %
 Eine Herausforderung beim Crawlen ist, dass der Crawler nicht als solchen vom Webseitenbetreiber erkannt wird. Diverse Betreiber möchten gerne verhindern, dass Informationen von Ihren Seiten gecrawlt werden \cite{comparis}.\\
-Ist ein Crawler zu aggressiv, kann es vorkommen, dass er vom Betreiber gesperrt wird. Es gilt daher mit einer gewissen Raffinesse vorzugehen. Um möglichst nicht aufzufallen, ist es sinnvoll nur ein paar Requests\footnote{Anfrage auf eine Webseite} pro Minute abzusetzen und einen existierenden User Agent String\footnote{Browser/Crawler Kennung für die Website} anzugeben. Wenn das nicht ausreichend ist, können die Seiten über einen Pool von rotierenden IP-Adressen aufgerufen werden. So ist die Quelladresse nicht immer dieselbe \cite{offensive_crawling}.
+Ist ein Crawler zu aggressiv, kann es vorkommen, dass er vom Betreiber gesperrt wird. Es gilt daher mit einer gewissen Raffinesse vorzugehen. Um möglichst nicht aufzufallen, ist es sinnvoll nur ein paar Requests\footnote{Anfrage auf eine Webseite} pro Minute abzusetzen und einen existierenden User Agent String\footnote{Browser Kennung für die Webseite} anzugeben. Wenn das nicht ausreichend ist, können die Seiten über einen Pool von rotierenden IP-Adressen aufgerufen werden. So ist die Quelladresse nicht immer dieselbe \cite{offensive_crawling}.
 %
 \subsection{Machine Learning}
-Machine Learning ist eine Art Künstliche Intelligenz (AI), das Softwareapplikationen erlaubt Vorhersagen anhand von trainierten Algorithmen zu erstellen.
+Machine Learning ist eine Art Künstliche Intelligenz (KI), das Softwareapplikationen erlaubt Vorhersagen anhand von trainierten Algorithmen zu erstellen.
 Die Definition von Machine Learning aus dem Jahr 1959 von Arthur Samuel, einer der Pioniere im Bereich Machine Learning, lautet \cite{what_is_ml}:
   \begin{quote}
   \textit{Machine Learning: Field of study that gives computers the ability to learn without being explicitly programmed.}
@@ -29,7 +29,7 @@ Grundsätzlich erhält ein Algorithmus Daten, die er zu einem Modell verarbeitet
 Machine Learning Algorithmen lassen sich grob in die folgenden Kategorien einteilen \cite{super_unsuper}:
 \begin{description}
   \item[Supervised Learning]	Bei diesen Algorithmen sind die Daten gekennzeichnet. Das heisst, es ist erkenntlich, welchen Beobachtungswert die Daten darstellen. Mit Hilfe dieser Daten, wird ein Modell erstellt, das möglichst nahe den Beobachtungswert schätzt. Dabei kann es sich um eine Klassifizierung oder Regression handeln.
-  \item[Unsupervised Learning] Hier sind die Daten nicht gekennzeichnet. Es wird versucht Muster zu erkennen. Anhand von diesen Mustern können anderem Trends oder Ausreisser erkannt werden.
+  \item[Unsupervised Learning] Hier sind die Daten nicht gekennzeichnet. Es wird versucht Muster zu erkennen. Anhand von diesen Mustern können unter anderem Trends oder Ausreisser erkannt werden.
   \item[Reinforcement Learning] Hier lernt der Algorithmus anhand seiner Aktionen. Für jede Aktion, die er berechnet, wird er entweder belohnt oder bestraft. Mit genug Iterationen kann der Algorithmus situationsbedingte Abläufe erlernen und später anwenden.
 \end{description}
 \end{samepage}
@@ -59,12 +59,12 @@ Mean Absolute Percentage Error & MAPE & $\frac1n \sum_{i=1}^{n} |\frac{y_i - \ha
 Median Absolute Percentage Error & MdAPE & $med(\sum_{i=1}^{n} |\frac{y_i - \hat{y_i}}{y_i}|), y_i \neq 0$ & prozentual\\
 \bottomrule
 \end{tabular}}
-\caption{Fehlermodelle mit Formelen}
+\caption{Fehlermodelle mit Formeln}
 \label{tab:error_models}
 \end{table}
 
 Wie in Tabelle \ref{tab:error_models} gezeigt, haben sich mit der Zeit diverse Fehlermodelle entwickelt \cite{error_models}. Die Wahl des Fehlermodells ist vom Anwendungsfall abhängig. Grundsätzlich können Fehler absolut, quadratisch oder prozentual berechnet werden.\\
-Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei beim quadratischen Fehlermodell grössere Fehler durch quadrieren stärker gewichtet werden. Beim MAE hat ein Fehler bei einem hohen Beobachtungswert einen grösseren Einfluss auf den gesamten Fehler. Das kann durch den Median (MdAE) oder einer prozentualen Angabe wie der MAPE oder MdAPE vermieden werden. Eine prozentuale Angabe hat zusätzlich den Vorteil, dass sie intuitiver Interpretiert werden kann. Der Nachteil bei MAPE und MdAPE ist, dass sie bei einem $y$ Wert von 0 nicht verwendet werden können \cite{error_models_2}.
+Bei absoluten Werten werden alle Fehler gleich stark gewichtet, wobei beim quadratischen Fehlermodell grössere Fehler durch Quadrieren stärker gewichtet werden. Beim MAE hat ein Fehler bei einem hohen Beobachtungswert einen grösseren Einfluss auf den gesamten Fehler. Das kann durch den Median (MdAE) oder einer prozentualen Angabe wie der MAPE oder MdAPE vermieden werden. Eine prozentuale Angabe hat zusätzlich den Vorteil, dass sie intuitiver interpretiert werden kann. Der Nachteil bei MAPE und MdAPE ist, dass sie bei einem $y$ Wert von 0 nicht verwendet werden können \cite{error_models_2}.
 
 Eine weitere Möglichkeit die Performance eines Modells neben dem Fehlermodell zu bestimmen, ist der $R^2$ Wert. $R^2$ ist ein Gütemass, das beschreibt, wie gut die Features in der Lage sind, die Varianz der Zielvariable erklären zu können. Dabei ist $y$ der Beobachtungswert, $\hat{y}$ der geschätzte Wert und $\overline{y}$ der Durchschnitt aller gegebenen $y$. Sind alle Beobachtungswerte gleich, ist $R^2$ nicht definiert. Die Interpretation der Formel \eqref{eq:r2} zeigt, dass mit einem hohen Wert (maximal 1) die statistische Varianz der Daten gut erklärt werden kann. Mit einem tiefen Wert (gegen 0), kann die Varianz nicht gut erklärt werden. \\
 Es gilt jedoch zu beachten, dass der $R^2$ Wert die Varianzen aufzeigt. Somit kann nicht davon ausgegangen werden, dass ein hoher $R^2$ Wert auch eine hohe Genauigkeit beim Schätzen erzielt \cite{r2, r2_2}.
@@ -74,17 +74,17 @@ R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y_i})^2}{\sum_{i=1}^{n}(y_i - \overli
 \end{equation}
 
 Es macht keinen Sinn auf denselben Daten zu trainieren und das Modell zu überprüfen. Deshalb wird der Datensatz in mindestens einen Trainings- und einen Testdatensatz aufgeteilt \cite{cross_validation}.
-Dadurch kann die Gefahr eines Overfits\footnote{Überanpassung} verringert werden. Bei einem Overfit wurde das Modell zu stark an den Trainingsdaten trainiert und schneidet schlecht ab bei den Testdaten. Wichtig dabei ist, dass die Daten vor dem Aufteilen gut gemischt werden. So soll beispielsweise verhindert werden, dass nicht nur Wohnungen im Trainingsdatensatz und nicht alle Häuser nur im Testdatensatz sind.\\
-Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser teilt den gesamten Datensatz in K-Teile auf. Dabei werden K-1 Datensätze für das Trainieren und 1 Datensatz für das Testen verwendet. Das ganze wird K-mal wiederholt, so dass jeder Datensatz einmal als Testdatensatz verwendet wurde.
+Dadurch kann die Gefahr eines Overfits\footnote{Überanpassung} verringert werden. Bei einem Overfit wurde das Modell zu stark an den Trainingsdaten trainiert und schneidet bei den Testdaten schlecht ab. Wichtig dabei ist, dass die Daten vor dem Aufteilen gut gemischt werden. So soll beispielsweise verhindert werden, dass nicht nur Wohnungen im Trainings\-datensatz und nicht alle Häuser nur im Testdatensatz sind.\\
+Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser teilt den gesamten Datensatz in K-Teile auf. Dabei werden K-1 Datensätze für das Trainieren und 1 Datensatz für das Testen verwendet. Das ganze wird K-mal wiederholt, so dass jeder Datensatz einmal als Testdatensatz verwendet wird.
 %
 \subsubsection{Lineare Regression}
-Bei der Linearen Regression wird versucht, anhand einer linearen Funktion einen Beobachtungswert $y$ durch einen oder mehrere Features aus $X$ zu berechnen. Dabei handelt es sich um ein statistisches Verfahren bei dem davon ausgegangen wird, dass $y$ abhängig von $X$ ist. Weiter gilt, dass die unabhängigen Variablen $X$ dichotom oder intervallskaliert sind.
+Bei der Linearen Regression wird versucht, anhand einer linearen Funktion einen Beobachtungswert $y$ durch einen oder mehrere Features aus $X$ zu berechnen. Dabei handelt es sich um ein statistisches Verfahren, bei dem davon ausgegangen wird, dass $y$ abhängig von $X$ ist. Weiter gilt, dass die unabhängigen Variablen $X$ dichotom oder intervallskaliert sind.
 
 \begin{equation}\label{eq:linear}
 \hat{y} = h_\theta(x) = \sum_{j=0}^{N} \theta_j x_j
 \end{equation}
 
-Formel \eqref{eq:linear} zeigt die lineare Regression wobei  den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die den kleinsten Abstand zu allen Punkten hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.
+Formel \eqref{eq:linear} zeigt die lineare Regression wobei $\theta$ den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die zu allen Punkten den kleinstmöglichen Abstand hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.
 
 \begin{equation}\label{eq:cost_function}
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2
@@ -93,8 +93,8 @@ J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2
 Das quadratische Fehlermodell macht den Algorithmus anfälliger auf Ausreisser. Diese sollten, wenn immer möglich, in einem vorherigen Schritt erkannt und herausgefiltert werden. Auch sollte der Fehler in den Daten normalverteilt sein und die Residuen eine Homoskedastizität aufweisen, da ansonsten keine gute Regression gefunden wird \cite{gradient_descent, gradient_descent_2, gradient_descent_3}.
 
 \textbf{Polynomial Regression}\\
-In vielen Fällen hat der Datensatz keine Homoskedastizität, sondern besitzt eine Heteroskedastizität \cite{poly}. Dies ist oft dann der Fall wenn das Verhältnis zwischen y und X einer Kurve entspricht. In solch einem Fall, erzielt die lineare Regression keine gute Performance.
-Bei der Polynomialen Regression ist deshalb das beste Modell keine Gerade durch den Datensatz, sondern ähnelt der einer Kurve. Je nachdem wievielten Grades die Regression ist, desto kurvenreicher ist die Funktion am Schluss. Die Formel für eine Polynomgleichung zweiten Grades wird in Gleichung \eqref{eq:poly} dargestellt.
+In vielen Fällen hat der Datensatz keine Homoskedastizität, sondern besitzt eine Heteroskedastizität \cite{poly}. Dies ist oft dann der Fall, wenn das Verhältnis zwischen y und X einer Kurve entspricht. In solch einem Fall erzielt die lineare Regression keine gute Performance.
+Bei der Polynomialen Regression ist deshalb das beste Modell keine Gerade durch den Datensatz, sondern ähnelt der einer Kurve. Je mehr polynome die Regression besitzt, desto kurvenreicher ist die Funktion am Schluss. Die Formel für eine Polynomgleichung zweiten Grades wird in Gleichung \eqref{eq:poly} dargestellt.
 
 \begin{equation}\label{eq:poly}
 y = \theta_0 + \theta_1 * X + \theta_2 * X^2
@@ -111,11 +111,11 @@ Es wird auch vom \textit{Bias-Varianz-Dilemma} gesprochen \cite{bias_variance, b
 \label{fig:under_overfit}
 \end{figure}
 
-Das Bias-Varianz-Dilemma ergibt sich durch die Komplexität eines Modells. Die Komplexität wird durch hinzufügen von Polynomen oder Features gesteigert.
+Das Bias-Varianz-Dilemma ergibt sich durch die Komplexität eines Modells. Die Komplexität wird durch Hinzufügen von Polynomen oder Features gesteigert.
 Es ist daher sinnvoll die Modelle möglichst einfach zu gestalten oder einen Regularisierungsparameter zu verwenden.
 
 \textbf{Ridge Regression}\\
-Ridge Regression ist ein Linearer Regressions Algorithmus mit einem Regularisierungsparameter $\lambda$. Anhand diesem kann der Algorithmus die Koeffizienten der einzelnen Features verkleinern und somit die Komplexität reduzieren. Infolgedessen wird $\lambda$ auch Schrumpfparameter genannt. Je höher dieser gewählt wird, desto schwächer werden die Koeffizienten \cite{ridge, ridge_2}. Formel \eqref{eq:ridge} zeigt die Definition von Ridge Regression.
+Ridge Regression ist ein Linearer Regressions Algorithmus mit einem Regularisierungsparameter $\lambda$. Anhand von diesem kann der Algorithmus die Koeffizienten der einzelnen Features verkleinern und somit die Komplexität reduzieren. Infolgedessen wird $\lambda$ auch Schrumpfparameter genannt. Je höher dieser gewählt wird, desto schwächer werden die Koeffizienten \cite{ridge, ridge_2}. Formel \eqref{eq:ridge} zeigt die Definition von Ridge Regression.
 
 \begin{equation}
 \label{eq:ridge}
@@ -133,20 +133,20 @@ J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2 + \lambda \sum_{
 
 \subsubsection{$K$-Nearest Neighbour}
 Der $K$-Nearest Neighbour Algorithmus (KNN) ist ein unsupervised Algorithmus und kann für Klassifizierungs- wie auch für Regressionsmodelle verwendet werden. In dieser Arbeit wird er als Regressionsmodell verwendet.\\
-Der KNN-Algorithmus sucht für einen Datensatz die $K$ ähnlichsten Datensätze aus dem Trainingsset. Als Schätzung gibt er den Durchschnitt der gefundenen Werten ab \cite{knn_1}. KNN ist folgendermassen definiert \eqref{eq:knn_1}:
+Der KNN-Algorithmus sucht für einen Datensatz die $K$ ähnlichsten Datensätze aus dem Trainingsset. Als Schätzung gibt er den Durchschnitt der gefundenen Werten an \cite{knn_1}. KNN ist folgendermassen definiert \eqref{eq:knn_1}:
 
 \begin{equation}\label{eq:knn_1}
 \hat{y} = \frac{1}{K} \sum_{i=1}^{K} (y_{knj})
 \end{equation}
 
-Wobei $\hat{y}$ der geschätzte Wert darstellt, $K$ die Anzahl Datensätze, die für die Schätzung einbezogen werden und $y_{knj}$ die gefundenen beobachtungs Werte, die am nächsten zum gesuchten Punkt liegen.\\
+Wobei $\hat{y}$ der geschätzte Wert darstellt, $K$ die Anzahl Datensätze, die für die Schätzung einbezogen werden und $y_{knj}$ die gefundenen Beobachtungswerte, die am nächsten zum gesuchten Punkt liegen.\\
 Die Distanzberechnung von einem gesuchten Punkt kann mit unterschiedlichen Algorithmen berechnet werden. Häufig wird der Euklid, wie in Formel~\eqref{eq:euklid} gezeigt, verwendet, da er alle Dimensionen gleich behandelt. Wie beim quadratischen Fehlermodell, ist auch der Euklid anfällig auf grosse Ausreisser. Um das zu verhindern, kann der Manhatten oder Chebyshev Algorithmus verwendet werden. Beim Manhatten Algorithmus werden Querdistanzen höher gewichtet als gerade Distanzen. Im Gegensatz zum Chebyshev Algorithmus, bei dem alle Richtungen gleich gewichtet werden.
 
 \begin{equation}\label{eq:euklid}
 D(x, p_i) = \sqrt{(x - p_i)^2}
 \end{equation}
 
-Auch bei diesem Algorithmus trit die Gefahr von einem Underfit und Overfit auf. Wird $K$ zu gross gewählt, kommt es zu einem Underfit. Ist $K$ sehr klein kann es zu einem Overfit kommen. Das optimale $K$ hängt vom Datensatz und der gewünschten Performance ab. Abbildung \ref{fig:under_overfit_knn} zeigt den Vergleich von einem Underfit zu einem Overfit bei einem KNN Algorithmus.
+Auch bei diesem Algorithmus tritt die Gefahr von einem Underfit und Overfit auf. Wird $K$ zu gross gewählt, kommt es zu einem Underfit. Ist $K$ sehr klein, kann es zu einem Overfit kommen. Das optimale $K$ hängt vom Datensatz und der gewünschten Performance ab. Abbildung \ref{fig:under_overfit_knn} zeigt den Vergleich von einem Underfit zu einem Overfit bei einem KNN Algorithmus.
 
 \begin{figure}[ht]
 \centering
@@ -171,18 +171,18 @@ Die Gewichtung wird mit dem gefundenen Beobachtungswert multipliziert, wie in Fo
 \hat{y} = \sum_{j=1}^{K} W(x_0, x_i) y_i
 \end{equation}
 
-\subsubsection{Tree Based Learning Algorithmen}
-Ein anderer Ansatz von Machine Learning besteht aus den Tree Based Learning Algorithmen. Am verbreitetsten sind Classification and Regression Trees (CART), die von Breiman 1984 beschrieben wurden. Darunter existieren noch diverse ähnliche Algorithmen\footnote{ID3, C4.5, CHADI, MARS, Conditional Inference Trees}. Bei diesen Algorithmen handelt es sich grundsätzlich um supervised Algorithmen. Es existieren aber auch unsupervised Ansätze, die nicht Teil dieser Arbeit sind.
+\subsubsection{Baum Algorithmen}
+Ein anderer Ansatz von Machine Learning besteht aus den Tree Based Learning Algorithmen. Am verbreitetsten sind Classification and Regression Trees (CART), die von Breiman 1984 beschrieben wurden. Darunter gibt es noch diverse ähnliche Algorithmen\footnote{ID3, C4.5, CHADI, MARS, Conditional Inference Trees}. Bei diesen Algorithmen handelt es sich grundsätzlich um supervised Algorithmen. Es existieren aber auch unsupervised Ansätze, die nicht Teil dieser Arbeit sind.
 
 \textbf{Decision Trees}
 
 \begin{figure}[h]\label{fig:decision_tree}
   \centering
   \includegraphics[width=0.7\textwidth]{images/decision_tree.png}
-  \caption[Aufbau eines Decision Trees]{Aufbau eines Decision Trees}
+  \caption[Aufbau eines Entscheidungsbaumes]{Aufbau eines Entscheidungsbaumes}
 \end{figure}
 
-Ein Decision Tree (Entscheidungsbaum) ist eine Baumstruktur, die es erlaubt, Daten mithilfe von Entscheidungsregeln zu kategorisieren. Bei den Daten kann es sich sowohl um diskrete als auch um kontinuierliche Werte handeln.\\
+Ein Decision Tree\footnote{Entscheidungsbaum} ist eine Baumstruktur, die es erlaubt, Daten mithilfe von Entscheidungsregeln zu kategorisieren. Bei den Daten kann es sich sowohl um diskrete als auch um kontinuierliche Werte handeln.\\
 Auf jedem Knoten des Entscheidungsbaumes wird ein Feature aus dem Datensatz ausgewählt und eine Teilung in seinem Wertebereich durchgeführt. Der Feature Raum wird somit in unterschiedliche, nicht überlappende Regionen aufgeteilt. Es gilt zu beachten, dass dasselbe Feature wiederholt als Entscheidungsregel verwendet werden kann.
 
 Für eine Schätzung wird der Durchschnitt aller Werte in den Regionen $R_j$ berechnet, in die der zu schätzende Wert fällt.\\
@@ -205,13 +205,13 @@ Diese Splits werden solange rekursiv ausgeführt, bis eine der folgenden Abbruch
 
 \begin{itemize}
 \item Die minimale Anzahl an Datensätzen in einer Region ist erreicht.
-\item Die maximale Tiefe wurde für einen Teilbaum erreicht.
+\item Die maximale Tiefe für einen Teilbaum ist erreicht.
 \item Ein erneuter Split bringt keine besseren Ergebnisse.
 \end{itemize}
 
 Die Vorteile vom Decision Tree bestehen darin, dass der generierte Baum einfach verständlich und lesbar ist, da das Endresultat ein geordneter und gerichteter Baum ist. Dadurch lässt sich dieser bei Bedarf auch gut visualisieren und Predictions können manuell überprüft werden, sofern der Baum nicht zu gross ist.\\
 Decision Trees neigen jedoch gerne zu Overfitting. Dagegen hilft einerseits Pruning, andererseits Ensemblemethoden.\\
-Pruning eliminiert bestehende Knoten, die sich als irrelevant herausstellen, anhand einem Regularisierungsparameter $\lambda$. Dieses Parameter ist ähnlich wie beim Lasso Algorithmus. Pruning ist jedoch nicht so verbreitet wie die Ensamblemethoden.
+Pruning eliminiert bestehende Knoten, die sich als irrelevant herausstellen, anhand einem Regularisierungsparameter $\lambda$. Dieser Parameter ist ähnlich wie beim Lasso Algorithmus. Pruning ist jedoch nicht so verbreitet wie die Ensamblemethoden.
 
 \textbf{Random Forest}\\
 Der Random Forest gehört in die Kategorie der Ensemblemethoden. Es handelt sich hierbei um einen erweiterten Bootstrap Aggregating (Bagging) Algorithmus und wurde von Breiman entwickelt. Bagging reduziert die Varianz indem der Algorithmus mehrere Bäume aus dem Datensatz generiert und diese einzeln trainiert.  Die Bäume trainieren jeweils aus einer zufälligen Teilmenge des ganzen Datensatzes. Für die Schätzung wird der Durchschnitt aller Bäume $B$ verwendet, wie in Formel \eqref{eq:random_forest} gezeigt. Dabei ist $f^{(b)}$ die Schätzung für den b-ten Baum.
@@ -222,11 +222,11 @@ Der Random Forest gehört in die Kategorie der Ensemblemethoden. Es handelt sich
 \end{equation}
 
 Es kann auftreten, dass die Bäume untereinander korrelieren und sich so die Vorhersage verschlechtert. Der Random Forest Algorithmus eliminiert dieses Problem, indem er bei jeder Teilung in einem Subset nicht alle, sondern nur weniger, zufällig ausgewählte Features verwendet. Die Bäume sollten möglichst gross werden und es sollte kein Pruning durchgeführt werden.\\
-Breiman hat in einem Theorem bewiesen, dass mit dieser Methode kein Overfitting stattfinden kann, sofern genügend Trees verwendet werden \cite{random_forest, random_forest_1}.
+Breiman hat in einem Theorem bewiesen, dass mit dieser Methode kein Overfitting stattfinden kann, sofern genügend Entscheidungsbäume verwendet werden \cite{random_forest, random_forest_1}.
 %
 \newpage
 \textbf{Extra Trees}\\
-Extra Trees (Extremely Randomized Trees) ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen besser performed als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.
+Extra Trees oder auch Extremely Randomized Trees ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert, als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt, um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen eine bessere Perfomance auweist, als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.
 
 \textbf{XGBoost}\\
 XGBoost steht für Extreme Gradient Boosting und gehört ebenfalls zur Familie der Ensemble-Algorithmen \cite{xgboost}.\\
