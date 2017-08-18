@@ -8,7 +8,7 @@ Ist bekannt von welchen Seiten die Informationen gecrawlt werden können, eignet
 Sind die Webseiten nicht bekannt oder haben die gesuchten Informationen keine definierte Struktur, eignen sich Deep Web Crawler. Diese bewegen sich mehrheitlich autonom und versuchen durch analysieren des Inhaltes herauszufinden, ob der Inhalt von Interesse ist oder nicht.\\
 Sind übermässig viele Seiten zu crawlen, oder ist die Stabilität der Crawler wichtig, kommen verteilte Crawler zum Einsatz. Durch die Verteilung wird an Stabilität gewonnen und die Last auf die verschiedenen Crawler verteilt \cite{scrapy_3}.\\[2ex]
 %
-Um Daten von einer Webseite zu extrahieren, gibt es diverse Möglichkeiten. Von der einfachen Stringsuche bis zu Machine Learning Methoden kann nahezu alles angewandt werden. Beim fokussierten Crawlen wird häufig versucht Informationen über den XPATH oder über die CSS-Klassen zu extrahieren. Beide Varianten haben ihre Vor- und Nachteile, sind aber im Grunde sehr ähnlich \cite{xpath_vs_css}. Somit ist es dem Benutzer überlassen, welche Variante er wählt \cite{xpath}.\\[2ex]
+Um Daten von einer Webseite zu extrahieren, gibt es diverse Möglichkeiten. Von der einfachen String-Suche bis zu Machine Learning Methoden kann nahezu alles angewandt werden. Beim fokussierten Crawlen wird häufig versucht Informationen über den XPATH oder über die CSS-Klassen zu extrahieren. Beide Varianten haben ihre Vor- und Nachteile, sind aber im Grunde sehr ähnlich \cite{xpath_vs_css}. Somit ist es dem Benutzer überlassen, welche Variante er wählt \cite{xpath}.\\[2ex]
 %
 Eine Herausforderung beim Crawlen ist, dass der Crawler nicht als solchen vom Webseitenbetreiber erkannt wird. Diverse Betreiber möchten gerne verhindern, dass Informationen von Ihren Seiten gecrawlt werden \cite{comparis}.\\
 Ist ein Crawler zu aggressiv, kann es vorkommen, dass er vom Betreiber gesperrt wird. Es gilt daher mit einer gewissen Raffinesse vorzugehen. Um möglichst nicht aufzufallen, ist es sinnvoll nur ein paar Requests\footnote{Anfrage auf eine Webseite} pro Minute abzusetzen und einen existierenden User Agent String\footnote{Browser Kennung für die Webseite} anzugeben. Wenn das nicht ausreichend ist, können die Seiten über einen Pool von rotierenden IP-Adressen aufgerufen werden. So ist die Quelladresse nicht immer dieselbe \cite{offensive_crawling}.
@@ -36,7 +36,7 @@ Machine Learning Algorithmen lassen sich grob in die folgenden Kategorien eintei
 
 Für eine Schätzung braucht jeder Machine Learning Algorithmus ein berechnetes Modell. Dieses kann unter anderem eine mathematische Formel oder eine Baumstruktur sein. Damit ein Modell erstellt werden kann, braucht jeder Algorithmus ein oder mehrere Features. Features sind messbare Merkmale, die einen Beobachtungswert, auch Target genannt, beschreiben. Es ist sinnvoll die Features im Voraus zu untersuchen und herauszufinden, welche Features wichtig sind und welche weggelassen werden können. Dabei können auch Features miteinander kombiniert werden. Dieses Vorgehen wird Feature Engineering genannt.\\[2ex]
 %
-Damit ein Algorithmus überprüfen kann, wie gut seine Schätzungen sind, wird der Fehler, beziehungsweise die Residuen berechnet. Die Differenz zwischen einem geschätztem Wert und dem dazugehörigen beobachteten Wert wird als Residue bezeichnet. Dabei sind systematische\footnote{Ein falsches Modell wurde verwendet.} wie auch statistische Fehler\footnote{Es handelt sich um Ausreisser.} im Residual mit  eingerechnet. Formel \eqref{eq:residuals} zeigt die Berechnung des Residuals, dabei ist $\hat{y}$ der geschätzte Wert und $y$ der beobachtete Wert. Es kann sich dabei sowohl um Skalare als auch Vektorenwerte handeln.
+Damit ein Algorithmus überprüfen kann, wie gut seine Schätzungen sind, wird der Fehler, beziehungsweise die Residuen berechnet. Die Differenz zwischen einem geschätztem Wert und dem dazugehörigen beobachteten Wert wird als Residuum bezeichnet. Es sind systematische\footnote{Ein falsches Modell wurde verwendet.} wie auch statistische Fehler\footnote{Es handelt sich um Ausreisser.} im Residuum mit eingerechnet. Formel \eqref{eq:residuals} zeigt die Berechnung der Residuen, dabei ist $\hat{y}$ der geschätzte Wert und $y$ der beobachtete Wert.
 
 \begin{equation}
 \label{eq:residuals}
@@ -49,7 +49,7 @@ Damit ein Algorithmus überprüfen kann, wie gut seine Schätzungen sind, wird d
 \resizebox{\textwidth}{!}{
 \begin{tabular}{@{}llll@{}}
 \toprule
-Name & Abkürzung & Formel & Modelart\\
+Name & Abkürzung & Formel & Modellart\\
 \midrule
 Mean Absolute Error & MAE & $\frac1n \sum_{i=1}^{n} |y_i - \hat{y_i}|$ & absolut\\
 Median Absolute Error & MdAE & $med(\sum_{i=1}^{n} |y_i - \hat{y_i}|)$ & absolut\\
@@ -75,7 +75,7 @@ R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y_i})^2}{\sum_{i=1}^{n}(y_i - \overli
 
 Es macht keinen Sinn auf denselben Daten zu trainieren und das Modell zu überprüfen. Deshalb wird der Datensatz in mindestens einen Trainings- und einen Testdatensatz aufgeteilt \cite{cross_validation}.
 Dadurch kann die Gefahr eines Overfits\footnote{Überanpassung} verringert werden. Bei einem Overfit wurde das Modell zu stark an den Trainingsdaten trainiert und schneidet bei den Testdaten schlecht ab. Wichtig dabei ist, dass die Daten vor dem Aufteilen gut gemischt werden. So soll beispielsweise verhindert werden, dass nicht nur Wohnungen im Trainings\-datensatz und nicht alle Häuser nur im Testdatensatz sind.\\
-Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser teilt den gesamten Datensatz in K-Teile auf. Dabei werden K-1 Datensätze für das Trainieren und 1 Datensatz für das Testen verwendet. Das ganze wird K-mal wiederholt, so dass jeder Datensatz einmal als Testdatensatz verwendet wird.
+Cross Validation ist eine weitere Möglichkeit den Datensatz aufzuteilen. Dieser teilt den gesamten Datensatz in K-Teile auf. Dabei werden K-1 Datensätze für das Trainieren und 1 Datensatz für das Testen verwendet. Das Ganze wird K-mal wiederholt, so dass jeder Datensatz einmal als Testdatensatz verwendet wird.
 %
 \subsubsection{Lineare Regression}
 Bei der Linearen Regression wird versucht, anhand einer linearen Funktion einen Beobachtungswert $y$ durch einen oder mehrere Features aus $X$ zu berechnen. Dabei handelt es sich um ein statistisches Verfahren, bei dem davon ausgegangen wird, dass $y$ abhängig von $X$ ist. Weiter gilt, dass die unabhängigen Variablen $X$ dichotom oder intervallskaliert sind.
@@ -84,7 +84,7 @@ Bei der Linearen Regression wird versucht, anhand einer linearen Funktion einen 
 \hat{y} = h_\theta(x) = \sum_{j=0}^{N} \theta_j x_j
 \end{equation}
 
-Formel \eqref{eq:linear} zeigt die lineare Regression wobei $\theta$ den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die zu allen Punkten den kleinstmöglichen Abstand hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary least squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.
+Formel \eqref{eq:linear} zeigt die lineare Regression wobei $\theta$ den Koeffizienten für jedes einzelne Feature darstellt. Je höher der Koeffizient ist, desto mehr Gewicht hat dieses Feature im Modell. Um auf die optimalen Koeffizienten zu kommen, versucht der Algorithmus eine Gerade durch den Datensatz zu ziehen, die zu allen Punkten den kleinstmöglichen Abstand hat. Der Algorithmus versucht folglich, das Schätzungsmodell auf das gewählte Fehlermodell zu optimieren. Zugleich dient das Fehlermodell auch als Performancemetrik. Die Optimierung wird durch die Kostenfunktion \eqref{eq:cost_function} berechnet. Oft wird dafür die \textit{Ordinary Least Squares} (OLS) Methode genommen. Wird auf diesem Algorithmus optimiert, können auch andere, spezifischere Kostenfunktionen eingesetzt werden.
 
 \begin{equation}\label{eq:cost_function}
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2
@@ -94,14 +94,14 @@ Das quadratische Fehlermodell macht den Algorithmus anfälliger auf Ausreisser. 
 
 \textbf{Polynomial Regression}\\
 In vielen Fällen hat der Datensatz keine Homoskedastizität, sondern besitzt eine Heteroskedastizität \cite{poly}. Dies ist oft dann der Fall, wenn das Verhältnis zwischen y und X einer Kurve entspricht. In solch einem Fall erzielt die lineare Regression keine gute Performance.
-Bei der Polynomialen Regression ist deshalb das beste Modell keine Gerade durch den Datensatz, sondern ähnelt der einer Kurve. Je mehr polynome die Regression besitzt, desto kurvenreicher ist die Funktion am Schluss. Die Formel für eine Polynomgleichung zweiten Grades wird in Gleichung \eqref{eq:poly} dargestellt.
+Bei der Polynomialen Regression ist deshalb das beste Modell keine Gerade durch den Datensatz, sondern ähnelt der einer Kurve. Je mehr Polynome die Regression besitzt, desto kurvenreicher ist die Funktion am Schluss. Die Formel für eine Polynomgleichung zweiten Grades wird in Gleichung \eqref{eq:poly} dargestellt.
 
 \begin{equation}\label{eq:poly}
 y = \theta_0 + \theta_1 * X + \theta_2 * X^2
 \end{equation}
 
 Je höher der Grad des Polynoms, desto genauer wird der Algorithmus auf den Trainingsdatensatz trainiert. Das hat den Nachteil, dass neue Datensätze ungenau geschätzt werden, da das Modell eine hohe Varianz aufweist. Dieses Phänomen nennt sich Overfitting. Der Algorithmus wurde somit zu stark am Trainingsdatensatz trainiert.\\
-Ist der Grad des Polynoms zu klein gewählt, kommt es zu einem Underfitting. Das Modell kann nur Features abbilden, die dem ausgewählten Grad entsprechen. Alle anderen Features werden ignoriert. So entsteht die Gefahr, dass wichtige Features nicht ins Modell miteinfliessen und das Modell einen hohen Bias besitzt. Abbildung \ref{fig:under_overfit} zeigt den Vergleich von Underfit zu einem Overfit.\\
+Ist der Grad des Polynoms zu klein gewählt, kommt es zu einem Underfitting. Das Modell kann nur Features abbilden, die dem ausgewählten Grad entsprechen. Alle anderen Features werden ignoriert. So entsteht die Gefahr, dass wichtige Features nicht ins Modell mit einfliessen und das Modell ein hohes Bias besitzt. Abbildung \ref{fig:under_overfit} zeigt den Vergleich von Underfit zu einem Overfit.\\
 Es wird auch vom \textit{Bias-Varianz-Dilemma} gesprochen \cite{bias_variance, bias_variance_2}. Die Kunst ist, die richtige Abstimmung zu finden, damit das Modell die beste Performance hat.
 
 \begin{figure}[ht]
@@ -115,7 +115,7 @@ Das Bias-Varianz-Dilemma ergibt sich durch die Komplexität eines Modells. Die K
 Es ist daher sinnvoll die Modelle möglichst einfach zu gestalten oder einen Regularisierungsparameter zu verwenden.
 
 \textbf{Ridge Regression}\\
-Ridge Regression ist ein Linearer Regressions Algorithmus mit einem Regularisierungsparameter $\lambda$. Anhand von diesem kann der Algorithmus die Koeffizienten der einzelnen Features verkleinern und somit die Komplexität reduzieren. Infolgedessen wird $\lambda$ auch Schrumpfparameter genannt. Je höher dieser gewählt wird, desto schwächer werden die Koeffizienten \cite{ridge, ridge_2}. Formel \eqref{eq:ridge} zeigt die Definition von Ridge Regression.
+Ridge Regression ist ein Linearer Regression Algorithmus mit einem Regularisierungsparameter $\lambda$. Anhand von diesem kann der Algorithmus die Koeffizienten der einzelnen Features verkleinern und somit die Komplexität reduzieren. Infolgedessen wird $\lambda$ auch Schrumpfparameter genannt. Je höher dieser gewählt wird, desto schwächer werden die Koeffizienten \cite{ridge, ridge_2}. Formel \eqref{eq:ridge} zeigt die Definition von Ridge Regression.
 
 \begin{equation}
 \label{eq:ridge}
@@ -125,14 +125,14 @@ J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2 + \lambda \sum_{
 Wichtig beim Ridge Algorithmus ist, dass die einzelnen Koeffizienten verkleinert werden, aber nie 0 erreichen. Das geeignetste Lambda hängt immer vom Datensatz ab und muss durch analysieren verschiedener Werte gefunden werden.
 
 \textbf{Lasso Regression}\\
-Ein weiterer Regularisierungs Algorithmus ist der Lasso Regression Algorithmus \eqref{eq:lasso}. Dieser fügt, wie der Ridge Regression auch, einen zusätzlichen $\lambda$ Parameter ein. Er nimmt dabei nicht das $\theta$ im Quadrat, sondern den absoluten Wert von $\theta$ und summiert diesen auf. Durch das kann der Algorithmus unwichtige Features auf 0 setzen und eliminieren. Wenn Features weggelassen werden, wird die Komplexität des Modells reduziert \cite{lasso}.
+Ein weiterer Regularisierungsalgorithmus ist der Lasso Regression Algorithmus \eqref{eq:lasso}. Dieser fügt, wie der Ridge Regression auch, einen zusätzlichen $\lambda$ Parameter ein. Er nimmt dabei nicht das $\theta$ im Quadrat, sondern den absoluten Wert von $\theta$ und summiert diesen auf. Durch das kann der Algorithmus unwichtige Features auf 0 setzen und eliminieren. Wenn Features weggelassen werden, wird die Komplexität des Modells reduziert \cite{lasso}.
 
 \begin{equation}\label{eq:lasso}
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{N} (h_\theta(x^i) - y^i)^2 + \lambda \sum_{j=0}^{M} |\theta_j|
 \end{equation}
 
-\subsubsection{$K$-Nearest Neighbour}
-Der $K$-Nearest Neighbour Algorithmus (KNN) ist ein unsupervised Algorithmus und kann für Klassifizierungs- wie auch für Regressionsmodelle verwendet werden. In dieser Arbeit wird er als Regressionsmodell verwendet.\\
+\subsubsection{$K$-Nearest Neighbor}
+Der $K$-Nearest Neighbor Algorithmus (KNN) ist ein unsupervised Algorithmus und kann für Klassifizierungs- wie auch für Regressionsmodelle verwendet werden. In dieser Arbeit wird er als Regressionsmodell verwendet.\\
 Der KNN-Algorithmus sucht für einen Datensatz die $K$ ähnlichsten Datensätze aus dem Trainingsset. Als Schätzung gibt er den Durchschnitt der gefundenen Werten an \cite{knn_1}. KNN ist folgendermassen definiert \eqref{eq:knn_1}:
 
 \begin{equation}\label{eq:knn_1}
@@ -140,7 +140,7 @@ Der KNN-Algorithmus sucht für einen Datensatz die $K$ ähnlichsten Datensätze 
 \end{equation}
 
 Wobei $\hat{y}$ der geschätzte Wert darstellt, $K$ die Anzahl Datensätze, die für die Schätzung einbezogen werden und $y_{knj}$ die gefundenen Beobachtungswerte, die am nächsten zum gesuchten Punkt liegen.\\
-Die Distanzberechnung von einem gesuchten Punkt kann mit unterschiedlichen Algorithmen berechnet werden. Häufig wird der Euklid, wie in Formel~\eqref{eq:euklid} gezeigt, verwendet, da er alle Dimensionen gleich behandelt. Wie beim quadratischen Fehlermodell, ist auch der Euklid anfällig auf grosse Ausreisser. Um das zu verhindern, kann der Manhatten oder Chebyshev Algorithmus verwendet werden. Beim Manhatten Algorithmus werden Querdistanzen höher gewichtet als gerade Distanzen. Im Gegensatz zum Chebyshev Algorithmus, bei dem alle Richtungen gleich gewichtet werden.
+Die Distanzberechnung von einem gesuchten Punkt kann mit unterschiedlichen Algorithmen berechnet werden. Häufig wird der Euklid, wie in Formel~\eqref{eq:euklid} gezeigt, verwendet, da er alle Dimensionen gleichbehandelt. Wie beim quadratischen Fehlermodell, ist auch der Euklid anfällig auf grosse Ausreisser. Um das zu verhindern, kann der Manhattan oder Chebyshev Algorithmus verwendet werden. Beim Manhattan Algorithmus werden Querdistanzen höher gewichtet als gerade Distanzen. Im Gegensatz zum Chebyshev Algorithmus, bei dem alle Richtungen gleich gewichtet werden.
 
 \begin{equation}\label{eq:euklid}
 D(x, p_i) = \sqrt{(x - p_i)^2}
@@ -186,7 +186,7 @@ Ein Decision Tree\footnote{Entscheidungsbaum} ist eine Baumstruktur, die es erla
 Auf jedem Knoten des Entscheidungsbaumes wird ein Feature aus dem Datensatz ausgewählt und eine Teilung in seinem Wertebereich durchgeführt. Der Feature Raum wird somit in unterschiedliche, nicht überlappende Regionen aufgeteilt. Es gilt zu beachten, dass dasselbe Feature wiederholt als Entscheidungsregel verwendet werden kann.
 
 Für eine Schätzung wird der Durchschnitt aller Werte in den Regionen $R_j$ berechnet, in die der zu schätzende Wert fällt.\\
-Wie die  $J$ unterschiedliche Regionen aufgeteilt werden, hängt von der Kostenfunktion ab. Bei der Regression wird dafür den Residual Sum of Squares (RSS) verwendet. Das Ziel ist es die Regionen $R_1$, $R_2$ … $R_j$ so zu legen, dass der RSS minimiert wird. Das kann anhand der Formel \eqref{eq:decision_tree} erreicht werden.
+Wie die  $J$ unterschiedliche Regionen aufgeteilt werden, hängt von der Kostenfunktion ab. Bei der Regression wird dafür der Residual Sum of Squares (RSS) verwendet. Das Ziel ist es, die Regionen $R_1$, $R_2$ … $R_j$ so zu legen, dass der RSS minimiert wird. Das kann anhand der Formel \eqref{eq:decision_tree} erreicht werden.
 
 \begin{equation}
 \label{eq:decision_tree}
@@ -195,7 +195,7 @@ Wie die  $J$ unterschiedliche Regionen aufgeteilt werden, hängt von der Kostenf
 
 Dabei ist $\hat{y}_{R_j}$ der durchschnittliche Beobachtungswert in der $j$-ten Region. Für eine Klassifikation werden andere Kostenfunktionen wie der Gini Coefficent oder Gini Impurity verwendet.
 
-Da es aber mit steigender Anzahl von Datensätzen praktisch unmöglich wird, jede mögliche optimale Region durchzurechnen, wird ein “greedy” Ansatz verwendet. Greedy deshalb, weil die nächstbeste Teilung nur mit den aktuell vorhandenen Regionen berechnet wird. Es wird nicht rekursiv vorausberechnet um mit weiteren Teilungen ein theoretisch besseren Baum zu erstellen. So wird nur ein lokales und kein globales Optimum gefunden. Die Aufteilung einer Region in zwei unterschiedliche Regionen nennt sich “recursive binary splitting” und wird in Formel \eqref{eq:splitting} gezeigt. Dabei gilt die Bedingung für die zuteilende Region $R$, wobei $s$ die Entscheidungsregel ist.
+Da es aber mit steigender Anzahl von Datensätzen praktisch unmöglich wird, jede mögliche optimale Region durchzurechnen, wird ein “greedy” Ansatz verwendet. Greedy deshalb, weil die nächstbeste Teilung nur mit den aktuell vorhandenen Regionen berechnet wird. Es wird nicht rekursiv vorausberechnet um mit weiteren Teilungen ein theoretisch besserer Baum zu erstellen. So wird nur ein lokales und kein globales Optimum gefunden. Die Aufteilung einer Region in zwei unterschiedliche Regionen nennt sich “recursive binary splitting” und wird in Formel \eqref{eq:splitting} gezeigt. Dabei gilt die Bedingung für die zuteilende Region $R$, wobei $s$ die Entscheidungsregel ist.
 
 \begin{equation}\label{eq:splitting}
 R_1(j,s) = \{X|X_j < s\} \text{ and } R_2(j,s) = \{X|X_j \geq s\}
@@ -211,7 +211,7 @@ Diese Splits werden solange rekursiv ausgeführt, bis eine der folgenden Abbruch
 
 Die Vorteile vom Decision Tree bestehen darin, dass der generierte Baum einfach verständlich und lesbar ist, da das Endresultat ein geordneter und gerichteter Baum ist. Dadurch lässt sich dieser bei Bedarf auch gut visualisieren und Predictions können manuell überprüft werden, sofern der Baum nicht zu gross ist.\\
 Decision Trees neigen jedoch gerne zu Overfitting. Dagegen hilft einerseits Pruning, andererseits Ensemblemethoden.\\
-Pruning eliminiert bestehende Knoten, die sich als irrelevant herausstellen, anhand einem Regularisierungsparameter $\lambda$. Dieser Parameter ist ähnlich wie beim Lasso Algorithmus. Pruning ist jedoch nicht so verbreitet wie die Ensamblemethoden.
+Pruning eliminiert bestehende Knoten, die sich als irrelevant herausstellen, anhand einem Regularisierungsparameter $\lambda$. Dieser Parameter ist ähnlich wie beim Lasso Algorithmus. Pruning ist jedoch nicht so verbreitet wie die Ensemblemethoden.
 
 \textbf{Random Forest}\\
 Der Random Forest gehört in die Kategorie der Ensemblemethoden. Es handelt sich hierbei um einen erweiterten Bootstrap Aggregating (Bagging) Algorithmus und wurde von Breiman entwickelt. Bagging reduziert die Varianz indem der Algorithmus mehrere Bäume aus dem Datensatz generiert und diese einzeln trainiert.  Die Bäume trainieren jeweils aus einer zufälligen Teilmenge des ganzen Datensatzes. Für die Schätzung wird der Durchschnitt aller Bäume $B$ verwendet, wie in Formel \eqref{eq:random_forest} gezeigt. Dabei ist $f^{(b)}$ die Schätzung für den b-ten Baum.
@@ -226,7 +226,7 @@ Breiman hat in einem Theorem bewiesen, dass mit dieser Methode kein Overfitting 
 %
 \newpage
 \textbf{Extra Trees}\\
-Extra Trees oder auch Extremely Randomized Trees ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert, als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt, um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im allgemeinen eine bessere Perfomance auweist, als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.
+Extra Trees oder auch Extremely Randomized Trees ist eine abgeleitete Variante des Random Forests. Im Unterschied zu Random Forests bezieht Extra Trees immer alle Datensätze in die Berechnungen der Decision Trees ein. Dadurch wird der Bias besser minimiert, als wenn nur ein Teildatensatz verwendet wird. Zudem werden die Splits in den Knoten komplett zufällig gewählt, um die Varianz besser reduzieren zu können. In der Studie wurde empirisch bewiesen, dass der Extra Trees Algorithmus im Allgemeinen eine bessere Perfomance aufweist, als vergleichbare Ensemble Algorithmen \cite{extrem_forest}.
 
 \textbf{XGBoost}\\
 XGBoost steht für Extreme Gradient Boosting und gehört ebenfalls zur Familie der Ensemble-Algorithmen \cite{xgboost}.\\
@@ -257,7 +257,7 @@ Kritik an diesem und verwandten Algorithmen wird in \cite{critic} geäussert. Da
 %
 \subsubsection{Isolation Forest}
 Der Isolation Forest Algorithmus ist ein neuerer Outlier Detection Algorithmus\footnote{Algorithmus zur Erkennung von Ausreissern.}. Der Algorithmus wurde im Jahr 2008 von Fei Tony Liu, Kai Ming Ting und Zhi-Hua Zhou entwickelt und vorgestellt. Outlier Detection ist ein wichtiger Teil beim Machine Learning Prozess. Mit diesem werden Datensätze herausgefiltert, die zu stark von den erwarteten Grössen abweichen und somit einen Ausreisser darstellen \cite{isolation_forest_1}.\\
-Bekannte Outlier Detection Algorithmen versuchen mit Hilfe der Distanz oder der Dichte die Ausreisser zu erkennen. Der One-Class SVM sowie der Local Outlier Factor (LOF) messen die Dichte, wobei K-Nearest Neighbour die Distanz berechnet \cite{isolation_forest_2}.\\
+Bekannte Outlier Detection Algorithmen versuchen mit Hilfe der Distanz oder der Dichte die Ausreisser zu erkennen. Der One-Class SVM sowie der Local Outlier Factor (LOF) messen die Dichte, wobei K-Nearest Neighbor die Distanz berechnet \cite{isolation_forest_2}.\\
 Diese erzielen bei unregelmässig verteilten Ausreisser ein gutes Ergebnis. Sind die Ausreisser aber als Gruppe vorhanden, haben Distanz- oder Dichtebasierte Algorithmen mehr Mühe diese als Ausreisser zu erkennen \cite{isolation_forest_3}.
 
 Der Isolation Forest geht hier einen anderen Weg. Er geht davon aus, dass sich Ausreisser besser isolieren lassen als normale Datensätze.\\
@@ -279,4 +279,4 @@ Der Anomaly Score wird mit Hilfe der nicht erfolgreichen Suche eines Binary Sear
 s(x, n) = 2^{-\frac{E(h(x))}{c(n)}}
 \end{equation}
 
-Die Funktion $s(x, n)$ gibt immer einen Wert zwischen 0 und 1 zurück. Wobei 1 einem klarem Ausreisser entspricht \cite{isolation_forest_2}.
+Die Funktion $s(x, n)$ gibt immer einen Wert zwischen 0 und 1 zurück. Wobei 1 einem klaren Ausreisser entspricht \cite{isolation_forest_2}.

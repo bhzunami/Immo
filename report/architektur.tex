@@ -1,9 +1,9 @@
 % NUR ZIEL SYSTEM (Das was wir entwickeln) WIE wird mit situationen gearbeitet, was wir machen
 \section{Architektur}
-Im folgenden Kapitel wird schematisch der gesamte Aufbau der Komponenten erklärt. Es handelt sich um ein Python Projekt, das drei Module besitzt. Die Module sind nach ihren Hauptaufgaben aufgeteilt. Diese werden nun einzeln erläutert.
+Im Folgenden Kapitel wird schematisch der gesamte Aufbau der Komponenten erklärt. Es handelt sich um ein Python Projekt, das drei Module besitzt. Die Module sind nach ihren Hauptaufgaben aufgeteilt. Diese werden nun einzeln erläutert.
 
 \subsection{Systemaufbau}
-Abbildung \ref{fig:system} zeigt den ganzen Systemaufbau dieser Arbeit, wobei der blaue Bereich die Komponenten beinhaltet, die auf unserer Infrastruktur betrieben sind. Das Projekt wird auf einem Linux Server gehosted.
+Abbildung \ref{fig:system} zeigt den ganzen Systemaufbau dieser Arbeit, wobei der blaue Bereich die Komponenten beinhaltet, die auf unserer Infrastruktur betrieben sind. Das Projekt wird auf einem Linux Server gehostet.
 
 \begin{figure}[ht]
 \centering
@@ -16,11 +16,11 @@ Die drei wichtigsten Komponenten sind:
 \begin{description}
 \item[Crawler] Die Crawler sammeln die Immobiliendaten auf den verschiedenen Portalen. Sie besitzen Schnittstellen zu den Immobilienplattformen wie auch zur Datenbank.
 \item[Datenbank] Die Datenbank ist die zentrale Speicherstelle für die gesammelten Inserate. und wurde von Beginn an mit ortsbezogenen Daten vom Bundesamt für Statistik befüllt.
-\item[Machine Learning] Die Daten für die Machine Learning Algorithmen werden aus der Datenbank geladen und hier gefilert, erweitert und darauf Modelle erstellt.
+\item[Machine Learning] Die Daten für die Machine Learning Algorithmen werden aus der Datenbank geladen und hier gefiltert, erweitert und darauf Modelle erstellt.
 \end{description}
 
-In den folgenden Kapiteln wird auf diese drei Komponente genauer eingegangen.
-Zudem benutzen wir diverse Schnittstellen zu externen APIs oder Datenbanken, um zusätzliche Informationen zu bekommen, auf die punktuell eingegangen wird.
+In den folgenden Kapiteln wird auf diese drei Komponenten genauer eingegangen.
+Zudem benutzen wir diverse Schnittstellen zu externen APIs oder Datenbanken, um zusätzliche Informationen zu bekommen, die punktuell erläutert werden.
 
 \subsection{Aufbau Crawler}
 Für diese Arbeit wird Scrapy als Webcrawler verwendet. Scrapy ist ein mächtiges, in Python geschriebenes, Open Source Crawler Framework.\\
@@ -36,7 +36,7 @@ Weiter bietet Scrapy eine Item Pipeline an, um gesammelte Daten weiter zu verarb
 
 \textbf{Crawlen der Webseiten}\\
 Für das Crawlen der Kaufobjekte auf den Immobilienplattformen werden fokussierte Crawler verwendet. Da es zahlreiche Immobilienplattformen in der Schweiz gibt, wurden von den grössten Plattformen vier ausgesucht. Die Grösse definiert sich an der Anzahl Inserate, die auf einer Seite ausgeschrieben sind. Dafür wurde die Rankingliste von Comparis hinzugezogen (Tabelle \ref{tab:portals}).\\
-Um nicht als Crawler aufzufallen, wurde mit Scrapoxy auf Amazon mehrere Proxyinstanzen gestartet. Diese wurden im 10-Minuten Takt terminiert und neu gestartet, um immer frische IP-Adressen zu erhalten. Da Amazon keine schweizer Server anbietet, konnten nur Portale angesteuert werden, die ausländische IP-Adressen zulassen. Comparis, als grösstes Portal, sperrt alle ausländischen IP-Adressen und ist so für uns nicht benutzbar.
+Um nicht als Crawler aufzufallen, wurde mit Scrapoxy auf Amazon mehrere Proxyinstanzen gestartet. Diese wurden im 10-Minuten Takt terminiert und neu gestartet, um immer frische IP-Adressen zu erhalten. Da Amazon keine Schweizer Server anbietet, konnten nur Portale angesteuert werden, die ausländische IP-Adressen zulassen. Comparis, als grösstes Portal, sperrt alle ausländischen IP-Adressen und ist so für uns nicht benutzbar.
 
 \begin{table*}[ht]
 \centering
@@ -72,15 +72,15 @@ Wird der gecrawlte Namen auch nicht in den Alternativnamen gefunden, kann keine 
 Es ist möglich, dass ein Inserat bei mehreren Plattformen online gestellt wird. Da es nicht optimal ist, wenn ein Inserat zweimal in unserem Datensatz vorkommt, wird versucht Dubletten möglichst früh zu erkennen und herauszufiltern. Der Dublettencheck überprüft die Übereinstimmung von Ortschaft, Objekttyp, Preis, Wohnfläche und Anzahl Zimmer. Sind diese Eigenschaften gleich, wird das Inserat als Duplikat eingestuft und folglich ignoriert.\\[2ex]
 %
 \textbf{Auslesen der Tags}\\
-Die Beschreibung eines Inserates, wie auch die Charakteristik, beinhaltet viele Informationen. Zum einen werden die Eckdaten nochmals in prosa formuliert. Zum Anderen wird die Innen- und Ausseneinrichtung, sowie die Umgebung beschrieben. Hier bietet sich an, diesen Text anhand von Natural Language Processing zu untersuchen. Dazu werden die wichtigsten Wörter extrahiert und als JSON-Liste abgespeichert.\\
+Die Beschreibung eines Inserates, wie auch die Charakteristik, beinhaltet viele Informationen. Zum einen werden die Eckdaten nochmals in Prosa formuliert. Zum anderen wird die Innen- und Ausseneinrichtung, sowie die Umgebung beschrieben. Hier bietet sich an, diesen Text anhand von Natural Language Processing zu untersuchen. Dazu werden die wichtigsten Wörter extrahiert und als JSON-Liste abgespeichert.\\
 Das NLTK-Module, das für solche Aufgaben gedacht ist, hat aber nur sehr wenige Stop-Wörter. Somit mussten wir uns eine eigene Stoppwörterliste zusammenstellen. Auch für die Übersetzung der einzelnen Ausdrücke haben wir ein eigenes Dictionary verwendet.\\[2ex]
 %
 \textbf{Koordinaten setzen}\\
 Um die Koordinaten zu setzen, braucht es eine Strassenanschrift. Ist diese nicht vorhanden, werden auch keine Koordinaten gesetzt. Das Beschaffen der Koordinaten ist ein mehrstufiger Prozess. Da von Google Maps eine Limite von 2'500 Requests pro Tag existiert, wird versucht zuerst über die OpenStreetMap API die Koordinaten zu beschaffen. OpenStreetMap hat im Vergleich zu Google viel weniger Einträge. Wenn bei OpenStreetMap keine Koordinaten gefunden werden, wird die Google Maps API angesteuert.\\[2ex]
 %
 \textbf{Lärmbelastung}\\
-Das Bundesamt für Umwelt stellt die Lärmdatenbank sonBASE\footnote{https://www.bafu.admin.ch/dam/bafu/de/dokumente/laerm/statistik/laerm-berechnungsonbaseermitteltlaermbelastunginderschweiz.pdf} im GDAL-Format online zur Verfügung. Diese beinhaltet unter anderem den Strassenverkehrslärm für die ganze Schweiz. Da wir für einige Häuser eine exakte Adresse besitzen, können wir anhand den Koordinaten die Lärmbelastung aus der \mbox{sonBASE} berechnen.\\
-Die Schweiz besitzt eine eigene Landestriangulation namens LV03. Um die Lärmbelastung eines Punktes zu erhalten, müssen die vorher gesetzen Koordinaten ins LV03-System transformiert werden.\\
+Das Bundesamt für Umwelt stellt die Lärmdatenbank sonBASE\footnote{https://www.bafu.admin.ch/dam/bafu/de/dokumente/laerm/statistik/laerm-berechnungsonbaseermitteltlaermbelastunginderschweiz.pdf} im GDAL-Format online zur Verfügung. Diese beinhaltet unter anderem den Strassenverkehrslärm für die ganze Schweiz. Da wir für einige Häuser eine exakte Adresse besitzen, können wir anhand der Koordinaten die Lärmbelastung aus der \mbox{sonBASE} berechnen.\\
+Die Schweiz besitzt eine eigene Landestriangulation namens LV03. Um die Lärmbelastung eines Punktes zu erhalten, müssen die vorher gesetzten Koordinaten ins LV03-System transformiert werden.\\
 Dieser Schritt ist der einzige in der Pipeline, der abhängig vom vorherigen Schritt ist. Denn, sind keine Koordinaten vorhanden, kann auch keine Lärmbelastung berechnet werden.
 
 \textbf{Speichern}\\
@@ -113,11 +113,11 @@ Anschliessend wird ein Feature Engineering durchgeführt, bei dem diverse Featur
 
 Um den ganzen Prozess einfacher zu handhaben, wurden alle Transformationen und Aktionen in möglichst kleine Funktionen verpackt, die in einer Pipeline kombiniert werden können. Somit können nach Wunsch einzelne Funktionen deaktiviert werden. Die Pipeline wird anhand einer JSON-Liste definiert. Diese Liste wird vom Programm eingelesen und der Reihe nach abgearbeitet.\\[2ex]
 %
-Für jeden der Algorithmen wurden die diversen Parameter mit der GridSearchCV Komponente von scikit-learn durchgetestet. GridSearchCV testet für jeden Algorithmus alle Parameter mit einer Crossvalidation und gibt am Ende die Parameterwerte mit dem besten Resultat zurück. Bottleneck ist dabei die benötigte Zeit. Je nachdem wie viele Kombinationen durchgeführt werden müssen, kann ein Durchlauf über einen Tag dauern.\\
-Um nicht jedesmal eine Crossvalidation durchzuführen, werden die besten Resultate in eine Konfigurationsdatei geschrieben.
+Für jeden der Algorithmen wurden die diversen Parameter mit der GridSearchCV Komponente von Scikit-Learn durchgetestet. GridSearchCV testet für jeden Algorithmus alle Parameter mit einer Crossvalidation und gibt am Ende die Parameterwerte mit dem besten Resultat zurück. Bottleneck ist dabei die benötigte Zeit. Je nachdem wie viele Kombinationen durchgeführt werden müssen, kann ein Durchlauf über einen Tag dauern.\\
+Um nicht jedes Mal eine Crossvalidation durchzuführen, werden die besten Resultate in eine Konfigurationsdatei geschrieben.
 
 \subsection{Code Struktur}
-Der gesamte Code mit Dokumentation wird ein einem Git\footnote{https://git-scm.com/} Repositroy auf Github\footnote{https://github.com/} verwaltet. Git ist ein Versionsverwaltungstool. Es zeichnet auf, wer wann welche Änderungen an welchen Daten gemacht hat.\\
+Der gesamte Code mit Dokumentation wird ein einem Git\footnote{https://git-scm.com/} Repository auf Github\footnote{https://github.com/} verwaltet. Git ist ein Versionsverwaltungstool. Es zeichnet auf, wer wann welche Änderungen an welchen Daten gemacht hat.\\
 Die grobe Verzeichnisstruktur des Projektes sieht wie folgt aus:
 \begin{verbatim}
 immo                   # Gesamter Python Code
@@ -129,7 +129,7 @@ immo                   # Gesamter Python Code
     ...
   models               # DB-Objektdefinition
   scikit               # Machine Learning
-    main.py            # Hauptdatei zum starten der Pipeline
+    main.py            # Hauptdatei zum Starten der Pipeline
     pipeline.py        # Definitionen der verschiedenen ML-Algorithmen
     data_analysis.py   # Holen und analysieren der Daten
     settings.json      # Speicherung der besten Parameter
