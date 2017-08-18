@@ -108,7 +108,6 @@ immo/scikit/images/*
 # piero special files
 /immo/tensorflow/
 /scikit
-*.ipynb
 
 # Text
 report/*.aux
