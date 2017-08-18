@@ -3,7 +3,7 @@ Um die Forschungsfragen zu beantworten, haben wir die gesammelten Immobiliendate
 751 Inserate haben so extreme Werte, dass sie die Statistik verzerrten und so eine Aussage über die Daten erschwerten. Deshalb wurden diese Werte für die Validation ignoriert.
 
 \subsection{Gesammelte Daten}
-Insgesamt konnten 162’225 Immobilieninserate in einem Zeitraum von 5 Monaten gesammelt werden. Davon stammten die meisten vom Immoscout24 Portal, wie in Tabelle \ref{tab:crawled_data} ersichtlich.
+Insgesamt konnten 162'622 Immobilieninserate in einem Zeitraum von 5 Monaten gesammelt werden. Davon stammten die meisten vom Immoscout24 Portal, wie in Tabelle \ref{tab:crawled_data} ersichtlich.
 
 \begin{table*}[ht]
 \centering
@@ -22,7 +22,7 @@ Urbanhome & 2'047 & 1'040\\
 \label{tab:crawled_data}
 \end{table*}
 
-Von den insgesamt 162’225 Inseraten wurden 77’608 ungültige Inserate herausgefiltert.
+Von den insgesamt 162'622 Inseraten wurden 77’608 ungültige Inserate herausgefiltert.
 Dabei handelte es sich mehrheitlich um fehlerhafte Inserate oder Inserate, bei denen wichtige Kennwerte fehlten.\\
 Insgesamt konnten 83’107 Wohungen und 65’430 Häuser gesammelt werden. Die restlichen Inserate waren Lagerräume oder nicht definierte Immobilien\-typen.\\
 Weiter konnte für 99\% aller Inserate die Gemeinde zugeordnet, sowie für 83\% aller Inserate, mit einer vollständigen Adresse, eine Lärmbelastung berechnet werden.\\
@@ -78,7 +78,7 @@ Wohnung \& Haus & 10 & 20’000'000 & 1’059’503 & 790’000 & 1’066’372\
 \end{table*}
 
 \subsubsection{Numerische Features}
-Bis auf die Lärmbelastung wurden alle numerischen Features von den Immobilienportalen gesammelt.\\
+Bis auf die Lärmbelastung und der Steuerfuss wurden alle numerischen Features von den Immobilienportalen gesammelt.\\
 Abbildung \ref{fig:num_features} zeigt einen Teil dieser Features in Verbindung zum Kaufpreis. Dabei ist ersichtlich, dass die Wohnfläche, Kubatur und Anzahl Zimmer eine linear ähnliche Abhängigkeit besitzen. Die restlichen Features beistzen keine direkte Korrelation zum Preis.
 
 \begin{figure}[h]
@@ -125,7 +125,7 @@ Abbildung \ref{fig:heatmap} zeigt eine Heatmap der einzelnen Features. Diese zei
 \newpage
 \subsubsection{Kategorische Features}
 Bei den kategorischen Features handelte es sich vor allem um ortsbezogene Features vom BFS. Viele davon beschrieben die Region, indem sich die Immobilie befand.\\
-Insgesamt wurden 35 kategorische Features verwendet. Eine Analyse der ortsbezogenen Features mit dem Kaufpreis ergab keine unerwarteten Ergebnisse. So zeigt Abbildung \ref{fig:cantons}, dass der Kanton Genf die teuersten Immobilien in der Schweiz besitzt, gefolgt vom Kanton Zug. Auch ist ersichtlich, dass städtische Immobilien im Schnitt teurer sind als auf dem Land. Anders gesagt, je urbaner die Region, desto teurer der Immobilienpreis. Diverse weitere Vergleiche befinden sich in Anhang \ref{daten_analys}.\\[2ex]
+Insgesamt wurden 23 kategorische Features verwendet. Eine Analyse der ortsbezogenen Features mit dem Kaufpreis ergab keine unerwarteten Ergebnisse. So zeigt Abbildung \ref{fig:cantons}, dass der Kanton Genf die teuersten Immobilien in der Schweiz besitzt, gefolgt vom Kanton Zug. Auch ist ersichtlich, dass städtische Immobilien im Schnitt teurer sind als auf dem Land. Anders gesagt, je urbaner die Region, desto teurer der Immobilienpreis. Diverse weitere Vergleiche befinden sich in Anhang \ref{daten_analys}.\\[2ex]
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{images/boxPlot_cantons.png}
@@ -144,11 +144,11 @@ Neben den ortsbezogenen Daten, analysierten wir die Beschreibung und die Merkmal
 \end{figure}
 
 \subsection{Machine Learning}
-Insgesamt haben wir neun verschiedene Machine Learning Algorithmen untersucht. Um eine vergleichnare Bewertung zu erhalten, bekamen alle Algorithmen die gleichen Datensätze zum Trainieren und zum Testen. So wurde verhindert, dass ein Algorithmus anhand eines vorteilhafteren Datensatzes eine bessere Performance erzielte. 
+Insgesamt haben wir neun verschiedene Machine Learning Algorithmen untersucht. Um eine vergleichbare Bewertung zu erhalten, bekamen alle Algorithmen die gleichen Datensätze zum Trainieren und zum Testen. So wurde verhindert, dass ein Algorithmus anhand eines vorteilhafteren Datensatzes eine bessere Performance erzielte. 
 
 Als erstes bereiteten wir unsere gesammelten Daten für unsere Algorithmen auf. Dafür wurden die Features, wenn nötig, in nummerische Werte transformiert. Dies geschah im Feature Engineering. In den nächsten Absätzen werden die verschiedenen Algorithmen mit einem Basisdatensatz untersucht.
 
-Als Basis für unseren Datensatz transformierten wir unsere kategorischen Features mit Hilfe einer One-Hot-Encoding in binäre Features um. So enstanden aus 35 Features über 2000 Features.\\
+Als Basis für unseren Datensatz transformierten wir unsere kategorischen Features mit Hilfe einer One-Hot-Encoding in binäre Features um. So enstanden aus 23 Features über 2000 Features.\\
 Wie im vorherigen Kapitel gezeigt, sind die Features Kubatur, Raumhöhe, effektive Fläche, Grundstücksfläche, Anzahl Stockwerke, Stockwerk und Renovationsjahr nur selten angegeben. Somit konnten sie nicht verwendet werden. Dafür konnten die Wohnfläche, die Anzahl Zimmer, das Baujahr, das Renovationsjahr, die Beschreibung und die Merkmale einer Immobile verwendet werden.\\
 Als letzter Schritt wurden die Inserate gelöscht, die keinen Eintrag bei einem verwendeten Feature besassen oder doppelt vorkamen.
 
@@ -174,7 +174,7 @@ Lasso Regression & 0.58 & 70.04 & 19.46 & 27.82 & 2.71E+07\\
 
 Wir sehen, dass die Algorithmen eher schlecht abschnitten. Zum einen liegt das daran, dass noch kein richtiges Feature Engineering durchgeführt wurde. Zum anderen haben wir in unserem Modell sehr viele kategorische Features. Die lineare Regression erwartet eine Normalverteilung der Features, was bei kategorischen Features nicht der Fall ist.\\
 Es ist ersichtlich, dass die Algorithmen mit einem Regularisierungsparameter eine deutlich bessere Performance erzielten, als die einfache lineare Regression. Somit ist ein Regularisierungsparameter bei diesem Datenset nützlich.\\
-Auffallend war, dass der Lasso Algorithmus eine deutliche bessere Performance als der Ridge Algorithmus vorwies. Denn der Lasso kann unnötige Features eliminieren und somit die Komplexität reduzieren, während der Ridge immer alle Features verwenden muss. Abbildung \ref{fig:lasso} zeigt den Tukey-Anscombe Plot \ref{fig:lasso_tukey-anscombe} und die Verteilung der Residuen \ref{fig:lasso_histo}. Darauf ist ersichtlich, dass es extreme Ausreisser gibt und somit die MAPE verzerren.
+Durch das der Lasso unnötige Features eliminieren konnte, hatte der Lasso Algorithmus eine deutliche bessere Performance als der Ridge Algorithmus. Denn dieser musste immer alle Features verwenden. Abbildung \ref{fig:lasso} zeigt den Tukey-Anscombe Plot \ref{fig:lasso_tukey-anscombe} und die Verteilung der Residuen \ref{fig:lasso_histo} für den Lasso Algorithmus. Darauf ist ersichtlich, dass es extreme Ausreisser gibt, die die MAPE verzerren.
 
 \begin{figure}[h]
 \begin{subfigure}{.5\textwidth}
@@ -213,8 +213,8 @@ $K$-Nearest Neighbour & 0.83 & 23.67 & 0 & 79.94 & 1.81E+07\\
 \label{tab:regression_knn}
 \end{table*}
 
-Die Performance wurde deutlich besser als bei den Regressions Algorithmen. 79,94\% der Immobilien konnten mit einer Abweichung von 10\% richtig geschätzt werden. Anhand diesen Ergebnissen konnte aufgezeigt werden, dass bei ähnlichen Immobilien auch ein ähnlicher Preis existiert.\\
-Eine MdAPE von 0\% erklärten wir damit, dass es sehr ähnliche Häuser gibt, die den selben Preis besitzen. Wir gehen im Kapitel 5 nochmals genauer darauf ein. Die MAPE mit einem Wert von 23,67\% war zu hoch, um von einem guten Modell zu sprechen. Abbildung \ref{fig:kneighbour} zeigt die Statistik für die Residuen. Im Histogramm \ref{fig:kneighbour_histo} wird nochmals der MdAPE von 0\% deutlich. Auf dem Tukey-Anscombe Plot \ref{fig:kneighbour_tukey-anscombe} wichen die Residuen weniger stark vom beobachteten Preis ab als beim Lasso.
+Die Performance wurde deutlich besser als bei den Regressions Algorithmen. 79,94\% der Immobilien konnten mit einer maximalen Abweichung von 10\% richtig geschätzt werden. Anhand diesen Ergebnissen konnte aufgezeigt werden, dass bei ähnlichen Immobilien auch ein ähnlicher Preis existiert.\\
+Eine MdAPE von 0\% erklärten wir damit, dass es sehr ähnliche Häuser gibt, die den selben Preis besitzen. In Kapitel 5 gehen wir genauer auf dieses Phänomen ein. Die MAPE mit einem Wert von 23,67\% war zu hoch, um von einem guten Modell zu sprechen. Abbildung \ref{fig:kneighbour} zeigt die Statistik für die Residuen. Im Histogramm \ref{fig:kneighbour_histo} wird nochmals der MdAPE von 0\% deutlich. Auf dem Tukey-Anscombe Plot \ref{fig:kneighbour_tukey-anscombe} wichen die Residuen weniger stark vom beobachteten Preis ab als beim Lasso.
 
 \begin{figure}[h]
 \begin{subfigure}{.5\textwidth}
@@ -239,7 +239,7 @@ Als nächstes untersuchten wir verschiedene Baum Algorithmen. Diese erfreuen sic
 Wir haben vier verschiedene Algorithmen untersucht. Sie unterscheiden sich hauptsächlich in ihrer Strategie. Der Random Forest wendet eine Art Bagging an. Der XGBoost wie auch der AdaBoost verwenden eine Boostingstrategie und der Extra Trees verwendet weder Boosting noch Bagging.
 
 Eine Auswertung mittels GridSearchCV hatte für die Algorithmen folgende Parameter vorgeschlagen.
-Für Random Forest verwendeten wir 700 Schätzungsmodelle, ansonsten die Default Parameter von Scikit Learn. Dasselbe galt auch für den Extra Trees Algorithmus.\\
+Für den Random Forest verwendeten wir 700 Schätzungsmodelle, ansonsten die Default Parameter von Scikit Learn. Dasselbe galt auch für den Extra Trees Algorithmus.\\
 Für AdaBoost haben wir als Basis Schätzungsmodell den DecisionTreeRegressor mit 18 Schätzungsmodelle benutzt.\\
 Der XGBoost besass eine maximale Tiefe von 100 mit einer Lernrate von 0.1 und 350 Schätzungsmodelle.
 
@@ -427,7 +427,7 @@ AdaBoost &0.940529 & 4.692 & 0 & 85.609 & 1.95E+06\\
 
 Wird die Einführung der Outlier Detection auf die Performance der Algorithmen in Tabelle \ref{tab:fifth_round} betrachtet, ist erkennbar, dass bei allen Performancekriterien eine Verbesserung erzielt werden konnte. Der maximale Fehler wurde auf 2~Mio.~CHF verkleinert, da Extremwerte nicht mehr vorhanden waren. Deshalb ist eine Outlier Detection für ein Machine Learning Algorithmus essentiell. Dies ist auch in Abbildung \ref{fig:adaboost_6} beim Tukey-Anscombe Plot \ref{fig:ada_tukey-anscombe_6} wie auch beim Histogramm der Residuen \ref{fig:ada_histo_6} ersichtlich.
 
-Die Tabelle \ref{tab:price_outlier} zeigt die neuen statistischen Werte für den Kaufpreis einer Immobilie. Im Vergleich zu Tabelle \ref{tab:price} ist ersichtlich, dass die Standardabweichung beträchtlich vermindert wurde. Ebenso ergeben der minimale wie auch der maximale Preis mehr Sinn. Der Durchschnitt und der Median besitzen ähnliche Werte wie vor der Outlier Detection.
+Die Tabelle \ref{tab:price_outlier} zeigt die neuen statistischen Werte für den Kaufpreis einer Immobilie. Im Vergleich zu Tabelle \ref{tab:price} ist ersichtlich, dass die Standardabweichung beträchtlich vermindert wurde. Ebenso ergaben der minimale wie auch der maximale Preis mehr Sinn. Der Durchschnitt und der Median besassen ähnliche Werte wie vor der Outlier Detection.
 
 \begin{figure}[h]
 \begin{subfigure}{.5\textwidth}
